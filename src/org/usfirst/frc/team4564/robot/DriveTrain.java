@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
 
 public class DriveTrain extends RobotDrive {
+	private static DriveTrain instance;
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
@@ -21,6 +22,20 @@ public class DriveTrain extends RobotDrive {
 		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, false, EncodingType.k4X);
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, false, EncodingType.k4X);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
+		
+		instance = this;
+	}
+	
+	public static DriveTrain instance() {
+		return instance;
+	}
+	
+	public Encoder getLeft() {
+		return encoderL;
+	}
+	
+	public Encoder getRight() {
+		return encoderR;
 	}
 	
 	public Heading getHeading() {
