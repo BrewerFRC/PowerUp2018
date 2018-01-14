@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
  * @author Evan McCoy
  */
 public class Robot extends SampleRobot {
+	private DriveTrain dt = new DriveTrain();
 
 	public Robot() {
 		
@@ -43,6 +44,9 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
 		while (isEnabled() && isOperatorControl()) {
 			long time = Common.time();
+			
+			Common.dashNum("encoderL", dt.getLeftCounts());
+			Common.dashNum("encoderR", dt.getRightCounts());
 			
 			Timer.delay((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000);
 		}

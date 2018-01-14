@@ -2,6 +2,12 @@ package org.usfirst.frc.team4564.robot;
 
 import java.util.function.Function;
 
+/**
+ * A mathematical model for controlling robot motion along a predefined functional path.
+ * Created January 2018
+ * 
+ * @author Evan McCoy
+ */
 public class Pathfinding {
 	private Function<Double, Double> f = (x) -> {return Math.pow(x, 2);};
 	private Function<Double, Double> dfdx = (x) -> {return 2*x;};
@@ -34,7 +40,7 @@ public class Pathfinding {
 	 * @return double - the left motor power.
 	 */
 	public double left() {
-		return leftPID.calc(dt.getLeft().getRate());
+		return leftPID.calc(dt.getLeftVelocity());
 	}
 	
 	/**
@@ -43,7 +49,7 @@ public class Pathfinding {
 	 * @return double - the right motor power.
 	 */
 	public double right() {
-		return rightPID.calc(dt.getRight().getRate());
+		return rightPID.calc(dt.getRightVelocity());
 	}
 	
 	/**
