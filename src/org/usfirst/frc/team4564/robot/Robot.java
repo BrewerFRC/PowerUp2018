@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class Robot extends SampleRobot {
 	private DriveTrain dt = new DriveTrain();
+	private Xbox j = new Xbox(0);
 
 	public Robot() {
 		
@@ -47,6 +48,10 @@ public class Robot extends SampleRobot {
 			
 			Common.dashNum("encoderL", dt.getLeftCounts());
 			Common.dashNum("encoderR", dt.getRightCounts());
+			
+			if (j.when("x")) {
+				dt.resetEncoders();
+			}
 			
 			Timer.delay((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000);
 		}

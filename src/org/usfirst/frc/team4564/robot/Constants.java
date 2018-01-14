@@ -15,13 +15,14 @@ public class Constants {
 	REFRESH_RATE = 50,
 	
 	//Drive motors
-	DRIVE_FL = 1, DRIVE_FR = 2, DRIVE_BL = 3, DRIVE_BR = 4,
+	DRIVE_FL = 6, DRIVE_FR = 9, DRIVE_BL = 7, DRIVE_BR = 8,
 	
 	//Encoders
-	DRIVE_ENCODER_LA = 0, DRIVE_ENCODER_LB = 1,
-	DRIVE_ENCODER_RA = 2, DRIVE_ENCODER_RB = 4,
+	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,
+	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
 	
 	//Sonic
-	SONIC = 0;
+	SONIC = 0
+	
 	;
 }

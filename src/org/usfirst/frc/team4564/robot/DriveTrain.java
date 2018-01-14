@@ -37,10 +37,20 @@ public class DriveTrain extends RobotDrive {
 		super(frontL, backL, frontR, backR);
 		
 		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, false, EncodingType.k4X);
+		encoderL.setDistancePerPulse(-0.01152655);
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, false, EncodingType.k4X);
+		encoderR.setDistancePerPulse(-0.01143919);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
 		
 		instance = this;
+	}
+	
+	/**
+	 * Resets the counts of the left and right encoders.
+	 */
+	public void resetEncoders() {
+		encoderL.reset();
+		encoderR.reset();
 	}
 	
 	/**
