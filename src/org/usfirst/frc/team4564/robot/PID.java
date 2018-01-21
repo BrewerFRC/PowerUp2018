@@ -23,6 +23,7 @@ public class PID {
 	 * True = cummulate, False = raw return value
 	 */
 	private boolean forward;
+	private boolean inverted;
 	
 	private double target;
 	private double Outmin = -1;
@@ -43,11 +44,12 @@ public class PID {
 	 * @param forward whether or not to cummulate calculations.
 	 * @param name the name of the pid object, used for NetworkTables posting.
 	 */
-	public PID(double p, double i, double d, boolean forward, String name) {
+	public PID(double p, double i, double d, boolean inverted, boolean forward, String name) {
 		this.name = name;
 		this.p = p;
 		this.i = i;
 		this.d = d;
+		this.inverted = inverted;
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
 		
@@ -218,6 +220,6 @@ public class PID {
 		}
 		lastCalc = this.output;
 		
-		return this.output;
+		return (inverted) ? -this.output : this.output;
 	}
 }

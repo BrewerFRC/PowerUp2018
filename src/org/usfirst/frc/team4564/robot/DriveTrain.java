@@ -22,7 +22,9 @@ public class DriveTrain extends RobotDrive {
 			backR = new Spark(Constants.DRIVE_BR);
 	
 	private Encoder encoderL, encoderR;
+	private PID pidL, pidR;
 	private Heading heading;
+	private Pathfinding path = new Pathfinding();
 	double driveSpeed = 0;
 	double turnSpeed = 0;
 	double slideSpeed = 0;
@@ -36,11 +38,16 @@ public class DriveTrain extends RobotDrive {
 	public DriveTrain() {
 		super(frontL, backL, frontR, backR);
 		
-		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, false, EncodingType.k4X);
-		encoderL.setDistancePerPulse(-0.01152655);
-		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, false, EncodingType.k4X);
-		encoderR.setDistancePerPulse(-0.01143919);
+		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
+		encoderL.setDistancePerPulse(0.01152655);
+		encoderL.setSamplesToAverage(10);
+		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, true, EncodingType.k4X);
+		encoderR.setDistancePerPulse(0.01143919);
+		encoderR.setSamplesToAverage(10);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
+		
+		pidL = new PID(0.005, 0, 0, false, true, "velL");
+		pidR = new PID(0.005, 0, 0, false, true, "velR");
 		
 		instance = this;
 	}
@@ -51,6 +58,21 @@ public class DriveTrain extends RobotDrive {
 	public void resetEncoders() {
 		encoderL.reset();
 		encoderR.reset();
+		pidL.reset();
+		pidR.reset();
+	}
+	
+	public void updatePIDs() {
+		pidL.update();
+		pidR.update();
+	}
+	
+	public void pidVelDrive() {
+		//pidL.setTarget(18);
+		//pidR.setTarget(54);
+		path.update();
+		this.tankDrive(path.left(), path.right());
+		//this.tankDrive(-pidL.calc(getLeftVelocity()), -pidR.calc(getRightVelocity()));
 	}
 	
 	/**
@@ -115,6 +137,33 @@ public class DriveTrain extends RobotDrive {
 	 */
 	public double getRightVelocity() {
 		return encoderR.getRate();
+	}
+	
+	/**
+	 * Get the averaged counts between the two encoders.
+	 * 
+	 * @return int - the average counts
+	 */
+	public int getAverageCounts() {
+		return (encoderL.get() + encoderR.get()) / 2;
+	}
+	
+	/**
+	 * Get the averaged scaled distance between the two encoders.
+	 * 
+	 * @return double - the average distance in inches
+	 */
+	public double getAverageDist() {
+		return (encoderL.getDistance() + encoderR.getDistance()) / 2;
+	}
+	
+	/**
+	 * Get the averaged scaled velocity between the two encoders.
+	 * 
+	 * @return double - the average velocity in inches/second
+	 */
+	public double getAverageVelocity() {
+		return (encoderL.getRate() + encoderR.getRate()) / 2;
 	}
 	
 	/**
