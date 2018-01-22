@@ -32,12 +32,12 @@ public class Path {
 	 */
 	public double[] getDrive() {
 		Common.dashNum("stage", state);
+		if (state >= stages.size()) {
+			return new double[] {0, 0};
+		}
 		if (stages.get(state).isComplete()) {
 			state++;
 			stages.get(state).start();
-		}
-		if (state >= stages.size()) {
-			return new double[] {0, 0};
 		}
 		return stages.get(state).getDrive();
 	}
@@ -76,8 +76,8 @@ public class Path {
 	 * @param name - the name of the PID for SmartDashboard tuning.
 	 * @return {@link Path Path} - the current Path instance
 	 */
-	public Path addPIDDrive(double distance, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
-		stages.add(new PIDDrive(distance, minPower, maxPower, p, i, d, inverted, name));
+	public Path addPIDDrive(double distance, double heading, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
+		stages.add(new PIDDrive(distance, heading, minPower, maxPower, p, i, d, inverted, name));
 		return this;
 	}
 	
@@ -161,6 +161,9 @@ public class Path {
 		}
 		
 		public double[] getDrive() {
+			Common.dashNum("targetHeading", heading);
+			System.out.println(Common.time() + " - targetHeading: " + heading);
+			System.out.println(Common.time() + " - gyroAngle: " + DriveTrain.instance().getHeading().getAngle());
 			double error = heading - DriveTrain.instance().getHeading().getAngle();
 			double offset = error*0.025;
 			if (error > 0) {
@@ -179,12 +182,14 @@ public class Path {
 	 */
 	private class PIDDrive implements Stage {
 		private PID pid;
+		private double heading;
 		
-		public PIDDrive(double distance, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
+		public PIDDrive(double distance, double heading, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
 			this.pid = new PID(p, i, d, inverted, false, name);
 			pid.setTarget(distance);
 			pid.setOutputLimits(-maxPower, maxPower);
 			pid.setMin(minPower);
+			this.heading = heading;
 		}
 		
 		public void start() {
@@ -196,7 +201,14 @@ public class Path {
 		}
 		
 		public double[] getDrive() {
-			return getDrive(DriveTrain.instance().getAverageDist());
+			double[] power = getDrive(DriveTrain.instance().getAverageDist());
+			double error = heading - DriveTrain.instance().getHeading().getAngle();
+			double offset = error*0.025;
+			if (error > 0) {
+				return new double[] {power[0] + offset, power[1]};
+			} else {
+				return new double[] {power[0], power[1] - offset};
+			}
 		}
 		
 		public double[] getDrive(double curDistance) {
