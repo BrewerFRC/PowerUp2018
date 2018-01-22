@@ -1,6 +1,9 @@
-package org.usfirst.frc.team4564.robot;
+package org.usfirst.frc.team4564.robot.path;
 
 import java.util.function.Function;
+
+import org.usfirst.frc.team4564.robot.DriveTrain;
+import org.usfirst.frc.team4564.robot.PID;
 
 /**
  * A mathematical model for controlling robot motion along a predefined functional path.

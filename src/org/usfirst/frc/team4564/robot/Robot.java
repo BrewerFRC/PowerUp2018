@@ -1,5 +1,8 @@
 package org.usfirst.frc.team4564.robot;
 
+import org.usfirst.frc.team4564.robot.path.Event;
+import org.usfirst.frc.team4564.robot.path.Path;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -85,6 +88,16 @@ public class Robot extends SampleRobot {
 			.addPowerTurn(76, 0.65)
 			.addDriveStraight(72, 90, 0.9)
 			.addDriveStraight(36, 90, 0.65)
+			.addEvent(new Event() {
+				public void trigger() {
+					if (DriveTrain.instance().getAverageDist() > 30) {
+						//Move parts.  This is executed every cycle.
+					}
+					if (/*Motion is complete*/true) {
+						this.complete = true;
+					}
+				}
+			})
 			.addPowerTurn(12, 0.65)
 			/* distance, angle, minPower, maxPower, P, I, D, inverted, name */
 			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
