@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * Handles actions related to robot motion.
@@ -12,14 +14,17 @@ import edu.wpi.first.wpilibj.Spark;
  * 
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
+ * @author Brent Roberts
  */
-public class DriveTrain extends RobotDrive {
+public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
 			backL = new Spark(Constants.DRIVE_BL),
 			backR = new Spark(Constants.DRIVE_BR);
+	private static final SpeedControllerGroup left = new SpeedControllerGroup(frontL, backL);
+	private static final SpeedControllerGroup right = new SpeedControllerGroup(frontR, frontR);
 	
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
@@ -36,7 +41,7 @@ public class DriveTrain extends RobotDrive {
 	 * Motor controller and encoder channels are determined in Constants.
 	 */
 	public DriveTrain() {
-		super(frontL, backL, frontR, backR);
+		super(left, right);
 		
 		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
 		encoderL.setDistancePerPulse(0.01152655);
