@@ -20,7 +20,7 @@ public class Heading {
 	 * @param d the derivative scaler.
 	 */
 	public Heading(double p, double i, double d) {
-		pid = new PID(p, i, d, false, "gyro");
+		pid = new PID(p, i, d, false, false, "gyro");
 		//PID is dealing with error; an error of 0 is always desired.
 		pid.setTarget(0.0);
 		pid.setMin(0.0);

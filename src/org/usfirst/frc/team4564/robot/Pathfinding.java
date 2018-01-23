@@ -9,9 +9,9 @@ import java.util.function.Function;
  * @author Evan McCoy
  */
 public class Pathfinding {
-	private Function<Double, Double> f = (x) -> {return Math.pow(x, 2);};
-	private Function<Double, Double> dfdx = (x) -> {return 2*x;};
-	private Function<Double, Double> d2fdx2 = (x) -> {return 2.0;};
+	private Function<Double, Double> f = (x) -> {return Math.pow(x/10, 2);};
+	private Function<Double, Double> dfdx = (x) -> {return 0.2*(x/10);};
+	private Function<Double, Double> d2fdx2 = (x) -> {return 0.02;};
 	
 	//The velocity of the centerpoint of the robot in inches/second.
 	private double centerVelocity = 96;
@@ -22,14 +22,27 @@ public class Pathfinding {
 	private PID rightPID;
 	private DriveTrain dt;
 	private double x = 0;
+	private double lastDist = 0;
 	
 	public Pathfinding() {
-		leftPID = new PID(0, 0, 0, true, "leftEncoderPath");
-		rightPID = new PID(0, 0, 0, true, "rightEncoderPath");
+		leftPID = new PID(0.001, 0.0035, 0, false, true, "leftEncoderPath");
+		rightPID = new PID(0.001, 0.0035, 0, false, true, "rightEncoderPath");
 		dt = DriveTrain.instance();
 	}
 	
+	/**
+	 * Update x position and target velocities.
+	 */
 	public void update() {
+		double travel = (dt.getLeftDist() + dt.getRightDist()) / 2 - lastDist;
+		lastDist += travel;
+		if (dfdx.apply(x) < 0) {
+			x += travel * Math.cos(Math.atan(dfdx.apply(x)));
+		}
+		else {
+			x += travel * Math.cos(Math.PI - Math.atan(dfdx.apply(x)));
+		}
+		x += travel * Math.cos(Math.atan(dfdx.apply(x)));
 		leftPID.setTarget(leftVelocity());
 		rightPID.setTarget(rightVelocity());
 	}
