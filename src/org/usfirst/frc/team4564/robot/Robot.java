@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -17,7 +18,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends SampleRobot {
 	private DriveTrain dt = new DriveTrain();
 	private static final double P = 0.075, I = 0, D = 0.08;
-	private Xbox j = new Xbox(0);
+	private Xbox j0 = new Xbox(0);
+	private Xbox j1 = new Xbox(1);
 	private String gameData;
 
 	public Robot() {
@@ -81,29 +83,20 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void operatorControl() {
-		
-		Path path = new Path();
-		path.addDriveStraight(60, 0, 0.65)
-			.addPowerTurn(76, 0.65)
-			.addDriveStraight(72, 90, 0.9)
-			.addDriveStraight(36, 90, 0.65)
-			.addPowerTurn(12, 0.65)
-			/* distance, angle, minPower, maxPower, P, I, D, inverted, name */
-			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
-		path.start();
-		while (isEnabled() && isOperatorControl()) {
-			long time = Common.time();
-			
-			if (j.getPressed("a")) {
-				double[] power = path.getDrive();
-				Common.dashNum("leftPower", power[0]);
-				Common.dashNum("rightPower", power[1]);
-				DriveTrain.instance().tankDrive(power[0], power[1]);
-			}
-			else {
-				DriveTrain.instance().tankDrive(0, 0);
-			}
-			Timer.delay(Math.max(0, ((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000)));
-		}
-	}
+    	long time;
+    	while (isEnabled() && isOperatorControl()) {
+    		time = Common.time();
+    		double forward = 0;
+    		double turn = 0;
+    		forward = j0.getY(GenericHID.Hand.kLeft);
+			turn  = j0.getX(GenericHID.Hand.kLeft);
+    		
+    		dt.accelDrive(forward, turn);
+    		
+    		
+    		
+    		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+    		Timer.delay((delay > 0) ? delay : 0.001);
+    	}
+    }
 }

@@ -23,7 +23,7 @@ public class DriveTrain extends DifferentialDrive {
 			backL = new Spark(Constants.DRIVE_BL),
 			backR = new Spark(Constants.DRIVE_BR);
 	private static final SpeedControllerGroup left = new SpeedControllerGroup(frontL, backL);
-	private static final SpeedControllerGroup right = new SpeedControllerGroup(frontR, frontR);
+	private static final SpeedControllerGroup right = new SpeedControllerGroup(frontR, backR);
 	
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
@@ -31,9 +31,9 @@ public class DriveTrain extends DifferentialDrive {
 	private Pathfinding path = new Pathfinding();
 	double driveSpeed = 0;
 	double turnSpeed = 0;
-	double slideSpeed = 0;
-	double driveAccel = .08;
-	double turnAccel = .08;
+	double DRIVEACCEL = .06;
+	double TURNACCEL = .06;
+	double TURNMAX = .8;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -49,6 +49,8 @@ public class DriveTrain extends DifferentialDrive {
 		encoderR.setDistancePerPulse(0.01143919);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
+		left.setInverted(true);
+		right.setInverted(true);
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
@@ -191,7 +193,7 @@ public class DriveTrain extends DifferentialDrive {
 	        return driveSpeed;
 	 }
 	 
-	 public double turnAccelCurve(double target, double turnAccel) {
+	 public double turnAccelCurve(double target, double turnAccel, double turnMax) {
 		 if (Math.abs(turnSpeed - target) > turnAccel) {
 	    		if (turnSpeed > target) {
 	    			turnSpeed = turnSpeed - turnAccel;
@@ -201,6 +203,11 @@ public class DriveTrain extends DifferentialDrive {
 	    	} else {
 	    		turnSpeed = target;
 	    	}
+		 if (turnSpeed >= 0) {
+			 turnSpeed = Math.min(turnMax, turnSpeed);
+		 } else {
+			 turnSpeed = Math.max(-turnMax, turnSpeed);
+		 }
 	    return turnSpeed;
 	}
 	 
@@ -212,12 +219,12 @@ public class DriveTrain extends DifferentialDrive {
 	}
 	
 	public void setDrive(double drive, double turn, double slide) {
-		arcadeDrive(drive,turn);
+		arcadeDrive(drive,-turn);
 	}
-	
-	public void accelDrive(double drive, double turn, double slide) {
-		drive = driveAccelCurve(drive, driveAccel );
-		turn = turnAccelCurve(turn, turnAccel);
-		arcadeDrive(drive, turn);
+	//turn should be inverted on testbed -Brent
+	public void accelDrive(double drive, double turn) {
+		drive = driveAccelCurve(drive, DRIVEACCEL );
+		turn = turnAccelCurve(turn, TURNACCEL, TURNMAX);
+		arcadeDrive(drive, -turn);
 	}
 }

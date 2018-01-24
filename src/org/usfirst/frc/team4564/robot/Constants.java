@@ -15,7 +15,7 @@ public class Constants {
 	REFRESH_RATE = 50,
 	
 	//Drive motors
-	DRIVE_FL = 6, DRIVE_FR = 9, DRIVE_BL = 7, DRIVE_BR = 8,
+	DRIVE_FL = 7, DRIVE_FR = 8, DRIVE_BL = 6, DRIVE_BR = 9,
 	
 	//Encoders
 	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,
