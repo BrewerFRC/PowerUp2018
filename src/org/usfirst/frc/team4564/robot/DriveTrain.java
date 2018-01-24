@@ -27,9 +27,9 @@ public class DriveTrain extends RobotDrive {
 	private Pathfinding path = new Pathfinding();
 	double driveSpeed = 0;
 	double turnSpeed = 0;
-	double slideSpeed = 0;
-	double driveAccel = .08;
-	double turnAccel = .08;
+	double DRIVEACCEL = .06;
+	double TURNACCEL = .06;
+	double TURNMAX = .8;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -187,7 +187,7 @@ public class DriveTrain extends RobotDrive {
 	        return driveSpeed;
 	 }
 	 
-	 public double turnAccelCurve(double target, double turnAccel) {
+	 public double turnAccelCurve(double target, double turnAccel, double turnMax) {
 		 if (Math.abs(turnSpeed - target) > turnAccel) {
 	    		if (turnSpeed > target) {
 	    			turnSpeed = turnSpeed - turnAccel;
@@ -197,6 +197,11 @@ public class DriveTrain extends RobotDrive {
 	    	} else {
 	    		turnSpeed = target;
 	    	}
+		 if (turnSpeed >= 0) {
+			 turnSpeed = Math.min(turnMax, turnSpeed);
+		 } else {
+			 turnSpeed = Math.max(-turnMax, turnSpeed);
+		 }
 	    return turnSpeed;
 	}
 	 
@@ -211,9 +216,9 @@ public class DriveTrain extends RobotDrive {
 		arcadeDrive(drive,turn);
 	}
 	
-	public void accelDrive(double drive, double turn, double slide) {
-		drive = driveAccelCurve(drive, driveAccel );
-		turn = turnAccelCurve(turn, turnAccel);
+	public void accelDrive(double drive, double turn) {
+		drive = driveAccelCurve(drive, DRIVEACCEL );
+		turn = turnAccelCurve(turn, TURNACCEL, TURNMAX);
 		arcadeDrive(drive, turn);
 	}
 }
