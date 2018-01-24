@@ -35,7 +35,9 @@ public class Robot extends SampleRobot {
 	public void disabled() {
 		while (isDisabled()) {
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
-			Common.dashStr("Game Data", gameData);
+			if(gameData != null) {
+				Common.dashStr("Game Data", gameData);
+			}
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
@@ -101,7 +103,7 @@ public class Robot extends SampleRobot {
 			else {
 				DriveTrain.instance().tankDrive(0, 0);
 			}
-			Timer.delay((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000);
+			Timer.delay(Math.max(0, ((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000)));
 		}
 	}
 }
