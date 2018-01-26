@@ -7,6 +7,7 @@ package org.usfirst.frc.team4564.robot;
  * 
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
+ * @author Brent Roberts
  */
 public class Constants {
 	public static final int
@@ -22,7 +23,10 @@ public class Constants {
 	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
 	
 	//Sonic
-	SONIC = 0
+	SONIC_LEFT_PIN = 0, SONIC_FRONT_PIN = 6, SONIC_RIGHT_PIN = 7,
+	
+	//Sonic able pins
+	SONIC_ABLE_PIN = 4
 	
 	;
 }

@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj.Timer;
  * Created January 2018
  * 
  * @author Brewer FIRST Robotics Team 4564
- * @author Evan McCoy And Sam "Woodie" Woodward
+ * @author Evan McCoy
+ * @author Brent Roberts
+ * @author Sam "Woodie" Woodward
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
@@ -20,6 +22,7 @@ public class Robot extends SampleRobot {
 	private static final double P = 0.075, I = 0, D = 0.08;
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
+	private Bat bat = new Bat();
 	private String gameData;
 
 	public Robot() {
@@ -85,6 +88,7 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
     	long time;
     	while (isEnabled() && isOperatorControl()) {
+    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
@@ -92,8 +96,6 @@ public class Robot extends SampleRobot {
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		
     		dt.accelDrive(forward, turn);
-    		
-    		
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
