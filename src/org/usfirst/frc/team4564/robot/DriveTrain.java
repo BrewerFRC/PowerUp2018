@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import org.usfirst.frc.team4564.robot.path.Pathfinding;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * Handles actions related to robot motion.
@@ -15,14 +16,17 @@ import edu.wpi.first.wpilibj.Spark;
  * 
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
+ * @author Brent Roberts
  */
-public class DriveTrain extends RobotDrive {
+public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
 			backL = new Spark(Constants.DRIVE_BL),
 			backR = new Spark(Constants.DRIVE_BR);
+	private static final SpeedControllerGroup left = new SpeedControllerGroup(frontL, backL);
+	private static final SpeedControllerGroup right = new SpeedControllerGroup(frontR, backR);
 	
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
@@ -30,16 +34,16 @@ public class DriveTrain extends RobotDrive {
 	private Pathfinding path = new Pathfinding();
 	double driveSpeed = 0;
 	double turnSpeed = 0;
-	double slideSpeed = 0;
-	double driveAccel = .08;
-	double turnAccel = .08;
+	double DRIVEACCEL = .06;
+	double TURNACCEL = .06;
+	double TURNMAX = .8;
 	
 	/**
 	 * Creates an instance of DriveTrain.
 	 * Motor controller and encoder channels are determined in Constants.
 	 */
 	public DriveTrain() {
-		super(frontL, backL, frontR, backR);
+		super(left, right);
 		
 		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
 		encoderL.setDistancePerPulse(0.01152655);
@@ -48,6 +52,8 @@ public class DriveTrain extends RobotDrive {
 		encoderR.setDistancePerPulse(0.01143919);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
+		left.setInverted(true);
+		right.setInverted(true);
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
@@ -190,7 +196,7 @@ public class DriveTrain extends RobotDrive {
 	        return driveSpeed;
 	 }
 	 
-	 public double turnAccelCurve(double target, double turnAccel) {
+	 public double turnAccelCurve(double target, double turnAccel, double turnMax) {
 		 if (Math.abs(turnSpeed - target) > turnAccel) {
 	    		if (turnSpeed > target) {
 	    			turnSpeed = turnSpeed - turnAccel;
@@ -200,6 +206,11 @@ public class DriveTrain extends RobotDrive {
 	    	} else {
 	    		turnSpeed = target;
 	    	}
+		 if (turnSpeed >= 0) {
+			 turnSpeed = Math.min(turnMax, turnSpeed);
+		 } else {
+			 turnSpeed = Math.max(-turnMax, turnSpeed);
+		 }
 	    return turnSpeed;
 	}
 	 
@@ -211,12 +222,12 @@ public class DriveTrain extends RobotDrive {
 	}
 	
 	public void setDrive(double drive, double turn, double slide) {
-		arcadeDrive(drive,turn);
+		arcadeDrive(drive,-turn);
 	}
-	
-	public void accelDrive(double drive, double turn, double slide) {
-		drive = driveAccelCurve(drive, driveAccel );
-		turn = turnAccelCurve(turn, turnAccel);
-		arcadeDrive(drive, turn);
+	//turn should be inverted on testbed -Brent
+	public void accelDrive(double drive, double turn) {
+		drive = driveAccelCurve(drive, DRIVEACCEL );
+		turn = turnAccelCurve(turn, TURNACCEL, TURNMAX);
+		arcadeDrive(drive, -turn);
 	}
 }

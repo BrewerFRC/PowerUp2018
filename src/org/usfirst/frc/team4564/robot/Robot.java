@@ -2,6 +2,7 @@ package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -12,13 +13,17 @@ import edu.wpi.first.wpilibj.Timer;
  * Created January 2018
  * 
  * @author Brewer FIRST Robotics Team 4564
- * @author Evan McCoy And Sam "Woodie" Woodward
+ * @author Evan McCoy
+ * @author Brent Roberts
+ * @author Sam "Woodie" Woodward
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
 	private DriveTrain dt = new DriveTrain();
 	private static final double P = 0.075, I = 0, D = 0.08;
-	private Xbox j = new Xbox(0);
+	private Xbox j0 = new Xbox(0);
+	private Xbox j1 = new Xbox(1);
+	private Bat bat = new Bat();
 	private String gameData;
 
 	public Robot() {
@@ -36,7 +41,9 @@ public class Robot extends SampleRobot {
 	public void disabled() {
 		while (isDisabled()) {
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
-			Common.dashStr("Game Data", gameData);
+			if(gameData != null) {
+				Common.dashStr("Game Data", gameData);
+			}
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
@@ -80,28 +87,34 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void operatorControl() {
-		
 		Path path = new Path();
-		/*path.addDriveStraight(60, 0, 0.65)
+		path.addDriveStraight(60, 0, 0.65)
 			.addPowerTurn(76, 0.65)
 			.addDriveStraight(72, 90, 0.9)
 			.addDriveStraight(36, 90, 0.65)
 			.addPowerTurn(12, 0.65)
-			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");*/
+			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
 		path.start();
-		while (isEnabled() && isOperatorControl()) {
-			long time = Common.time();
-			
-			if (j.getPressed("a")) {
+		
+    	long time;
+    	while (isEnabled() && isOperatorControl()) {
+    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
+    		time = Common.time();
+    		double forward = 0;
+    		double turn = 0;
+    		forward = j0.getY(GenericHID.Hand.kLeft);
+			turn  = j0.getX(GenericHID.Hand.kLeft);
+    		
+			if (j0.getPressed("a")) {
 				double[] power = path.getDrive();
-				Common.dashNum("leftPower", power[0]);
-				Common.dashNum("rightPower", power[1]);
-				DriveTrain.instance().tankDrive(power[0], power[1]);
+				dt.tankDrive(power[0], power[1]);
 			}
 			else {
-				DriveTrain.instance().tankDrive(0, 0);
+				dt.accelDrive(forward, turn);
 			}
-			Timer.delay((1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000);
-		}
-	}
+    		
+    		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+    		Timer.delay((delay > 0) ? delay : 0.001);
+    	}
+    }
 }
