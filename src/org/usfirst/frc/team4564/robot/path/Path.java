@@ -65,8 +65,8 @@ public class Path {
 	 * @param power - the power to apply to the drive train
 	 * @return {@link Path Path} - the current Path instance
 	 */
-	public Path addDriveStraight(double distance, double heading, double power) {
-		stages.add(new DriveStraight(distance, heading, power));
+	public Path addDriveStraight(double distance, double heading, double power, String name) {
+		stages.add(new DriveStraight(distance, heading, power, name));
 		return this;
 	}
 	

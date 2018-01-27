@@ -57,9 +57,9 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Path path1 = new Path();
-		path1.addDriveStraight(36, 0, 0.65)
-			 .addDriveStraight(200, 9, 0.65)
-			 .addDriveStraight(36, 0, 0.65);
+		path1.addDriveStraight(36, 0, 0.65, "startDrive")
+			 .addDriveStraight(200, 9, 0.65, "angledDrive");
+			 //.addDriveStraight(36, 0, 0.65);
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
@@ -82,13 +82,12 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
 		
 		Path path = new Path();
-		path.addDriveStraight(60, 0, 0.65)
+		/*path.addDriveStraight(60, 0, 0.65)
 			.addPowerTurn(76, 0.65)
 			.addDriveStraight(72, 90, 0.9)
 			.addDriveStraight(36, 90, 0.65)
 			.addPowerTurn(12, 0.65)
-			/* distance, angle, minPower, maxPower, P, I, D, inverted, name */
-			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
+			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");*/
 		path.start();
 		while (isEnabled() && isOperatorControl()) {
 			long time = Common.time();
