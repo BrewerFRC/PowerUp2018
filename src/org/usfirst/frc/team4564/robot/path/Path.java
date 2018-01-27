@@ -25,9 +25,6 @@ public class Path {
 	 */
 	public void reset() {
 		state = 0;
-		for (Stage stage : stages) {
-			stage.reset();
-		}
 	}
 	
 	/**
@@ -44,7 +41,6 @@ public class Path {
 			state++;
 			stages.get(state).start();
 		}
-		stages.get(state).triggerEvents();
 		return stages.get(state).getDrive();
 	}
 	
@@ -109,21 +105,6 @@ public class Path {
 	 */
 	public Path addPowerTurnOverlay(double targetAngle, double power) {
 		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, stages.get(stages.size() - 1)));
-		return this;
-	}
-	
-	/**
-	 * Adds an event to the last Stage in the path.
-	 * 
-	 * @param event - the event
-	 * @return {@link Path Path} - the current Path instance
-	 */
-	public Path addEvent(Event event) {
-		if (stages.size() > 0) {
-			Stage stage = stages.get(stages.size() - 1);
-			event.setStage(stage);
-			stage.addEvent(event);
-		}
 		return this;
 	}
 }
