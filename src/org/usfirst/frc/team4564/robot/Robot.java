@@ -88,10 +88,10 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
 		Path path = new Path();
-		path.addDriveStraight(60, 0, 0.65)
+		path.addDriveStraight(60, 0, 0.65, "startDrive")
 			.addPowerTurn(76, 0.65)
-			.addDriveStraight(72, 90, 0.9)
-			.addDriveStraight(36, 90, 0.65)
+			.addDriveStraight(72, 90, 0.9, "middleDrive")
+			.addDriveStraight(36, 90, 0.65, "finalDrive")
 			.addPowerTurn(12, 0.65)
 			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
 		path.start();
