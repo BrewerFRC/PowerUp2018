@@ -26,7 +26,9 @@ public class Constants {
 	SONIC_LEFT_PIN = 0, SONIC_FRONT_PIN = 6, SONIC_RIGHT_PIN = 7,
 	
 	//Sonic able pins
-	SONIC_ABLE_PIN = 4
+	SONIC_ABLE_PIN = 4,
 	
+	//Elevator motor can numbers
+	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13
 	;
 }
