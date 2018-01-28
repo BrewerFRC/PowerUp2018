@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends SampleRobot {
 	private DriveTrain dt = new DriveTrain();
 	private static final double P = 0.075, I = 0, D = 0.08;
+	private Intake intake = new Intake();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
@@ -43,11 +44,14 @@ public class Robot extends SampleRobot {
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
 			}
+			Common.dashNum("IR Output", intake.getDistance() );
+			Common.dashBool("Is Loaded", intake.isLoaded());
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
 				OR = ||
 			}*/
+			
 			if (gameData.length() == 3) {
 				Common.dashBool("Do You Have Game Data", true);
 			} else {
@@ -82,7 +86,7 @@ public class Robot extends SampleRobot {
 	}
 
 	/**
-	 * Control logic for teleoperated mode.
+	 * Control logic for teleop mode.
 	 */
 	@Override
 	public void operatorControl() {
