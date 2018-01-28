@@ -9,8 +9,10 @@ public class Elevator {
 	TalonSRX elevatorRight = new TalonSRX(Constants.ELEVATOR_RIGHT);
 
 	public void init() {
-		elevatorRight.set(ControlMode.Position, 0);
 		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+	}
+	
+	public void testMotor() {
 		elevatorRight.set(ControlMode.PercentOutput, 0.3);
 	}
 	

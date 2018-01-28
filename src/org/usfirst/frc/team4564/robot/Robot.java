@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -97,7 +99,7 @@ public class Robot extends SampleRobot {
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
-    		
+    		elevator.elevatorRight.set(ControlMode.PercentOutput, j0.getX(GenericHID.Hand.kRight));
     		dt.accelDrive(forward, turn);
     		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
