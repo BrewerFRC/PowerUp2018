@@ -30,6 +30,10 @@ public class Constants {
 	
 	//Elevator motor can numbers
 	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13,
+	
+	//Elevator limit switches
+	LOWER_LIMIT = 8, UPPER_LIMIT = 7,
+	
 	//IR Sensor
 	IR_SENSOR = 3,
 			
@@ -38,8 +42,8 @@ public class Constants {
 	
 	;
 	public static final long
-	//Elevator height in encoder counts(random value for now)
-	ELEVATOR_HEIGHT = 10000
+	//Elevator height in inches(random value for now)
+	ELEVATOR_HEIGHT = 72
 	
 	;
 }
