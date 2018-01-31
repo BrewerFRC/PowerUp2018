@@ -29,7 +29,10 @@ public class Constants {
 	SONIC_ABLE_PIN = 4,
 	
 	//IR Sensor
-	IR_SENSOR = 3
+	IR_SENSOR = 3,
+	
+	//potentiometer intake
+	INTAKE_POT = 2
 	
 	;
 }

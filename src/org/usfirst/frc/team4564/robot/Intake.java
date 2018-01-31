@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 public class Intake {
 
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
+	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
+	private double MAX_ELEVATOR_SAFE = 4096, MIN_ELEVATOR_SAFE = 0;
 	private double previousReading = 0;
 
 	public double getDistance() {
@@ -26,5 +28,15 @@ public class Intake {
 			return false;
 		}
 	}
-	
+	public double getPosition() {
+		double position = pot.getValue();
+		return position;
+				
+	}
+	public boolean elevatorSafe() {
+		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
+			return true;
+		}
+		return false;
+	}
 }
