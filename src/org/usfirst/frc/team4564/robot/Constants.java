@@ -41,9 +41,4 @@ public class Constants {
 	INTAKE_POT = 2
 	
 	;
-	public static final long
-	//Elevator height in inches(random value for now)
-	ELEVATOR_HEIGHT = 72
-	
-	;
 }
