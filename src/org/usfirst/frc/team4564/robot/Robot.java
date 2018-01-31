@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
+import org.usfirst.frc.team4564.robot.path.Paths;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -21,21 +22,15 @@ import edu.wpi.first.wpilibj.Timer;
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
 	private DriveTrain dt = new DriveTrain();
-	private static final double P = 0.075, I = 0, D = 0.08;
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
 	private String gameData;
-
-	public Robot() {
-		
-	}
-	
-	
 	
 	@Override
 	public void robotInit() {
-		
+		//Initialize all paths.
+		new Paths();
 	}
 	
 	@Override
@@ -64,15 +59,12 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Path path1 = new Path();
-		path1.addDriveStraight(48, 0, 0.8, "startDrive")
-			 .addDriveStraight(203.4, 11.8, 0.8, "angledDrive")
-			 .addDriveStraight(36, 0, 0.8, "finalDrive");
-		path1.start();
+		Path path = Paths.NEAR_SCALE;
+		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
-			double[] power = path1.getDrive();
+			double[] power = path.getDrive();
 			
 			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
 			System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
@@ -89,16 +81,9 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void operatorControl() {
-		Path path = new Path();
-		path.addDriveStraight(60, 0, 0.65, "startDrive")
-			.addPowerTurn(76, 0.65)
-			.addDriveStraight(72, 90, 0.9, "middleDrive")
-			.addDriveStraight(36, 90, 0.65, "finalDrive")
-			.addPowerTurn(12, 0.65)
-			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
-		path.start();
-		
     	long time;
+    	Path path = Paths.FAR_SCALE;
+    	path.start();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;

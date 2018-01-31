@@ -88,8 +88,8 @@ public class Path {
 	 * @param name - the name of the PID for SmartDashboard tuning.
 	 * @return {@link Path Path} - the current Path instance
 	 */
-	public Path addPIDDrive(double distance, double heading, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
-		stages.add(new PIDDrive(distance, heading, minPower, maxPower, p, i, d, inverted, name));
+	public Path addPIDDrive(double distance, double heading, double minPower, double maxPower, boolean inverted, String name) {
+		stages.add(new PIDDrive(distance, heading, minPower, maxPower, inverted, name));
 		return this;
 	}
 	
