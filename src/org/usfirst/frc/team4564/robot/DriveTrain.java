@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
  */
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
+	
+	public static final double DRIVEACCEL = .06, TURNACCEL = .06, TURNMAX = .8;
+	
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
@@ -32,11 +35,8 @@ public class DriveTrain extends DifferentialDrive {
 	private PID pidL, pidR;
 	private Heading heading;
 	private Pathfinding path = new Pathfinding();
-	double driveSpeed = 0;
-	double turnSpeed = 0;
-	double DRIVEACCEL = .06;
-	double TURNACCEL = .06;
-	double TURNMAX = .8;
+	private double driveSpeed = 0, turnSpeed = 0;
+	private double tankLeft = 0, tankRight = 0;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -52,8 +52,6 @@ public class DriveTrain extends DifferentialDrive {
 		encoderR.setDistancePerPulse(0.01143919);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
-		left.setInverted(true);
-		right.setInverted(true);
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
@@ -71,11 +69,17 @@ public class DriveTrain extends DifferentialDrive {
 		pidR.reset();
 	}
 	
+	/**
+	 * Update PID tuning values from the SmartDashboard.
+	 */
 	public void updatePIDs() {
 		pidL.update();
 		pidR.update();
 	}
 	
+	/**
+	 * Drive the robot on controlled left and right velocity targets.
+	 */
 	public void pidVelDrive() {
 		//pidL.setTarget(18);
 		//pidR.setTarget(54);
@@ -183,51 +187,82 @@ public class DriveTrain extends DifferentialDrive {
 	public Heading getHeading() {
 		return this.heading;
 	}
-	 public double driveAccelCurve(double target, double driveAccel) {
-		 if (Math.abs(driveSpeed - target) > driveAccel) {
-	            if (driveSpeed > target) {
-	                driveSpeed = driveSpeed - driveAccel;
-	            } else {
-	                driveSpeed = driveSpeed + driveAccel;
-	            }
-	        } else {
-	            driveSpeed = target;
-	        }
-	        return driveSpeed;
+	
+	/**
+	 * Gradually accelerate to a specified drive value.
+	 * 
+	 * @param target - the target drive value from -1 to 1
+	 * @return double - the allowed drive value for this cycle.
+	 */
+	 public double driveAccelCurve(double target) {
+		 if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
+            if (driveSpeed > target) {
+                driveSpeed = driveSpeed - DRIVEACCEL;
+            } else {
+                driveSpeed = driveSpeed + DRIVEACCEL;
+            }
+        } else {
+            driveSpeed = target;
+        }
+        return driveSpeed;
 	 }
 	 
-	 public double turnAccelCurve(double target, double turnAccel, double turnMax) {
-		 if (Math.abs(turnSpeed - target) > turnAccel) {
+	 /**
+	  * Gradually accelerate to a specified turn value.
+	  * 
+	  * @param target - the target turn value from -1 to 1
+	  * @return double - the allowed turn value at this cycle.
+	  */
+	 public double turnAccelCurve(double target) {
+		 if (Math.abs(turnSpeed - target) > TURNACCEL) {
 	    		if (turnSpeed > target) {
-	    			turnSpeed = turnSpeed - turnAccel;
+	    			turnSpeed = turnSpeed - TURNACCEL;
 	    		} else {
-	    			turnSpeed = turnSpeed + turnAccel;
+	    			turnSpeed = turnSpeed + TURNACCEL;
 	    		}
 	    	} else {
 	    		turnSpeed = target;
 	    	}
 		 if (turnSpeed >= 0) {
-			 turnSpeed = Math.min(turnMax, turnSpeed);
+			 turnSpeed = Math.min(TURNMAX, turnSpeed);
 		 } else {
-			 turnSpeed = Math.max(-turnMax, turnSpeed);
+			 turnSpeed = Math.max(-TURNMAX, turnSpeed);
 		 }
 	    return turnSpeed;
 	}
-	 
-	public void manualDrive(double fl, double bl, double fr, double br, double sl, double sr) {
-		frontL.set(fl);
-		backL.set(bl);
-		frontR.set(fr);
-		backR.set(br);
+	
+	//turn should be inverted on testbed -Brent
+	/**
+	 * Arcade drive with an acceleration curve.
+	 * 
+	 * @param drive - the forward/backward value from -1 to 1.
+	 * @param turn - the turn value from -1 to 1.
+	 */
+	public void accelDrive(double drive, double turn) {
+		drive = driveAccelCurve(drive);
+		turn = turnAccelCurve(turn);
+		arcadeDrive(drive, -turn);
 	}
 	
-	public void setDrive(double drive, double turn, double slide) {
-		arcadeDrive(drive,-turn);
-	}
-	//turn should be inverted on testbed -Brent
-	public void accelDrive(double drive, double turn) {
-		drive = driveAccelCurve(drive, DRIVEACCEL );
-		turn = turnAccelCurve(turn, TURNACCEL, TURNMAX);
-		arcadeDrive(drive, -turn);
+	public void accelTankDrive(double left, double right) {
+		if (Math.abs(tankLeft - left) > DRIVEACCEL) {
+            if (tankLeft > left) {
+                tankLeft = tankLeft - DRIVEACCEL;
+            } else {
+                tankLeft = tankLeft + DRIVEACCEL;
+            }
+        } else {
+            tankLeft = left;
+        }
+		if (Math.abs(tankRight - right) > DRIVEACCEL) {
+            if (tankRight > right) {
+                tankRight = tankRight - DRIVEACCEL;
+            } else {
+                tankRight = tankRight + DRIVEACCEL;
+            }
+        } else {
+            tankRight = right;
+        }
+		super.tankDrive(tankLeft, tankRight);
 	}
 }

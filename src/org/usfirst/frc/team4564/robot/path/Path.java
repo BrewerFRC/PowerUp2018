@@ -3,7 +3,7 @@ package org.usfirst.frc.team4564.robot.path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.usfirst.frc.team4564.robot.Common;
+import org.usfirst.frc.team4564.robot.DriveTrain;
 
 /**
  * A class representing a collection of drive stages that forms a continuous drive path.
@@ -13,10 +13,14 @@ import org.usfirst.frc.team4564.robot.Common;
  * 
  */
 public class Path {
+	private static DriveTrain dt;
 	private List<Stage> stages = new ArrayList<Stage>();
 	private int state = 0;
 	
 	public void start() {
+		dt = DriveTrain.instance();
+		dt.getHeading().reset();
+		dt.resetEncoders();
 		stages.get(0).start();
 	}
 	
@@ -25,6 +29,7 @@ public class Path {
 	 */
 	public void reset() {
 		state = 0;
+		start();
 	}
 	
 	/**
@@ -33,13 +38,18 @@ public class Path {
 	 * @return double[] - The left/right motor powers, or [0, 0] if the path is complete.
 	 */
 	public double[] getDrive() {
-		Common.dashNum("stage", state);
 		if (state >= stages.size()) {
 			return new double[] {0, 0};
 		}
 		if (stages.get(state).isComplete()) {
 			state++;
-			stages.get(state).start();
+			System.out.println("Path#getDrive: State Switch - New State = " + state);
+			if (state < stages.size()) {
+				stages.get(state).start();
+			}
+			else {
+				return new double[] {0, 0};
+			}
 		}
 		return stages.get(state).getDrive();
 	}

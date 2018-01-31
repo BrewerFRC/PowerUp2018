@@ -65,19 +65,20 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Path path1 = new Path();
-		path1.addDriveStraight(36, 0, 0.65, "startDrive")
-			 .addDriveStraight(200, 9, 0.65, "angledDrive");
-			 //.addDriveStraight(36, 0, 0.65);
+		path1.addDriveStraight(48, 0, 0.8, "startDrive")
+			 .addDriveStraight(203.4, 11.8, 0.8, "angledDrive")
+			 .addDriveStraight(36, 0, 0.8, "finalDrive");
+		path1.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
 			double[] power = path1.getDrive();
 			
 			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
-			Common.dashNum("leftPower", power[0]);
-			Common.dashNum("rightPower", power[1]);
+			System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
+					"; Motor Powers: " + power[0] + ":" + power[1]);
 			
-			DriveTrain.instance().tankDrive(power[0], power[1]);
+			DriveTrain.instance().accelTankDrive(power[0], power[1]);
 			
 			Timer.delay(Math.max(0, (1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000));
 		}
@@ -99,7 +100,6 @@ public class Robot extends SampleRobot {
 		
     	long time;
     	while (isEnabled() && isOperatorControl()) {
-    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
