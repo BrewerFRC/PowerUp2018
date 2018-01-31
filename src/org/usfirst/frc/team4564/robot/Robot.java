@@ -100,6 +100,9 @@ public class Robot extends SampleRobot {
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		elevator.elevatorRight.set(ControlMode.PercentOutput, j0.getX(GenericHID.Hand.kRight));
+    		if (j0.getPressed("a")) {
+    			elevator.resetEncoder();
+    		}
     		dt.accelDrive(forward, turn);
     		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;

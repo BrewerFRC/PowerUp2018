@@ -30,5 +30,11 @@ public class Constants {
 	
 	//Elevator motor can numbers
 	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13
+	
+	;
+	public static final long
+	//Elevator height in encoder counts(random value for now)
+	ELEVATOR_HEIGHT = 10000
+	
 	;
 }

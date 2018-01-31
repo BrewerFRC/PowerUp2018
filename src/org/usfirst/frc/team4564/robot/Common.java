@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
  * @author Jacob Cote
+ * @author Brent Roberts
  */
 public class Common {
 	private static final DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
@@ -38,5 +39,12 @@ public class Common {
 	
 	public static long time() {
 		return Calendar.getInstance().getTimeInMillis();
+	}
+	public static double map(double input, double minInput, double maxInput, double minOutput, double maxOutput) {
+		double inputRange = maxInput - minInput;
+		double inputPercentage = (input-minInput)/inputRange;
+		double outputRange = maxOutput - minOutput;
+		double output = (outputRange * inputPercentage) + minOutput;
+		return output;
 	}
 }
