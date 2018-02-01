@@ -28,11 +28,14 @@ public class Intake {
 			return false;
 		}
 	}
+	
+	
 	public double getPosition() {
 		double position = pot.getValue();
-		return position;
-				
+		return position;		
 	}
+	
+	
 	public boolean elevatorSafe() {
 		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
 			return true;
