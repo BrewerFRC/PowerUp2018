@@ -96,6 +96,7 @@ public class Elevator {
 	 * 
 	 */
 	public void home() {
+		Common.debug("New state Homing");
 		state = States.HOMING;
 	}
 	/**Gets the state of the elevator
@@ -127,6 +128,7 @@ public class Elevator {
 		//overrules moveToHeight()
 		if (state != States.STOPPED && state != States.HOMING){
 			this.speed = speed;
+			Common.debug("New state Joystick");
 			state = States.JOYSTICK;
 		}
 	}
@@ -137,6 +139,7 @@ public class Elevator {
 	public void moveToHeight(double targetHeight) {
 		if (state != States.STOPPED && state != States.HOMING && state != States.JOYSTICK) {
 			this.targetHeight = targetHeight + offset;
+			Common.debug("New State Moving");
 			state = States.MOVING;
 		}
 	}
@@ -159,6 +162,7 @@ public class Elevator {
 			if (lowerLimit.get()) {
 				offset = getInches();
 				setPower(0.0);
+				Common.debug("New state Idle");
 				state = States.IDLE;
 			} else {
 				setPower(-0.4);
@@ -171,6 +175,7 @@ public class Elevator {
 			error = targetHeight - getInches();
 			if (Math.abs(error) < ACCEPTABLE_ERROR) {
 				setPower(0.0);
+				Common.debug("New state Idle");
 				state = States.IDLE;
 			} else {
 				if (error > 0) {
@@ -182,6 +187,7 @@ public class Elevator {
 			break;
 		case JOYSTICK:
 			setPower(speed);
+			Common.debug("new State Idle");
 			state = States.IDLE;
 			break;
 		}
