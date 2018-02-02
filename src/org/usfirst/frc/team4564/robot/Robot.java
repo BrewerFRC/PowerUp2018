@@ -2,6 +2,7 @@ package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
+import org.usfirst.frc.team4564.robot.path.PowerTurn;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -39,17 +40,17 @@ public class Robot extends SampleRobot {
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
+				if (gameData.length() == 3) {
+					Common.dashBool("Do You Have Game Data", true);
+				} else {
+					Common.dashBool("Do You Have Game Data" , false);
+				}
 			}
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
 				OR = ||
 			}*/
-			if (gameData.length() == 3) {
-				Common.dashBool("Do You Have Game Data", true);
-			} else {
-				Common.dashBool("Do You Have Game Data" , false);
-			}
 		}
 	}
 	
@@ -67,11 +68,15 @@ public class Robot extends SampleRobot {
 			double[] power = path.getDrive();
 			
 			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
-			System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
-					"; Motor Powers: " + power[0] + ":" + power[1]);
-			
-			DriveTrain.instance().accelTankDrive(power[0], power[1]);
-			
+			//System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
+			//		"; Motor Powers: " + power[0] + ":" + power[1]);
+			if (path.isEdge(PowerTurn.class)) {
+				Common.debug("Power Turn Edge");
+				DriveTrain.instance().tankDrive(power[0], power[1]);
+			}
+			else {
+				DriveTrain.instance().accelTankDrive(power[0], power[1]);
+			}
 			Timer.delay(Math.max(0, (1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000));
 		}
 	}
@@ -93,7 +98,7 @@ public class Robot extends SampleRobot {
     		
 			if (j0.getPressed("a")) {
 				double[] power = path.getDrive();
-				dt.tankDrive(power[0], power[1]);
+				dt.accelTankDrive(power[0], power[1]);
 			}
 			else {
 				dt.accelDrive(forward, turn);

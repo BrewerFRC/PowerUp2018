@@ -16,6 +16,7 @@ public class Path {
 	private static DriveTrain dt;
 	private List<Stage> stages = new ArrayList<Stage>();
 	private int state = 0;
+	private Stage[] edge;
 	
 	public void start() {
 		dt = DriveTrain.instance();
@@ -42,14 +43,16 @@ public class Path {
 			return new double[] {0, 0};
 		}
 		if (stages.get(state).isComplete()) {
+			//The state is changing. Initialize edge with previous and new stage instances.
+			edge = new Stage[2];
+			edge[0] = stages.get(state);
 			state++;
 			System.out.println("Path#getDrive: State Switch - New State = " + state);
 			if (state < stages.size()) {
+				edge[1] = stages.get(state);
 				stages.get(state).start();
 			}
-			else {
-				return new double[] {0, 0};
-			}
+			return stages.get(state - 1).getDrive();
 		}
 		return stages.get(state).getDrive();
 	}
@@ -61,6 +64,32 @@ public class Path {
 	 */
 	public boolean isComplete() {
 		return state >= stages.size();
+	}
+	
+	/**
+	 * Returns the index of the current stage.
+	 * 
+	 * @return int - the index.
+	 */
+	public int currentStage() {
+		return state;
+	}
+	
+	/**
+	 * Returns whether or not the specified type is a member of the current Stage change.
+	 * 
+	 * @param type - the class type to check.
+	 * @return - is edge.
+	 */
+	public boolean isEdge(Class<? extends Stage> type) {
+		//If the last cycle created an edge with both a previous and new stage.
+		if (edge != null && edge.length == 2) {
+			//Whether either of the stages in the edge match the requested class type.
+			boolean isEdge = edge[0].getClass().equals(type) || edge[1].getClass().equals(type);
+			edge = null;
+			return isEdge;
+		}
+		return false;
 	}
 	
 	/**

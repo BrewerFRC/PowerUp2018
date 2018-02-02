@@ -42,10 +42,10 @@ public class DriveStraight extends Stage {
 		pid.update();
 		double offset = pid.calc(DriveTrain.instance().getHeading().getAngle());
 		if (offset > 0) {
-			return new double[] {power, power + Math.abs(offset)};
+			return new double[] {power, Math.min(power + Math.abs(offset), 1)};
 		}
 		else {
-			return new double[] {power + Math.abs(offset), power};
+			return new double[] {Math.min(power + Math.abs(offset), 1), power};
 		}
 		//double error = heading - DriveTrain.instance().getHeading().getAngle();
 		//double offset = error*0.025;

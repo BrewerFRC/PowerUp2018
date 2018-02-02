@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static final double DRIVEACCEL = .06, TURNACCEL = .06, TURNMAX = .8;
+	public static final double DRIVEACCEL = .06, TURNACCEL = .06, TANKACCEL = 0.01, TANKMIN = 0.40, TURNMAX = .8;
 	
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
@@ -244,25 +244,51 @@ public class DriveTrain extends DifferentialDrive {
 		arcadeDrive(drive, -turn);
 	}
 	
+	/**
+	 * An implementation of tank drive that updates current speed values used in acceleration curve methods.
+	 */
+	@Override
+	public void tankDrive(double left, double right) {
+		tankLeft = left;
+		tankRight = right;
+		super.tankDrive(tankLeft, tankRight);
+	}
+	
+	/**
+	 * Acceleration control for tank drive.
+	 * 
+	 * @param left - the target left power.
+	 * @param right - the target right power.
+	 */
 	public void accelTankDrive(double left, double right) {
-		if (Math.abs(tankLeft - left) > DRIVEACCEL) {
+		//Left
+		if (tankLeft < TANKMIN) {
+			tankLeft = Math.min(TANKMIN, left);
+		}
+		else if (Math.abs(tankLeft - left) > TANKACCEL) {
             if (tankLeft > left) {
-                tankLeft = tankLeft - DRIVEACCEL;
+                tankLeft = tankLeft - TANKACCEL;
             } else {
-                tankLeft = tankLeft + DRIVEACCEL;
+                tankLeft = tankLeft + TANKACCEL;
             }
-        } else {
+        } 
+		else {
             tankLeft = left;
         }
-		if (Math.abs(tankRight - right) > DRIVEACCEL) {
+		//Right
+		if (tankRight < TANKMIN) {
+			tankRight = Math.min(TANKMIN, right);
+		}
+		else if (Math.abs(tankRight - right) > TANKACCEL) {
             if (tankRight > right) {
-                tankRight = tankRight - DRIVEACCEL;
+                tankRight = tankRight - TANKACCEL;
             } else {
-                tankRight = tankRight + DRIVEACCEL;
+                tankRight = tankRight + TANKACCEL;
             }
         } else {
             tankRight = right;
         }
+		System.out.println(tankLeft + ":" + tankRight);
 		super.tankDrive(tankLeft, tankRight);
 	}
 }

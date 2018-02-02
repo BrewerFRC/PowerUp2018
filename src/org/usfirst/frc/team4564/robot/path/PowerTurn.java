@@ -29,10 +29,13 @@ public class PowerTurn extends Stage {
 	}
 	
 	public double[] getDrive() {
-		if (target < DriveTrain.instance().getHeading().getAngle()) {
-			return new double[] {0, power};
+		if (isComplete()) {
+			return new double[] {power, power};
 		}
-		return new double[] {power, 0};
+		if (target < DriveTrain.instance().getHeading().getAngle()) {
+			return new double[] {-0.3, power};
+		}
+		return new double[] {power, -0.3};
 	}
 	
 	/**
