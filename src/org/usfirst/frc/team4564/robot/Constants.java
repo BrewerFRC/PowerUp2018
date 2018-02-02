@@ -28,9 +28,15 @@ public class Constants {
 	//Sonic able pins
 	SONIC_ABLE_PIN = 4,
 	
+	//Elevator motor can numbers
+	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13,
+	
+	//Elevator limit switches
+	LOWER_LIMIT = 8, UPPER_LIMIT = 7,
+	
 	//IR Sensor
 	IR_SENSOR = 3,
-	
+			
 	//potentiometer intake
 	INTAKE_POT = 2
 	

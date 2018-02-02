@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -24,6 +26,7 @@ public class Robot extends SampleRobot {
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
+	private Elevator elevator = new Elevator();
 	private String gameData;
 
 	public Robot() {
@@ -34,7 +37,7 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
-		
+		elevator.init();
 	}
 	
 	@Override
@@ -57,6 +60,7 @@ public class Robot extends SampleRobot {
 			} else {
 				Common.dashBool("Do You Have Game Data" , false);
 			}
+			elevator.update();
 		}
 	}
 	
@@ -92,15 +96,16 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
     	long time;
     	while (isEnabled() && isOperatorControl()) {
+    		
     		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
-    		
+    		elevator.elevatorRight.set(ControlMode.PercentOutput, j0.getX(GenericHID.Hand.kRight));
     		dt.accelDrive(forward, turn);
-    		
+    		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
