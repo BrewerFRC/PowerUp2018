@@ -96,8 +96,7 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
     	long time;
     	while (isEnabled() && isOperatorControl()) {
-    		
-    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
+    		Common.dashNum("Ultrasonic", bat.getDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;

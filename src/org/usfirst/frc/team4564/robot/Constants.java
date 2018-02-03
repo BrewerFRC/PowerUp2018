@@ -23,10 +23,7 @@ public class Constants {
 	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
 	
 	//Sonic
-	SONIC_LEFT_PIN = 0, SONIC_FRONT_PIN = 1, SONIC_RIGHT_PIN = 2,
-	
-	//Sonic able pins
-	SONIC_ABLE_PIN = 4,
+	SONIC_PIN = 0,
 	
 	//Elevator motor can numbers
 	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13,
@@ -39,6 +36,9 @@ public class Constants {
 			
 	//potentiometer intake
 	INTAKE_POT = 2
+
+	
+
 	
 	;
 }
