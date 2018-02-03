@@ -92,7 +92,7 @@ public class DriveTrain extends DifferentialDrive {
 	 * Returns an instance of DriveTrain which is bound to the motor controllers.
 	 * Only this instance will be functional.
 	 * 
-	 * @return DriveTrain - the DriveTrain instance.
+	 * @return the DriveTrain instance.
 	 */
 	public static DriveTrain instance() {
 		return instance;
@@ -101,7 +101,7 @@ public class DriveTrain extends DifferentialDrive {
 	/**
 	 * Get raw counts for the left encoder.
 	 * 
-	 * @return int - the counts
+	 * @return the counts
 	 */
 	public int getLeftCounts() {
 		return encoderL.get();
@@ -110,7 +110,7 @@ public class DriveTrain extends DifferentialDrive {
 	/**
 	 * Get the scaled distance of the left encoder.
 	 * 
-	 * @return double - the distance in inches
+	 * @return the distance in inches
 	 */
 	public double getLeftDist() {
 		return encoderL.getDistance();
@@ -119,7 +119,7 @@ public class DriveTrain extends DifferentialDrive {
 	/**
 	 * Get the scaled velocity of the left encoder.
 	 * 
-	 * @return double - the velocity in inches/second
+	 * @return the velocity in inches/second
 	 */
 	public double getLeftVelocity() {
 		return encoderL.getRate();
@@ -128,7 +128,7 @@ public class DriveTrain extends DifferentialDrive {
 	/**
 	 * Get raw counts for the right encoder.
 	 * 
-	 * @return int - the counts
+	 * @return the counts
 	 */
 	public int getRightCounts() {
 		return encoderR.get();

@@ -15,6 +15,7 @@ public class PowerTurn extends Stage {
 	private double startingAngle;
 	
 	public PowerTurn(double target, double power) {
+		super(true);
 		this.target = target;
 		this.power = power;
 	}

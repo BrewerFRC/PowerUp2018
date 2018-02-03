@@ -19,6 +19,7 @@ public class DriveStraight extends Stage {
 	private String name;
 	
 	public DriveStraight(double distance, double heading, double power, String name) {
+		super(false);
 		this.target = distance;
 		this.heading = heading;
 		this.power = power;

@@ -10,12 +10,13 @@ import org.usfirst.frc.team4564.robot.PID;
  * @author Evan McCoy
  */
 public class PIDDrive extends Stage {
-	private static final double P = 0.075, I = 0, D = 0.08;
+	private static final double P = 0.03, I = 0, D = 0.01;
 	
 	private PID pid;
 	private double heading;
 	
 	public PIDDrive(double distance, double heading, double minPower, double maxPower, boolean inverted, String name) {
+		super(false, true);
 		this.pid = new PID(P, I, D, inverted, false, name);
 		pid.setTarget(distance);
 		pid.setOutputLimits(-maxPower, maxPower);

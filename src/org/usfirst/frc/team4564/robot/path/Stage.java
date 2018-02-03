@@ -9,6 +9,18 @@ package org.usfirst.frc.team4564.robot.path;
  * 
  */
 public abstract class Stage {
+	private boolean hold;
+	private boolean persist;
+	
+	public Stage(boolean hold) {
+		this.hold = hold;
+		this.persist = false;
+	}
+	
+	public Stage(boolean hold, boolean persist) {
+		this.hold = hold;
+		this.persist = persist;
+	}
 	
 	/**
 	 * Complete the initializing steps of the stage.
@@ -28,4 +40,12 @@ public abstract class Stage {
 	 * @return double[] - left/right motor powers
 	 */
 	public abstract double[] getDrive();
+	
+	public boolean isHeld() {
+		return hold;
+	}
+	
+	public boolean isPersist() {
+		return persist;
+	}
 }
