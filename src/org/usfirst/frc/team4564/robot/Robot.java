@@ -91,6 +91,7 @@ public class Robot extends SampleRobot {
     	path.start();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
+    		Common.dashNum("Ultrasonic", bat.getDistance());
     		double forward = 0;
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
