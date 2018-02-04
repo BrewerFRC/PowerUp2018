@@ -61,6 +61,7 @@ public class Robot extends SampleRobot {
 				Common.dashBool("Do You Have Game Data" , false);
 			}
 			elevator.update();
+			Common.dashNum("Pot Out", intake.getPosition());
 		}
 	}
 	
