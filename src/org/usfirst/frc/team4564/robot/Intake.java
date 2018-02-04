@@ -44,7 +44,8 @@ public class Intake {
 	
 	
 	public boolean elevatorSafe() {
-		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
+		//Made it equal to inorder to test -Brent
+		if (getPosition() >= MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
 			return true;
 		}
 		return false;
