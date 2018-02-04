@@ -2,8 +2,8 @@ package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
-import org.usfirst.frc.team4564.robot.path.PowerTurn;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
+	private AnalogInput pot = new AnalogInput(2);
 	private DriveTrain dt = new DriveTrain();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
@@ -37,6 +38,10 @@ public class Robot extends SampleRobot {
 	@Override
 	public void disabled() {
 		while (isDisabled()) {
+			Common.dashNum("Pot Out", pot.getValue());
+			Common.dashNum("Average Distance", dt.getAverageDist());
+			Common.dashNum("Left Counts", dt.getLeftCounts());
+			Common.dashNum("Right Counts", dt.getRightCounts());
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
@@ -60,7 +65,8 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Path path = Paths.NEAR_SCALE;
+		Paths.reset();
+		Path path = Paths.FAR_SCALE;
 		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
@@ -81,6 +87,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
+    	Paths.reset();
     	Path path = Paths.FAR_SCALE;
     	path.start();
     	while (isEnabled() && isOperatorControl()) {

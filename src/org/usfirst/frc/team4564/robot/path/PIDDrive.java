@@ -11,7 +11,7 @@ import org.usfirst.frc.team4564.robot.PID;
  * @author Evan McCoy
  */
 public class PIDDrive extends Stage {
-	private static final double P = 0.03, I = 0, D = 0.00;
+	private static final double P = 0.017, I = 0, D = 1.5;
 	
 	private PID pid;
 	private double angle;

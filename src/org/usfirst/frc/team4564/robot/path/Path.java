@@ -30,7 +30,7 @@ public class Path {
 	 */
 	public void reset() {
 		state = 0;
-		start();
+		//start();
 	}
 	
 	/**

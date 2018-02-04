@@ -154,7 +154,7 @@ public class Heading {
 			resetPID();
 			this.headingHold = true;
 			//Set target angle to current heading.
-			setHeading(getHeading());
+			//setHeading(getHeading());
 		}
 		else {
 			resetPID();

@@ -5,11 +5,11 @@ public class Paths {
 	
 	public Paths() {
 		FAR_SCALE = new Path().addDriveStraight(60, 0, 0.65, "startDrive")
-				.addPowerTurn(76, 0.65)
-				.addDriveStraight(72, 90, 0.9, "middleDrive")
+				.addPowerTurn(90, 0.65)
+				.addDriveStraight(72, 90, 0.7, "middleDrive")
 				.addDriveStraight(36, 90, 0.65, "finalDrive")
-				.addPowerTurn(12, 0.65)
-				.addPIDDrive(36, 0, 0.4, 0.8, true, "driveScale");
+				.addPowerTurn(0, 0.65)
+				.addPIDDrive(48, 0, 0.4, 0.8, true, "driveScale");
 		
 		NEAR_SCALE = new Path().addPIDDrive(60, 0, 0.4, 0.7, true, "startDrive");
 				 //.addDriveStraight(203.4, 11.8, 0.6, "angledDrive")
@@ -24,5 +24,15 @@ public class Paths {
 		NEAR_SCALE_SWITCH = new Path();
 		
 		CROSS_LINE = new Path().addDriveStraight(50, 0, 0.65, "crossLine");
+	}
+	
+	public static void reset() {
+		FAR_SCALE.reset();
+		NEAR_SCALE.reset();
+		FAR_SWITCH.reset();
+		NEAR_SWITCH.reset();
+		FAR_SCALE_SWITCH.reset();
+		NEAR_SCALE_SWITCH.reset();
+		CROSS_LINE.reset();
 	}
 }

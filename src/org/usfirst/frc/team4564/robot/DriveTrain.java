@@ -48,10 +48,10 @@ public class DriveTrain extends DifferentialDrive {
 		super(left, right);
 		
 		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
-		encoderL.setDistancePerPulse(0.01152655);
+		encoderL.setDistancePerPulse(0.0098209719);
 		encoderL.setSamplesToAverage(10);
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, true, EncodingType.k4X);
-		encoderR.setDistancePerPulse(0.01143919);
+		encoderR.setDistancePerPulse(0.0098209719);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading();
 		
