@@ -36,6 +36,10 @@ public class Elevator {
 	final double MAX_POWER = 0.5;
 	//The minimum power that the elevator can be run at
 	final double MIN_POWER = 0.3;
+	//The last power that was set
+	double lastPower = 0;
+	//The maximum power change
+	final double MAX_DELTA_POWER = 0.1;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
@@ -82,9 +86,24 @@ public class Elevator {
 				power = Math.max(power, -MAX_POWER);
 			}
 		}
+		lastPower = power;
 		elevatorRight.set(ControlMode.PercentOutput, power);
 		elevatorLeft.set(ControlMode.PercentOutput, power);
 		Common.debug("Elevator power:"+power);
+	}
+	
+	public void accelPower(double targetPower) {
+		double power = 0; 	
+		if (Math.abs(lastPower - targetPower) > MAX_DELTA_POWER) {
+			if (lastPower > targetPower) {
+				power = lastPower - MAX_DELTA_POWER;
+			} else {
+				power = lastPower + MAX_DELTA_POWER;
+			}
+		} else {
+			power = targetPower;
+		}
+		setPower(power);
 	}
 	
 	/**Gets if the elevator is at the top
