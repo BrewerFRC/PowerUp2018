@@ -96,7 +96,7 @@ public class Robot extends SampleRobot {
     	long time;
     	while (isEnabled() && isOperatorControl()) {
     		elevator.setPower(0.25);
-    		//Common.dashNum("Left ultrasonic", bat.getLeftDistance());
+    		//Common.dashNum("Ultrasonic", bat.getDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
