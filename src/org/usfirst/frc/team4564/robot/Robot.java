@@ -94,7 +94,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
-    	elevator.home();
+    	//elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		//Common.dashNum("Ultrasonic", bat.getDistance());
     		time = Common.time();

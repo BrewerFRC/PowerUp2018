@@ -17,7 +17,7 @@ public class Elevator {
 	private DigitalInput lowerLimit = new DigitalInput(Constants.LOWER_LIMIT);
 	//assuming true = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
-	//in inches
+	//in counts
 	double offset = 0;
 	//random value for now
 	final double COUNTS_PER_INCH = 0.1;
@@ -30,6 +30,12 @@ public class Elevator {
 	double error = 0;
 	//How close to the targetHeight that elevator can be to complete
 	final double ACCEPTABLE_ERROR = 1.5;
+	//The location of the upper limit switch in inches
+	final double UPPER_LIMIT_POINT = 70;
+	//The maximum power that the elevator can be run at
+	final double MAX_POWER = 0.5;
+	//The minimum power that the elevator can be run at
+	final double MIN_POWER = 0.3;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
@@ -46,7 +52,7 @@ public class Elevator {
 		elevatorLeft.setInverted(true);
 	}
 	
-	/**A safe function to set the power of the elevator
+	/**A safe function to set the power of the elevator, cannot exceed MAX_POWER
 	 * 
 	 * @param power -power to run the elevator at, + = up and - = down
 	 */
@@ -54,14 +60,27 @@ public class Elevator {
 		// Check safeties and stop power if necessary
 		if (!intake.elevatorSafe()) {	
 			power = 0.0;
-		} if (power > 0.0 && upperLimit.get()) { // upper limit true when pressed
-			power = 0.0;
-		} if (power < 0.0 && lowerLimit.get()) { // lower limit true when pressed
-			power = 0.0;
-		} if (power > 0.0 && this.getInches() >= (ELEVATOR_HEIGHT-DANGER_ZONE) + offset) {
-			power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, 12.0, 0.4, 1.0));
-		} if (power < 0.0 && this.getInches() <= (DANGER_ZONE-ELEVATOR_HEIGHT) + offset) {
-			power = Math.max(power, Common.map(DANGER_ZONE-getInches(), 0.0, 12.0, -0.4, -1.0));
+		}
+		if (power > 0.0) {  //Move up
+			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
+				power = 0.0;
+			} else if(upperLimit.get()) {  //Have we made it to the upper limit trigger point
+				if (getInches() < UPPER_LIMIT_POINT) {  //Make sure encoder has counted enough inches
+					power = 0.0;
+				}
+			} else if(getInches()>= ELEVATOR_HEIGHT-DANGER_ZONE) {
+				power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, 12.0, MIN_POWER, MAX_POWER));
+			} else {
+				power = Math.min(power, MAX_POWER);
+			}
+		} else {  //Moving Down
+			if (lowerLimit.get()) { //lower limit true when pressed
+				power = 0.0;
+			} else if (getInches() <= DANGER_ZONE) {
+				power = Math.max(power, Common.map(DANGER_ZONE-getInches(), 0.0, 12.0, -MIN_POWER, -MAX_POWER));
+			} else {
+				power = Math.max(power, -MAX_POWER);
+			}
 		}
 		elevatorRight.set(ControlMode.PercentOutput, power);
 		elevatorLeft.set(ControlMode.PercentOutput, power);
@@ -72,9 +91,9 @@ public class Elevator {
 	 * 
 	 * @return -true = at top
 	 */
-	public boolean atTop() {
+	public boolean upperLimitSafe() {
 		//greater or equal to total height
-		if (upperLimit.get()) {
+		if (upperLimit.get() &&  getInches() < UPPER_LIMIT_POINT) {
 			return true;
 		} else {
 			return false;
@@ -105,12 +124,18 @@ public class Elevator {
 	public States getState() {
 		return state;
 	}
+	/**Resets the offset of the encoder
+	 * 
+	 */
+	public void resetEncoder() {
+		offset = elevatorRight.getSensorCollection().getPulseWidthPosition();
+	}
 	/**Gets the raw encoder counts + the offset in counts 
 	 * 
 	 * @return -The current height of the elevator in counts
 	 */
 	public double getEncoder() {
-		return (offset*COUNTS_PER_INCH) + elevatorRight.getSensorCollection().getPulseWidthPosition();
+		return elevatorRight.getSensorCollection().getPulseWidthPosition() - offset;
 	}
 	/**Gets the current height of the elevator in inches
 	 * 
@@ -137,7 +162,7 @@ public class Elevator {
 	 */
 	public void moveToHeight(double targetHeight) {
 		if (state != States.STOPPED && state != States.HOMING && state != States.JOYSTICK) {
-			this.targetHeight = targetHeight + offset;
+			this.targetHeight = targetHeight;
 			Common.debug("New State Moving");
 			state = States.MOVING;
 		}
@@ -150,7 +175,7 @@ public class Elevator {
 		Common.dashNum("Elevator encoder", getEncoder());
 		Common.dashNum("offset", offset);
 		Common.dashNum("Elevator encoder in inches", getInches());
-		Common.dashBool("at top", atTop());
+		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("at bottom", atBottom());
 		Common.dashStr("Elevator State", state.toString());
 		switch(state) {
@@ -159,12 +184,12 @@ public class Elevator {
 			break;
 		case HOMING:
 			if (lowerLimit.get()) {
-				offset = getInches();
+				resetEncoder();
 				setPower(0.0);
 				Common.debug("New state Idle");
 				state = States.IDLE;
 			} else {
-				setPower(-0.4);
+				setPower(-0.3);
 			}
 			break;
 		case IDLE:
@@ -177,10 +202,11 @@ public class Elevator {
 				Common.debug("New state Idle");
 				state = States.IDLE;
 			} else {
+				double power = Common.map(Math.abs(error), 0, ELEVATOR_HEIGHT, MIN_POWER, MAX_POWER);
 				if (error > 0) {
-					setPower(Common.map(error, offset, ELEVATOR_HEIGHT+offset, 0.4, 1.0));
-				} if (error < 0) {
-					setPower(-Common.map(error, offset, ELEVATOR_HEIGHT+offset, 0.4, 1.0));
+					setPower(power);
+				} else {
+					setPower(-power);
 				}
 			}
 			break;
