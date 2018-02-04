@@ -3,9 +3,7 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
 public class Heading {
-	public static final double P = 0.08;
-	public static final double I = 0;
-	public static final double D = 1;//250.0;
+	private static final double P = 0.025, I = 0, D = 1.5;
 	
 	private ADXRS450_Gyro gyro;
 	//PID takes cumulative angles
@@ -19,12 +17,12 @@ public class Heading {
 	 * @param i the integral scaler.
 	 * @param d the derivative scaler.
 	 */
-	public Heading(double p, double i, double d) {
-		pid = new PID(p, i, d, false, false, "gyro");
+	public Heading() {
+		pid = new PID(P, I, D, true, false, "gyro");
 		//PID is dealing with error; an error of 0 is always desired.
 		pid.setTarget(0.0);
 		pid.setMin(0.0);
-		pid.setOutputLimits(-1, 1);
+		pid.setOutputLimits(-0.2, 0.2);
 		gyro = new ADXRS450_Gyro();	
 	}
 	
@@ -107,6 +105,15 @@ public class Heading {
 	}
 	
 	/**
+	 * Sets the PID target to the defined angle.
+	 * 
+	 * @param angle the target angle
+	 */
+	public void setAngle(double angle) {
+		pid.setTarget(angle);
+	}
+	
+	/**
 	 * Sets target angle given a heading, and will turn left or right to target dependent on which is shortest.
 	 * 
 	 * @param heading the heading to set the target to in degrees.
@@ -173,11 +180,19 @@ public class Heading {
 		pid.update();
 		if (headingHold) {
 			double turnRate = pid.calc(gyro.getAngle());
-			//Return the PID calculation of the shorter path.
 			return turnRate;
 		}
 		else {
 			return 0.0;
 		}
+	}
+	
+	/**
+	 * Returns the direction, left or right, the robot must move to meet its target.
+	 * 
+	 * @return the direction, 1 for left, -1 for right
+	 */
+	public double getDirection() {
+		return (getAngle() < pid.getTarget()) ? 1 : -1;
 	}
 }

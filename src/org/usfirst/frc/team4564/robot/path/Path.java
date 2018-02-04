@@ -3,6 +3,7 @@ package org.usfirst.frc.team4564.robot.path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.usfirst.frc.team4564.robot.Common;
 import org.usfirst.frc.team4564.robot.DriveTrain;
 
 /**
@@ -65,6 +66,21 @@ public class Path {
 	}
 	
 	/**
+	 * Drives the motors with the current Path motor powers.
+	 */
+	public void drive() {
+		double[] power = getDrive();
+		if (isEdge(PowerTurn.class)) {
+			Common.debug("Power Turn Edge");
+			DriveTrain.instance().tankDrive(power[0], power[1]);
+		}
+		else {
+			DriveTrain.instance().accelTankDrive(power[0], power[1]);
+		}
+		DriveTrain.instance().applyTankDrive();
+	}
+	
+	/**
 	 * Whether or not the path has completed all stages.
 	 * 
 	 * @return complete
@@ -108,7 +124,7 @@ public class Path {
 	 * @return the current Path instance
 	 */
 	public Path addDriveStraight(double distance, double heading, double power, String name) {
-		stages.add(new DriveStraight(distance, heading, power, name));
+		stages.add(new DriveStraight(distance, heading, power));
 		return this;
 	}
 	

@@ -37,6 +37,8 @@ public class DriveTrain extends DifferentialDrive {
 	private Pathfinding path = new Pathfinding();
 	private double driveSpeed = 0, turnSpeed = 0;
 	private double tankLeft = 0, tankRight = 0;
+	private double targetHeading;
+	private boolean headingHold;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -51,7 +53,7 @@ public class DriveTrain extends DifferentialDrive {
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, true, EncodingType.k4X);
 		encoderR.setDistancePerPulse(0.01143919);
 		encoderR.setSamplesToAverage(10);
-		heading = new Heading(Heading.P, Heading.I, Heading.D);
+		heading = new Heading();
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
@@ -246,49 +248,73 @@ public class DriveTrain extends DifferentialDrive {
 	
 	/**
 	 * An implementation of tank drive that updates current speed values used in acceleration curve methods.
+	 * Does not set motors.
 	 */
 	@Override
 	public void tankDrive(double left, double right) {
 		tankLeft = left;
 		tankRight = right;
-		super.tankDrive(tankLeft, tankRight);
 	}
 	
 	/**
-	 * Acceleration control for tank drive.
+	 * Acceleration control for tank drive. Does not set motors.
 	 * 
 	 * @param left - the target left power.
 	 * @param right - the target right power.
 	 */
 	public void accelTankDrive(double left, double right) {
-		//Left
-		if (tankLeft < TANKMIN) {
-			tankLeft = Math.min(TANKMIN, left);
-		}
-		else if (Math.abs(tankLeft - left) > TANKACCEL) {
-            if (tankLeft > left) {
-                tankLeft = tankLeft - TANKACCEL;
-            } else {
-                tankLeft = tankLeft + TANKACCEL;
-            }
-        } 
-		else {
-            tankLeft = left;
-        }
-		//Right
-		if (tankRight < TANKMIN) {
-			tankRight = Math.min(TANKMIN, right);
-		}
-		else if (Math.abs(tankRight - right) > TANKACCEL) {
-            if (tankRight > right) {
-                tankRight = tankRight - TANKACCEL;
-            } else {
-                tankRight = tankRight + TANKACCEL;
-            }
-        } else {
-            tankRight = right;
-        }
+		tankLeft = accelSide(tankLeft, left);
+		tankRight = accelSide(tankRight, right);
+		
 		System.out.println(tankLeft + ":" + tankRight);
-		super.tankDrive(tankLeft, tankRight);
+	}
+	
+	/**
+	 * Applies the current DriveTrain tankLeft and tankRight motor powers.
+	 * Uses heading hold PID if heading hold is enabled with {@link Heading#setHeadingHold(boolean)}
+	 */
+	public void applyTankDrive() {
+		if (heading.isHeadingHold()) {
+			double turn = heading.turnRate() / 2;
+			super.tankDrive(tankLeft + turn, tankRight - turn);
+		}
+		else {
+			super.tankDrive(tankLeft, tankRight);
+		}
+	}
+	
+	/**
+	 * A utility method that determines the change in current power, given a desired target and allowed power curve.
+	 * 
+	 * @param current the current motor power.
+	 * @param target the target motor power.
+	 * @return the new motor power.
+	 */
+	private double accelSide(double current, double target) {
+		//If the magnitude of current is less than the minimum
+		if (Math.abs(current) < TANKMIN) {
+			//Move to the lesser value of the minimum or the target, including desired direction.
+			if (target > 0) {
+				current = Math.min(TANKMIN, target);
+			}
+			else {
+				current = Math.max(-TANKMIN, target);
+			}
+		}
+		//If the magnitude of current is greater than the minimum
+		//If the difference is greater than the allowed acceleration
+		if (Math.abs(current - target) > TANKACCEL) {
+			//Accelerate in the correct direction
+            if (current > target) {
+                current = current - TANKACCEL;
+            } else {
+                current = current + TANKACCEL;
+            }
+        }
+		//If the difference is less than the allowed acceleration, reach target
+		else {
+            current = target;
+        }
+		return current;
 	}
 }

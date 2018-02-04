@@ -65,18 +65,12 @@ public class Robot extends SampleRobot {
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
-			double[] power = path.getDrive();
+			path.drive();
 			
 			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
 			//System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
 			//		"; Motor Powers: " + power[0] + ":" + power[1]);
-			if (path.isEdge(PowerTurn.class)) {
-				Common.debug("Power Turn Edge");
-				DriveTrain.instance().tankDrive(power[0], power[1]);
-			}
-			else {
-				DriveTrain.instance().accelTankDrive(power[0], power[1]);
-			}
+			
 			Timer.delay(Math.max(0, (1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000));
 		}
 	}

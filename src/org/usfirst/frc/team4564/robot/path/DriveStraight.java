@@ -1,7 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
 import org.usfirst.frc.team4564.robot.DriveTrain;
-import org.usfirst.frc.team4564.robot.PID;
+import org.usfirst.frc.team4564.robot.Heading;
 
 /**
  * A class representing a stage of a Path where the robot drives straight on a heading for a specified distance.
@@ -11,25 +11,23 @@ import org.usfirst.frc.team4564.robot.PID;
  * @author Evan McCoy
  */
 public class DriveStraight extends Stage {
-	private static final double P = 0.025, I = 0, D = 1.5;
 	private double target;
-	private double heading;
+	private double angle;
 	private double power;
-	private PID pid;
 	private String name;
 	
-	public DriveStraight(double distance, double heading, double power, String name) {
+	public DriveStraight(double distance, double angle, double power) {
 		super(false);
 		this.target = distance;
-		this.heading = heading;
+		this.angle = angle;
 		this.power = power;
-		this.pid = new PID(P, I, D, false, false, name);
-		this.name = name;
 	}
 	
 	public void start() {
 		DriveTrain.instance().resetEncoders();
-		pid.setTarget(heading);
+		Heading heading = DriveTrain.instance().getHeading();
+		heading.setAngle(angle);
+		heading.setHeadingHold(true);
 	}
 	
 	public boolean isComplete() {
@@ -40,20 +38,6 @@ public class DriveStraight extends Stage {
 	}
 	
 	public double[] getDrive() {
-		pid.update();
-		double offset = pid.calc(DriveTrain.instance().getHeading().getAngle());
-		if (offset > 0) {
-			return new double[] {power, Math.min(power + Math.abs(offset), 1)};
-		}
-		else {
-			return new double[] {Math.min(power + Math.abs(offset), 1), power};
-		}
-		//double error = heading - DriveTrain.instance().getHeading().getAngle();
-		//double offset = error*0.025;
-		//if (error > 0) {
-		//	return new double[] {power + offset, power};
-		//} else {
-		//	return new double[] {power, power - offset};
-		//}
+		return new double[] {power, power};
 	}
 }

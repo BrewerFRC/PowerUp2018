@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
 import org.usfirst.frc.team4564.robot.DriveTrain;
+import org.usfirst.frc.team4564.robot.Heading;
 
 /**
  * A class representing a stage of a Path where the robot turns by tank drive until a specified angle is reached.
@@ -21,7 +22,9 @@ public class PowerTurn extends Stage {
 	}
 	
 	public void start() {
-		startingAngle = DriveTrain.instance().getHeading().getAngle();
+		Heading heading = DriveTrain.instance().getHeading();
+		heading.setHeadingHold(false);
+		startingAngle = heading.getAngle();
 	}
 	
 	public boolean isComplete() {
