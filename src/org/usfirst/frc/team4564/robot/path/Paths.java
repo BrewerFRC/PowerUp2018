@@ -1,5 +1,12 @@
 package org.usfirst.frc.team4564.robot.path;
 
+/**
+ * A class containing pre-built Paths.
+ * Created February 2018
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ */
 public class Paths {
 	public static Path FAR_SCALE, NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH, NEAR_SWITCH, CROSS_LINE;
 	
@@ -26,6 +33,9 @@ public class Paths {
 		CROSS_LINE = new Path().addDriveStraight(50, 0, 0.65, "crossLine");
 	}
 	
+	/**
+	 * Resets the state of the pre-builts paths.
+	 */
 	public static void reset() {
 		FAR_SCALE.reset();
 		NEAR_SCALE.reset();

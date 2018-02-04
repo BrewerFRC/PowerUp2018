@@ -35,6 +35,9 @@ public class Robot extends SampleRobot {
 		new Paths();
 	}
 	
+	/**
+	 * Control logic when the robot is disabled.
+	 */
 	@Override
 	public void disabled() {
 		while (isDisabled()) {

@@ -2,6 +2,12 @@ package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
+/**
+ * Heading control utility class for the ADXRS450 Gyro sensor.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ */
 public class Heading {
 	private static final double P = 0.025, I = 0, D = 1.5;
 	
