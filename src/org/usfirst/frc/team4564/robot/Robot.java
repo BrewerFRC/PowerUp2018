@@ -26,7 +26,7 @@ public class Robot extends SampleRobot {
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
-	private Elevator elevator = new Elevator();
+	private Elevator elevator = new Elevator(intake);
 	private String gameData;
 
 	public Robot() {
@@ -37,7 +37,6 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
-		elevator.init();
 	}
 	
 	@Override
@@ -95,6 +94,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
+    	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		Common.dashNum("Ultrasonic", bat.getDistance());
     		time = Common.time();
