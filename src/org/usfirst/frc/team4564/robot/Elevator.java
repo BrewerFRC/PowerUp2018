@@ -43,7 +43,7 @@ public class Elevator {
 	public Elevator(Intake intake) {
 		this.intake = intake;
 		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
-
+		elevatorLeft.setInverted(true);
 	}
 	
 	/**A safe function to set the power of the elevator
@@ -63,8 +63,8 @@ public class Elevator {
 		} if (power < 0.0 && this.getInches() <= (DANGER_ZONE-ELEVATOR_HEIGHT) + offset) {
 			power = Math.max(power, Common.map(DANGER_ZONE-getInches(), 0.0, 12.0, -0.4, -1.0));
 		}
-		//elevatorRight.set(ControlMode.PercentOutput, power);
-		//elevatorLeft.set(ControlMode.PercentOutput, power);
+		elevatorRight.set(ControlMode.PercentOutput, power);
+		elevatorLeft.set(ControlMode.PercentOutput, power);
 		Common.debug("Elevator power:"+power);
 	}
 	
