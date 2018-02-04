@@ -8,6 +8,7 @@ public class Intake {
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private double MAX_ELEVATOR_SAFE = 4096, MIN_ELEVATOR_SAFE = 0;
 	private double previousReading = 0;
+	private double MIN_POSITION = 0, MAX_POSITION = 4096, MIN_ANGLE = 0, MAX_ANGLE = 180;
 
 	public double getDistance() {
 	  // put your main code here, to run repeatedly:
@@ -28,11 +29,20 @@ public class Intake {
 			return false;
 		}
 	}
+	/**
+	 * Gets claw position.
+	 * 
+	 * Gets the claw position on a scale of 0-180 to represent angle.
+	 * @return
+	 */
+	
 	public double getPosition() {
 		double position = pot.getValue();
-		return position;
-				
+		Common.map(position, MIN_POSITION, MAX_POSITION, MIN_ANGLE, MAX_ANGLE);
+		return position;		
 	}
+	
+	
 	public boolean elevatorSafe() {
 		//Made it equal to inorder to test -Brent
 		if (getPosition() >= MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
