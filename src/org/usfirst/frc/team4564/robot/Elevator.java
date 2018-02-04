@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
  * @author Brent Roberts
  */
 public class Elevator {
-	Intake intake = new Intake();
+	Intake intake;
 	TalonSRX elevatorLeft = new TalonSRX(Constants.ELEVATOR_LEFT);
 	TalonSRX elevatorRight = new TalonSRX(Constants.ELEVATOR_RIGHT);
 	//assuming true = pressed
@@ -40,11 +40,10 @@ public class Elevator {
 	}
 	States state = States.STOPPED;
 	
-	/**Sets up elevator encoder
-	 * 
-	 */
-	public void init() {
+	public Elevator(Intake intake) {
+		this.intake = intake;
 		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		elevatorLeft.setInverted(true);
 	}
 	
 	/**A safe function to set the power of the elevator
@@ -53,7 +52,7 @@ public class Elevator {
 	 */
 	public void setPower(double power) {
 		// Check safeties and stop power if necessary
-		if (!intake.elevatorSafe()) {	
+		/*if (!intake.elevatorSafe()) {	
 			power = 0.0;
 		} if (power > 0.0 && upperLimit.get()) { // upper limit true when pressed
 			power = 0.0;
@@ -63,9 +62,9 @@ public class Elevator {
 			power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, 12.0, 0.4, 1.0));
 		} if (power < 0.0 && this.getInches() <= (DANGER_ZONE-ELEVATOR_HEIGHT) + offset) {
 			power = Math.max(power, Common.map(DANGER_ZONE-getInches(), 0.0, 12.0, -0.4, -1.0));
-		}
-		elevatorRight.set(ControlMode.PercentOutput, power);
+		}*/
 		elevatorLeft.set(ControlMode.PercentOutput, power);
+		elevatorRight.set(ControlMode.PercentOutput, power);
 		Common.debug("Elevator power:"+power);
 	}
 	

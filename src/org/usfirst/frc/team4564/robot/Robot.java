@@ -25,8 +25,8 @@ public class Robot extends SampleRobot {
 	private Intake intake = new Intake();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
-	private Bat bat = new Bat();
-	private Elevator elevator = new Elevator();
+	//private Bat bat = new Bat();
+	private Elevator elevator = new Elevator(intake);
 	private String gameData;
 
 	public Robot() {
@@ -37,7 +37,6 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
-		elevator.init();
 	}
 	
 	@Override
@@ -96,16 +95,16 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
     	long time;
     	while (isEnabled() && isOperatorControl()) {
-    		
-    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
+    		elevator.setPower(0.25);
+    		//Common.dashNum("Left ultrasonic", bat.getLeftDistance());
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
-    		elevator.elevatorRight.set(ControlMode.PercentOutput, j0.getX(GenericHID.Hand.kRight));
+    		//elevator.elevatorRight.set(ControlMode.PercentOutput, j0.getX(GenericHID.Hand.kRight));
     		dt.accelDrive(forward, turn);
-    		elevator.update();
+    		//elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
