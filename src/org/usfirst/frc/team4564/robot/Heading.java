@@ -23,7 +23,7 @@ public class Heading {
 		pid = new PID(p, i, d, false, false, "gyro");
 		//PID is dealing with error; an error of 0 is always desired.
 		pid.setTarget(0.0);
-		pid.setMin(0.0);
+		pid.setMinMagnitude(0.0);
 		pid.setOutputLimits(-1, 1);
 		gyro = new ADXRS450_Gyro();	
 	}

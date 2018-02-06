@@ -83,7 +83,7 @@ public class PID {
 	 * 
 	 * @param min the minimum absolute value of the output calculation.
 	 */
-	public void setMin(double min) {
+	public void setMinMagnitude(double min) {
 		this.min = min;
 	}
 	
