@@ -91,7 +91,10 @@ public class Elevator {
 		elevatorLeft.set(ControlMode.PercentOutput, power);
 		Common.debug("Elevator power:"+power);
 	}
-	
+	/**Limits elevator acceleration for safety
+	 * 
+	 * @param targetPower -The goal power of the function
+	 */
 	public void accelPower(double targetPower) {
 		double power = 0; 	
 		if (Math.abs(lastPower - targetPower) > MAX_DELTA_POWER) {
