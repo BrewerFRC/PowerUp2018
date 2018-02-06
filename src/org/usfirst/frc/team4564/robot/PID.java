@@ -97,6 +97,15 @@ public class PID {
 	}
 	
 	/**
+	 * Sets whether or not to invert the sign of the output.
+	 * 
+	 * @param inverted is inverted.
+	 */
+	public void setInverted(boolean inverted) {
+		this.inverted = inverted;
+	}
+	
+	/**
 	 * Returns the target value of the PID controller.
 	 * 
 	 * @return double the current target value.

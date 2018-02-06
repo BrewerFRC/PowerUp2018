@@ -26,13 +26,19 @@ public class PositionByVelocityPID {
 	private PID velocity;
 	private double minimumPosition = 0, maximumPosition = 0;
 	
-	public PositionByVelocityPID(double minPosition, double maxPosition, double minVelocity, double maxVelocity, String name) {
+	public PositionByVelocityPID(double minPosition, double maxPosition, double minVelocity, double maxVelocity, double maxPower, double minPower, double minPowerMagnitude, String name) {
 		position = new PID(0, 0, 0, false, false, name + "Position");
 		position.setOutputLimits(minVelocity, maxVelocity);
-		velocity = new PID(0, 0, 0, false, false, name + "Velocity");
+		velocity = new PID(0, 0, 0, false, true, name + "Velocity");
+		velocity.setOutputLimits(minPower, maxPower);
+		velocity.setMinMagnitude(minPowerMagnitude);
 		minimumPosition = minPosition;
 		maximumPosition = maxPosition;
 		correctTargetPosition();
+	}
+	
+	public PositionByVelocityPID(double minPosition, double maxPosition, double minVelocity, double maxVelocity, double minPowerMagnitude, String name) {
+		this(minPosition, maxPosition, minVelocity, maxVelocity, -1.0, 1.0, minPowerMagnitude, name);
 	}
 	
 	/**
@@ -63,6 +69,24 @@ public class PositionByVelocityPID {
 	public void update() {
 		position.update();
 		velocity.update();
+	}
+	
+	/**
+	 * Sets the inverted state of the position PID.
+	 * 
+	 * @param inverted is inverted
+	 */
+	public void setPositionInverted(boolean inverted) {
+		position.setInverted(inverted);
+	}
+	
+	/**
+	 * Sets the inverted state of the velocity PID.
+	 * 
+	 * @param inverted is inverted
+	 */
+	public void setVelocityInverted(boolean inverted) {
+		velocity.setInverted(inverted);
 	}
 	
 	/**
