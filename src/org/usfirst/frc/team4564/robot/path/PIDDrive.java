@@ -21,7 +21,7 @@ public class PIDDrive extends Stage {
 		this.pid = new PID(P, I, D, inverted, false, name);
 		pid.setTarget(distance);
 		pid.setOutputLimits(-maxPower, maxPower);
-		pid.setMin(minPower);
+		pid.setMinMagnitude(minPower);
 		this.angle = angle;
 	}
 	
