@@ -105,9 +105,9 @@ public class Robot extends SampleRobot {
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		dt.accelDrive(forward, turn);
     		if (j0.getPressed("a")) {
-    			//double jMap = Common.map(-j0.getY(), -1, 1, -6, 6);
-    			//Common.dashNum("jMap", jMap);
-    			elevator.pidVelMove(3);//jMap);
+    			double jMap = Common.map(-j0.getY(), -1, 1, -6, 6);
+    			Common.dashNum("jMap", jMap);
+    			elevator.joystickControl(jMap);
     		}
     		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
