@@ -37,6 +37,7 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
+		//elevator.resetEncoder();
 	}
 	
 	@Override
@@ -59,7 +60,7 @@ public class Robot extends SampleRobot {
 			} else {
 				Common.dashBool("Do You Have Game Data" , false);
 			}
-			elevator.update();
+			//elevator.update();
 		}
 	}
 	
@@ -94,7 +95,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
-    	//elevator.home();
+    	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		//Common.dashNum("Ultrasonic", bat.getDistance());
     		time = Common.time();
@@ -103,6 +104,11 @@ public class Robot extends SampleRobot {
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		dt.accelDrive(forward, turn);
+    		if (j0.getPressed("a")) {
+    			//double jMap = Common.map(-j0.getY(), -1, 1, -6, 6);
+    			//Common.dashNum("jMap", jMap);
+    			elevator.pidVelMove(3);//jMap);
+    		}
     		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);

@@ -26,7 +26,7 @@ public class PositionByVelocityPID {
 	private PID velocity;
 	private double minimumPosition = 0, maximumPosition = 0;
 	
-	public PositionByVelocityPID(double minPosition, double maxPosition, double minVelocity, double maxVelocity, double maxPower, double minPower, double minPowerMagnitude, String name) {
+	public PositionByVelocityPID(double minPosition, double maxPosition, double minVelocity, double maxVelocity, double minPower, double maxPower, double minPowerMagnitude, String name) {
 		position = new PID(0, 0, 0, false, false, name + "Position");
 		position.setOutputLimits(minVelocity, maxVelocity);
 		velocity = new PID(0, 0, 0, false, true, name + "Velocity");
@@ -100,6 +100,7 @@ public class PositionByVelocityPID {
 		position.setP(p);
 		position.setI(i);
 		position.setD(d);
+		position.postCoefficients();
 	}
 	
 	/**
@@ -113,6 +114,7 @@ public class PositionByVelocityPID {
 		velocity.setP(p);
 		velocity.setI(i);
 		velocity.setD(d);
+		velocity.postCoefficients();
 	}
 	
 	/**
