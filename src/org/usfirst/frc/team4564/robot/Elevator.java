@@ -117,17 +117,25 @@ public class Elevator {
 		}
 		setPower(power);
 	}
-	
+	/**Uses a pid to move the robot at a target velocity
+	 * 
+	 * @param targetVelocity -The target speed for the robot to move in inches per second
+	 */
 	public void pidVelMove(double targetVelocity) {
 		pid.setTargetVelocity(targetVelocity);
 		double pidVelCalc = pid.calcVelocity(getVelocity());
 		Common.dashNum("pidVelCalc", pidVelCalc);
 		accelPower(pidVelCalc);
 	}
-	
+	/**Uses a pid to move the robot at a target Velocity
+	 * 
+	 * @param targetHeight -The target height for the elevator to move to in inches
+	 */
 	public void pidDisMove(double targetHeight) {
 		pid.setTargetPosition(targetHeight);
-		accelPower(pid.calc(getInches(), getVelocity()));
+		double pidDisCalc = pid.calc(getInches(), getVelocity());
+		Common.dashNum("pidDisCalc", pidDisCalc);
+		accelPower(pidDisCalc);
 	}
 	
 	/**Gets if the elevator is at the top
@@ -250,7 +258,9 @@ public class Elevator {
 			setPower(0.0);
 			break;
 		case MOVING:
-			error = targetHeight - getInches();
+			pidDisMove(targetHeight);
+			state = States.IDLE;
+			/*error = targetHeight - getInches();
 			if (Math.abs(error) < ACCEPTABLE_ERROR) {
 				setPower(0.0);
 				Common.debug("New state Idle");
@@ -262,7 +272,7 @@ public class Elevator {
 				} else {
 					setPower(-power);
 				}
-			}
+			}*/
 			break;
 		case JOYSTICK:
 			pidVelMove(speed);
