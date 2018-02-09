@@ -17,6 +17,7 @@ public class Constants {
 	
 	//Drive motors
 	DRIVE_FL = 7, DRIVE_FR = 8, DRIVE_BL = 6, DRIVE_BR = 9,
+	ARM_DRIVE = 6,
 	
 	//Encoders
 	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,
