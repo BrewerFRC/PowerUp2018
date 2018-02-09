@@ -12,6 +12,7 @@ import org.usfirst.frc.team4564.robot.path.Paths;
 public class Auto {
 	private Path path;
 	private String gameData;
+	private char position;
 	private Mode mode;
 	private boolean twoCube;
 	private boolean tryAlternative;
@@ -25,33 +26,56 @@ public class Auto {
 		this.gameData = gameData.substring(0, 3);
 	}
 	
+	/**
+	 * Posts the position to autonomous.
+	 * 
+	 * @param position the position in the form 'L', 'R', or 'C' for left, right, or center respectively.
+	 */
+	public void setPosition(char position) {
+		this.position = position;
+	}
+	
+	/**
+	 * Reads the autonomous selections from NetworkTables.
+	 */
+	public void readAutonomousSelections() {
+		
+	}
+	
 	public Path getPath() {
 		switch (mode) {
 			case CROSS_LINE:
 				return Paths.CROSS_LINE;
 			case SCALE_ALWAYS:
-				if (gameData.charAt(1) == 'L') {
+				if (gameData.charAt(1) == position) {
 					return Paths.NEAR_SCALE;
 				}
 				return Paths.FAR_SCALE;
 			case SCALE_CLOSE:
-				if (gameData.charAt(1) == 'L') {
+				if (gameData.charAt(1) == position) {
 					return Paths.NEAR_SCALE;
 				}
 				if (tryAlternative) {
-					return Paths.NEAR_SWITCH;
+					if (gameData.charAt(0) == position) {
+						return Paths.NEAR_SWITCH;
+					}
 				}
-				return Paths.CROSS_LINE;
+				break;
 			case SWITCH_ALWAYS:
-				if (gameData.charAt(0) == 'L') {
+				if (gameData.charAt(0) == position) {
 					return Paths.NEAR_SWITCH;
 				}
 				return Paths.FAR_SWITCH;
 			case SWITCH_CLOSE:
-				if (gameData.charAt(0) == 'L') {
+				if (gameData.charAt(0) == position) {
 					return Paths.NEAR_SWITCH;
 				}
-				return Paths.CROSS_LINE;
+				if (tryAlternative) {
+					if (gameData.charAt(1) == position) {
+						return Paths.NEAR_SCALE;
+					}
+				}
+				break;
 		}
 		return Paths.CROSS_LINE;
 	}
