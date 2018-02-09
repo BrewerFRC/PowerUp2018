@@ -18,6 +18,21 @@ public class Auto {
 	private boolean tryAlternative;
 	
 	/**
+	 * Runs the startup sequence for the path of the current autonomous selections.
+	 */
+	public void start() {
+		path.reset();
+		path.start();
+	}
+	
+	/**
+	 * Drives the path of the current autonomous selections.
+	 */
+	public void drive() {
+		path.drive();
+	}
+	
+	/**
 	 * Posts the 3-character game data string to autonomous.
 	 * 
 	 * @param gameData the 3-character game data string
@@ -39,9 +54,14 @@ public class Auto {
 	 * Reads the autonomous selections from NetworkTables.
 	 */
 	public void readAutonomousSelections() {
-		
+		path = getPath();
 	}
 	
+	/**
+	 * Returns the desired path for the current set of autonomous selections.
+	 * 
+	 * @return the path
+	 */
 	public Path getPath() {
 		switch (mode) {
 			case CROSS_LINE:
