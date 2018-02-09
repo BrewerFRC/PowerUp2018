@@ -30,7 +30,28 @@ public class Auto {
 			case CROSS_LINE:
 				return Paths.CROSS_LINE;
 			case SCALE_ALWAYS:
-				
+				if (gameData.charAt(1) == 'L') {
+					return Paths.NEAR_SCALE;
+				}
+				return Paths.FAR_SCALE;
+			case SCALE_CLOSE:
+				if (gameData.charAt(1) == 'L') {
+					return Paths.NEAR_SCALE;
+				}
+				if (tryAlternative) {
+					return Paths.NEAR_SWITCH;
+				}
+				return Paths.CROSS_LINE;
+			case SWITCH_ALWAYS:
+				if (gameData.charAt(0) == 'L') {
+					return Paths.NEAR_SWITCH;
+				}
+				return Paths.FAR_SWITCH;
+			case SWITCH_CLOSE:
+				if (gameData.charAt(0) == 'L') {
+					return Paths.NEAR_SWITCH;
+				}
+				return Paths.CROSS_LINE;
 		}
 		return Paths.CROSS_LINE;
 	}
