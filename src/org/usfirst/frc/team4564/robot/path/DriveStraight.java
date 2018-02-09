@@ -1,7 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
-import org.usfirst.frc.team4564.robot.Common;
 import org.usfirst.frc.team4564.robot.DriveTrain;
+import org.usfirst.frc.team4564.robot.Heading;
 
 /**
  * A class representing a stage of a Path where the robot drives straight on a heading for a specified distance.
@@ -12,33 +12,32 @@ import org.usfirst.frc.team4564.robot.DriveTrain;
  */
 public class DriveStraight extends Stage {
 	private double target;
-	private double heading;
+	private double angle;
 	private double power;
+	private String name;
 	
-	public DriveStraight(double distance, double heading, double power) {
+	public DriveStraight(double distance, double angle, double power) {
+		super(false);
 		this.target = distance;
-		this.heading = heading;
+		this.angle = angle;
 		this.power = power;
 	}
 	
 	public void start() {
 		DriveTrain.instance().resetEncoders();
+		Heading heading = DriveTrain.instance().getHeading();
+		heading.setAngle(angle);
+		heading.setHeadingHold(true);
 	}
 	
 	public boolean isComplete() {
+		if (DriveTrain.instance().getAverageDist() >= target) {
+			System.out.println("DriveStraight: " + this.name + " - Complete");
+		}
 		return DriveTrain.instance().getAverageDist() >= target;
 	}
 	
 	public double[] getDrive() {
-		Common.dashNum("targetHeading", heading);
-		System.out.println(Common.time() + " - targetHeading: " + heading);
-		System.out.println(Common.time() + " - gyroAngle: " + DriveTrain.instance().getHeading().getAngle());
-		double error = heading - DriveTrain.instance().getHeading().getAngle();
-		double offset = error*0.025;
-		if (error > 0) {
-			return new double[] {power + offset, power};
-		} else {
-			return new double[] {power, power - offset};
-		}
+		return new double[] {power, power};
 	}
 }

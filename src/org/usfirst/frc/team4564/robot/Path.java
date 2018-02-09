@@ -188,7 +188,7 @@ public class Path {
 			this.pid = new PID(p, i, d, inverted, false, name);
 			pid.setTarget(distance);
 			pid.setOutputLimits(-maxPower, maxPower);
-			pid.setMin(minPower);
+			pid.setMinMagnitude(minPower);
 			this.heading = heading;
 		}
 		

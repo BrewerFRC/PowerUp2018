@@ -1,8 +1,5 @@
 package org.usfirst.frc.team4564.robot.path;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * An interface representing a generic stage of driving in a Path.
  * Created January 2018
@@ -12,33 +9,17 @@ import java.util.List;
  * 
  */
 public abstract class Stage {
-	private List<Event> events = new ArrayList<Event>();
+	private boolean hold;
+	private boolean persist;
 	
-	/**
-	 * Resets the stage.
-	 */
-	public void reset() {
-		for (Event event : events) {
-			event.reset();
-		}
+	public Stage(boolean hold) {
+		this.hold = hold;
+		this.persist = false;
 	}
 	
-	/**
-	 * Runs trigger routine for all events.  Should only activate events which have met a starting condition.
-	 */
-	public void triggerEvents() {
-		for (Event event : events) {
-			event.trigger();
-		}
-	}
-	
-	/**
-	 * Adds an event to the Stage.
-	 * 
-	 * @param event - the event
-	 */
-	public void addEvent(Event event) {
-		this.events.add(event);
+	public Stage(boolean hold, boolean persist) {
+		this.hold = hold;
+		this.persist = persist;
 	}
 	
 	/**
@@ -59,4 +40,12 @@ public abstract class Stage {
 	 * @return double[] - left/right motor powers
 	 */
 	public abstract double[] getDrive();
+	
+	public boolean isHeld() {
+		return hold;
+	}
+	
+	public boolean isPersist() {
+		return persist;
+	}
 }

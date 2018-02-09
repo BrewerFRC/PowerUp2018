@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
 import org.usfirst.frc.team4564.robot.DriveTrain;
+import org.usfirst.frc.team4564.robot.Heading;
 import org.usfirst.frc.team4564.robot.PID;
 
 /**
@@ -10,19 +11,25 @@ import org.usfirst.frc.team4564.robot.PID;
  * @author Evan McCoy
  */
 public class PIDDrive extends Stage {
-	private PID pid;
-	private double heading;
+	private static final double P = 0.017, I = 0, D = 1.5;
 	
-	public PIDDrive(double distance, double heading, double minPower, double maxPower, double p, double i, double d, boolean inverted, String name) {
-		this.pid = new PID(p, i, d, inverted, false, name);
+	private PID pid;
+	private double angle;
+	
+	public PIDDrive(double distance, double angle, double minPower, double maxPower, boolean inverted, String name) {
+		super(false, true);
+		this.pid = new PID(P, I, D, inverted, false, name);
 		pid.setTarget(distance);
 		pid.setOutputLimits(-maxPower, maxPower);
-		pid.setMin(minPower);
-		this.heading = heading;
+		pid.setMinMagnitude(minPower);
+		this.angle = angle;
 	}
 	
 	public void start() {
 		DriveTrain.instance().resetEncoders();
+		Heading heading = DriveTrain.instance().getHeading();
+		heading.setAngle(angle);
+		heading.setHeadingHold(true);
 	}
 	
 	public boolean isComplete() {
@@ -30,14 +37,7 @@ public class PIDDrive extends Stage {
 	}
 	
 	public double[] getDrive() {
-		double[] power = getDrive(DriveTrain.instance().getAverageDist());
-		double error = heading - DriveTrain.instance().getHeading().getAngle();
-		double offset = error*0.025;
-		if (error > 0) {
-			return new double[] {power[0] + offset, power[1]};
-		} else {
-			return new double[] {power[0], power[1] - offset};
-		}
+		return getDrive(DriveTrain.instance().getAverageDist());
 	}
 	
 	public double[] getDrive(double curDistance) {

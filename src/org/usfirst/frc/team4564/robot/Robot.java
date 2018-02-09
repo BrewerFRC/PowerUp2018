@@ -1,7 +1,8 @@
 package org.usfirst.frc.team4564.robot;
 import org.usfirst.frc.team4564.robot.path.Event;
 import org.usfirst.frc.team4564.robot.path.Path;
-
+import org.usfirst.frc.team4564.robot.path.Paths;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -14,51 +15,49 @@ import edu.wpi.first.wpilibj.Timer;
  * Created January 2018
  * 
  * @author Brewer FIRST Robotics Team 4564
-<<<<<<< HEAD
- * @author Evan McCoy And Sam "Woodie" Woodward
-=======
  * @author Evan McCoy
  * @author Brent Roberts
  * @author Sam "Woodie" Woodward
->>>>>>> origin/master
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
+	private AnalogInput pot = new AnalogInput(2);
 	private DriveTrain dt = new DriveTrain();
-	private static final double P = 0.075, I = 0, D = 0.08;
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
 	private String gameData;
-
-	public Robot() {
-		
-	}
-	
-	
 	
 	@Override
 	public void robotInit() {
-		
+		//Initialize all paths.
+		new Paths();
 	}
 	
+	/**
+	 * Control logic when the robot is disabled.
+	 */
 	@Override
 	public void disabled() {
 		while (isDisabled()) {
+			Common.dashNum("Pot Out", pot.getValue());
+			Common.dashNum("Average Distance", dt.getAverageDist());
+			Common.dashNum("Left Counts", dt.getLeftCounts());
+			Common.dashNum("Right Counts", dt.getRightCounts());
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
+				if (gameData.length() == 3) {
+					Common.dashBool("Do You Have Game Data", true);
+				} else {
+					Common.dashBool("Do You Have Game Data" , false);
+				}
 			}
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
 				OR = ||
 			}*/
-			if (gameData.length() == 3) {
-				Common.dashBool("Do You Have Game Data", true);
-			} else {
-				Common.dashBool("Do You Have Game Data" , false);
-			}
 		}
 	}
 	
@@ -68,20 +67,17 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Path path1 = new Path();
-		path1.addDriveStraight(36, 0, 0.65)
-			 .addDriveStraight(200, 9, 0.65)
-			 .addDriveStraight(36, 0, 0.65);
+		Paths.reset();
+		Path path = Paths.FAR_SCALE;
+		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
-			double[] power = path1.getDrive();
+			path.drive();
 			
 			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
-			Common.dashNum("leftPower", power[0]);
-			Common.dashNum("rightPower", power[1]);
-			
-			DriveTrain.instance().tankDrive(power[0], power[1]);
+			//System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
+			//		"; Motor Powers: " + power[0] + ":" + power[1]);
 			
 			Timer.delay(Math.max(0, (1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000));
 		}
@@ -92,29 +88,13 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void operatorControl() {
-		Path path = new Path();
-		path.addDriveStraight(60, 0, 0.65)
-			.addPowerTurn(76, 0.65)
-			.addDriveStraight(72, 90, 0.9)
-			.addDriveStraight(36, 90, 0.65)
-			.addEvent(new Event() {
-				public void trigger() {
-					if (DriveTrain.instance().getAverageDist() > 30) {
-						//Move parts.  This is executed every cycle.
-					}
-					if (/*Motion is complete*/true) {
-						this.complete = true;
-					}
-				}
-			})
-			.addPowerTurn(12, 0.65)
-			/* distance, angle, minPower, maxPower, P, I, D, inverted, name */
-			.addPIDDrive(36, 0, 0.4, 0.8, P, I, D, true, "driveScale");
-		path.start();
     	long time;
+    	Paths.reset();
+    	Path path = Paths.FAR_SCALE;
+    	path.start();
     	while (isEnabled() && isOperatorControl()) {
-    		Common.dashNum("Left ultrasonic", bat.getLeftDistance());
     		time = Common.time();
+    		Common.dashNum("Ultrasonic", bat.getDistance());
     		double forward = 0;
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
@@ -122,7 +102,7 @@ public class Robot extends SampleRobot {
     		
 			if (j0.getPressed("a")) {
 				double[] power = path.getDrive();
-				dt.tankDrive(power[0], power[1]);
+				dt.accelTankDrive(power[0], power[1]);
 			}
 			else {
 				dt.accelDrive(forward, turn);

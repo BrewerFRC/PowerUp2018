@@ -65,6 +65,7 @@ public class PID {
 		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
 		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
 		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
+		SmartDashboard.putNumber(this.name + "Target", getTarget());
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class PID {
 	 * 
 	 * @param min the minimum absolute value of the output calculation.
 	 */
-	public void setMin(double min) {
+	public void setMinMagnitude(double min) {
 		this.min = min;
 	}
 	
@@ -94,6 +95,15 @@ public class PID {
 	 */
 	public void setStartingOutput(double output) {
 		this.output = output;
+	}
+	
+	/**
+	 * Sets whether or not to invert the sign of the output.
+	 * 
+	 * @param inverted is inverted.
+	 */
+	public void setInverted(boolean inverted) {
+		this.inverted = inverted;
 	}
 	
 	/**
@@ -219,7 +229,7 @@ public class PID {
 			this.output = output;
 		}
 		lastCalc = this.output;
-		
+		SmartDashboard.putNumber(this.name + "Calc", this.output);
 		return (inverted) ? -this.output : this.output;
 	}
 }
