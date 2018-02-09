@@ -2,6 +2,7 @@ package org.usfirst.frc.team4564.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -25,7 +26,7 @@ public class Elevator {
 	//Elevator height in inches(random value for now)
 	final double ELEVATOR_HEIGHT = 65.75;
 	//Reduced speed zone at upper and lower limits in inches.
-	final int DANGER_ZONE = 12;
+	final int DANGER_ZONE = 18;
 	double speed = 0.0;
 	double targetHeight = 0.0;
 	double error = 0;
@@ -33,18 +34,20 @@ public class Elevator {
 	final double ACCEPTABLE_ERROR = 1.5;
 	//The location of the upper limit switch in inches
 	final double UPPER_LIMIT_POINT = 57.7;
-	//The maximum power that the elevator can be run at
-	final double MAX_POWER = 0.4;
-	//The minimum power that the elevator can be run at
-	final double MIN_POWER = 0.1;
+	//The maximum power that the elevator can be run at upward
+	final double MAX_UP_POWER = 1.0;
+	final double MAX_DOWN_POWER = -0.7;
+	//The minimum power that the elevator can be run at upward
+	final double MIN_UP_POWER = 0.05;
+	final double MIN_DOWN_POWER = 0.07;
 	//The last power that was set
 	double lastPower = 0;
 	//The maximum power change
 	final double MAX_DELTA_POWER = 0.1;
 	//In inches per second
 	final double MAX_VELOCITY = 12;
-	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, 0, "Elevator PID");
-	double velP = 0.001, velI = 0.0, velD = 0.0;
+	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
+	double velP = 0.002, velI = 0.0, velD = 0.0;
 	double posP = 0.1, posI = 0.0, posD = 0.0;
 	
 	public enum States {
@@ -59,6 +62,9 @@ public class Elevator {
 	public Elevator(Intake intake) {
 		this.intake = intake;
 		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		elevatorRight.configVelocityMeasurementWindow(8, 0);//defaults to 64, rolling average sample size
+		//defaults to 100 Ms, the time of the sample that the current sample is compare to, changes the units
+		elevatorRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_100Ms, 0);
 		elevatorLeft.setInverted(true);
 		pid.setVelocityScalars(velP, velI, velD);
 		pid.setVelocityInverted(true);
@@ -82,17 +88,17 @@ public class Elevator {
 					power = 0.0;
 				}
 			} else if(getInches()>= ELEVATOR_HEIGHT-DANGER_ZONE) {
-				power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, 12.0, MIN_POWER, MAX_POWER));
+				power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, DANGER_ZONE, MIN_UP_POWER, MAX_UP_POWER));
 			} else {
-				power = Math.min(power, MAX_POWER);
+				power = Math.min(power, MAX_UP_POWER);
 			}
 		} else {  //Moving Down
 			if (lowerLimit.get()) { //lower limit true when pressed
 				power = 0.0;
 			} else if (getInches() <= DANGER_ZONE) {
-				power = Math.max(power, Common.map(DANGER_ZONE-getInches(), 0.0, 12.0, -MIN_POWER, -MAX_POWER));
+				power = Math.max(power, Common.map(getInches(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
 			} else {
-				power = Math.max(power, -MAX_POWER);
+				power = Math.max(power, MAX_DOWN_POWER);
 			}
 		}
 		lastPower = power;
@@ -100,7 +106,8 @@ public class Elevator {
 		elevatorLeft.set(ControlMode.PercentOutput, power);
 		Common.dashNum("Elevator power:", power);
 	}
-	/**Limits elevator acceleration for safety
+	/**
+	 * Limits elevator acceleration for safety
 	 * 
 	 * @param targetPower -The goal power of the function
 	 */

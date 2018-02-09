@@ -231,13 +231,29 @@ public class PID {
 		//Apply necessary forward PID cummulation.
 		if (forward) {
 			this.output += output;
-			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
 		}
 		else {
-			this.output = Math.min(Math.max(output, Outmin), Outmax);
+			this.output = output;
 		}
 		lastCalc = this.output;
-		
+		/*if (inverted) {
+			this.output = Math.min(Math.max(this.output, -Outmax), -Outmin);
+		}
+		else {
+			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
+		}
+		double r = this.output;
+		if (inverted) {
+			r = -r;
+		}
+		r = Math.min(Math.max(r, Outmin), Outmax);
+		return r;*/
+		if (inverted) {
+			this.output = Math.min(Math.max(this.output, -Outmax), -Outmin);
+		}
+		else {
+			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
+		}
 		return (inverted) ? -this.output : this.output;
 	}
 }

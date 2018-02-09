@@ -105,7 +105,7 @@ public class Robot extends SampleRobot {
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		dt.accelDrive(forward, turn);
     		if (j0.getPressed("a")) {
-    			double jMap = Common.map(-j0.getY(), -1, 1, -6, 6);
+    			double jMap = Common.map(-j0.getY(), -1, 1, -60, 60);
     			Common.dashNum("jMap", jMap);
     			elevator.joystickControl(jMap);
     		}
