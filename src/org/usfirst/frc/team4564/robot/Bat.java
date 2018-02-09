@@ -1,7 +1,6 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
 
 /**
  * Ultrasonic control class

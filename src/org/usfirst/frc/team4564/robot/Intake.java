@@ -13,6 +13,7 @@ public class Intake {
 	public Intake() {
 		irInput = new AnalogInput(Constants.IR_SENSOR);
 		pot = new AnalogInput(Constants.INTAKE_POT);
+		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, -10, 10, -1.0, 1.0, 0, "intake");
 	}
 	
 	public double getDistance() {
