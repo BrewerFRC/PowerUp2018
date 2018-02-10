@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
+import org.usfirst.frc.team4564.robot.Common;
+
 /**
  * A class containing pre-built Paths.
  * Created February 2018
@@ -22,7 +24,29 @@ public class Paths {
 				 //.addDriveStraight(203.4, 11.8, 0.6, "angledDrive")
 				 //.addDriveStraight(36, 0, 0.6, "finalDrive");
 		
-		FAR_SWITCH = new Path();
+		FAR_SWITCH = new Path().addPIDDrive(60, 0, 0.4, 0.7, true, "eventTest")
+				.addEvent(new Event() {
+					private long startTime;
+					private boolean triggered;
+					@Override
+					public void start() {}
+					@Override
+					public void trigger() {
+						if (complete) {
+							return;
+						}
+						if (!triggered) {
+							startTime = Common.time();
+							triggered = true;
+						}
+						else {
+							if (Common.time() > startTime + 3000) {
+								System.out.println("Complete");
+								this.complete = true;
+							}
+						}
+					}
+				});
 		
 		NEAR_SWITCH = new Path();
 		

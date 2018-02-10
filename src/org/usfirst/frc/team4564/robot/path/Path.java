@@ -30,6 +30,9 @@ public class Path {
 	 */
 	public void reset() {
 		state = 0;
+		for (Stage stage : stages) {
+			stage.reset();
+		}
 		//start();
 	}
 	
@@ -39,6 +42,11 @@ public class Path {
 	 * @return The left/right motor powers, or [0, 0] if the path is complete.
 	 */
 	public double[] getDrive() {
+		for (int i = state;i >= 0;i--) {
+			if (i < stages.size()) {
+				stages.get(i).triggerEvents();
+			}
+		}
 		if (state >= stages.size()) {
 			if (stages.get(stages.size() - 1).isPersist()) {
 				return stages.get(stages.size() - 1).getDrive();
@@ -61,6 +69,9 @@ public class Path {
 			else {
 				return new double[] {0, 0};
 			}
+		}
+		for (int i = state;i >= 0;i--) {
+			stages.get(i).triggerEvents();
 		}
 		return stages.get(state).getDrive();
 	}
@@ -167,6 +178,21 @@ public class Path {
 	 */
 	public Path addPowerTurnOverlay(double targetAngle, double power) {
 		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, stages.get(stages.size() - 1)));
+		return this;
+	}
+	
+	/**
+	 * Adds an event to the last Stage in the path.
+	 * 
+	 * @param event - the event
+	 * @return {@link Path Path} - the current Path instance
+	 */
+	public Path addEvent(Event event) {
+		if (stages.size() > 0) {
+			Stage stage = stages.get(stages.size() - 1);
+			event.setStage(stage);
+			stage.addEvent(event);
+		}
 		return this;
 	}
 }

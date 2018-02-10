@@ -266,7 +266,7 @@ public class DriveTrain extends DifferentialDrive {
 		tankLeft = accelSide(tankLeft, left);
 		tankRight = accelSide(tankRight, right);
 		
-		System.out.println(tankLeft + ":" + tankRight);
+		//System.out.println(tankLeft + ":" + tankRight);
 	}
 	
 	/**
