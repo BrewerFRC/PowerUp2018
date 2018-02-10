@@ -27,6 +27,7 @@ public class Robot extends SampleRobot {
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
+	private Auto auto = new Auto();
 	private String gameData;
 	
 	@Override
@@ -53,7 +54,9 @@ public class Robot extends SampleRobot {
 				} else {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
+				auto.setGameData(gameData);
 			}
+			
 			/*char c = gameData.charAt(0);
 			if (c == 'R') {
 				AND = &&
