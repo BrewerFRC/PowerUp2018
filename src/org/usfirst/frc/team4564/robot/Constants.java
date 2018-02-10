@@ -23,7 +23,22 @@ public class Constants {
 	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
 	
 	//Sonic
-	SONIC_PIN = 0
+	SONIC_PIN = 0,
+	
+	//Elevator motor can numbers
+	ELEVATOR_LEFT = 12, ELEVATOR_RIGHT = 13,
+	
+	//Elevator limit switches
+	LOWER_LIMIT = 8, UPPER_LIMIT = 7,
+	
+	//IR Sensor
+	IR_SENSOR = 3,
+			
+	//potentiometer intake
+	INTAKE_POT = 2
+
+	
+
 	
 	;
 }
