@@ -2,8 +2,8 @@ package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
-
 import edu.wpi.first.wpilibj.AnalogInput;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -24,15 +24,18 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends SampleRobot {
 	private AnalogInput pot = new AnalogInput(2);
 	private DriveTrain dt = new DriveTrain();
+	private Intake intake = new Intake();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
+	private Elevator elevator = new Elevator(intake);
 	private String gameData;
 	
 	@Override
 	public void robotInit() {
 		//Initialize all paths.
 		new Paths();
+		//elevator.resetEncoder();
 	}
 	
 	/**
@@ -45,6 +48,9 @@ public class Robot extends SampleRobot {
 			Common.dashNum("Average Distance", dt.getAverageDist());
 			Common.dashNum("Left Counts", dt.getLeftCounts());
 			Common.dashNum("Right Counts", dt.getRightCounts());
+			Common.dashNum("IR Output", intake.getDistance() );
+			Common.dashBool("Is Loaded", intake.isLoaded());
+			
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
@@ -54,11 +60,6 @@ public class Robot extends SampleRobot {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
 			}
-			/*char c = gameData.charAt(0);
-			if (c == 'R') {
-				AND = &&
-				OR = ||
-			}*/
 		}
 	}
 	
@@ -85,7 +86,7 @@ public class Robot extends SampleRobot {
 	}
 
 	/**
-	 * Control logic for teleoperated mode.
+	 * Control logic for teleop mode.
 	 */
 	@Override
 	public void operatorControl() {
@@ -93,21 +94,32 @@ public class Robot extends SampleRobot {
     	Paths.reset();
     	Path path = Paths.FAR_SCALE;
     	path.start();
+    	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		Common.dashNum("Ultrasonic", bat.getDistance());
+    		
+    		//Common.dashNum("Ultrasonic", bat.getDistance());
+    		
     		double forward = 0;
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
-    		
-			if (j0.getPressed("a")) {
+			
+			if (j0.getPressed("b")) {
 				double[] power = path.getDrive();
 				dt.accelTankDrive(power[0], power[1]);
 			}
 			else {
 				dt.accelDrive(forward, turn);
 			}
+    		
+    		if (j0.getPressed("a")) {
+    			double jMap = Common.map(-j0.getY(), -1, 1, -60, 60);
+    			Common.dashNum("jMap", jMap);
+    			elevator.joystickControl(jMap);
+    		}
+    		
+    		elevator.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);

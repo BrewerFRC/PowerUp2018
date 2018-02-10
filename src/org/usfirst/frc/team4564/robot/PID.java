@@ -69,6 +69,15 @@ public class PID {
 	}
 	
 	/**
+	 * Post the current PID coefficients to SmartDashboard.
+	 */
+	public void postCoefficients() {
+		SmartDashboard.putNumber(this.name + "P", this.p);
+		SmartDashboard.putNumber(this.name + "I", this.i);
+		SmartDashboard.putNumber(this.name + "D", this.d);
+	}
+	
+	/**
 	 * Sets the minimum and maximum output values of the PID calculation.
 	 * 
 	 * @param min the minimum output value.
@@ -219,7 +228,6 @@ public class PID {
 			sign = 1;
 		output = Math.abs(output)+ min;
 		output *= sign;
-		output = Math.min(Math.max(output, Outmin), Outmax);
 		
 		//Apply necessary forward PID cummulation.
 		if (forward) {
@@ -229,7 +237,26 @@ public class PID {
 			this.output = output;
 		}
 		lastCalc = this.output;
+		
 		SmartDashboard.putNumber(this.name + "Calc", this.output);
+		/*if (inverted) {
+			this.output = Math.min(Math.max(this.output, -Outmax), -Outmin);
+		}
+		else {
+			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
+		}
+		double r = this.output;
+		if (inverted) {
+			r = -r;
+		}
+		r = Math.min(Math.max(r, Outmin), Outmax);
+		return r;*/
+		if (inverted) {
+			this.output = Math.min(Math.max(this.output, -Outmax), -Outmin);
+		}
+		else {
+			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
+		}
 		return (inverted) ? -this.output : this.output;
 	}
 }
