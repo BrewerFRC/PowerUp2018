@@ -25,10 +25,12 @@ public class Robot extends SampleRobot {
 	private AnalogInput pot = new AnalogInput(2);
 	private DriveTrain dt = new DriveTrain();
 	private Intake intake = new Intake();
+	private Elevator elevator = new Elevator(intake);
+	private Auto auto = new Auto();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
 	private Bat bat = new Bat();
-	private Elevator elevator = new Elevator(intake);
+	
 	private String gameData;
 	
 	@Override
@@ -59,6 +61,7 @@ public class Robot extends SampleRobot {
 				} else {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
+				auto.setGameData(gameData);
 			}
 		}
 	}
