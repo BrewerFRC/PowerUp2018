@@ -60,6 +60,7 @@ public class Robot extends SampleRobot {
 			} else {
 				Common.dashBool("Do You Have Game Data" , false);
 			}
+			elevator.debug();
 			//elevator.update();
 		}
 	}
@@ -105,9 +106,7 @@ public class Robot extends SampleRobot {
 			turn  = j0.getX(GenericHID.Hand.kLeft);
     		dt.accelDrive(forward, turn);
     		if (j0.getPressed("a")) {
-    			double jMap = Common.map(-j0.getY(), -1, 1, -60, 60);
-    			Common.dashNum("jMap", jMap);
-    			elevator.joystickControl(jMap);
+    			elevator.joystickControl(j0.getY());
     		}
     		elevator.update();
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
