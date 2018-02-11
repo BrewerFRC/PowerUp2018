@@ -23,11 +23,18 @@ public class Intake {
 			MIN_POSITION = 0, MAX_POSITION = 4096, 
 			MIN_ANGLE = 0, MAX_ANGLE = 180,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
-			MAX_LOAD_DISTANCE = 10;
+			MAX_LOAD_DISTANCE = 10,
+			P_POS = 0, I_POS = 0, D_POS = 0,
+			P_VEL = 0, I_VEL = 0, D_VEL = 0;
 	private double previousReading = 0;
 	
+	private double previousPosition = 0;
+	private double previousVelocity = 0;
+	
 	public Intake() {
-		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intakeArm");
+		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
+		pid.setPositionScalars(P_POS, I_POS, D_POS);
+		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
 	}
 	
 	/**
@@ -74,7 +81,6 @@ public class Intake {
 	 * @return - the distance in inches
 	 */
 	public double getCubeDistance() {
-	  // put your main code here, to run repeatedly:
 	  double reading = irInput.getValue() / 4 * 0.1 + previousReading * 0.9;
 	  double inches = (-20.0/575.0)*reading+20;
 	  if (inches < 0){
@@ -86,9 +92,9 @@ public class Intake {
 	}
 	
 	/**
-	 * Returns whether or not a cube is loaded.
+	 * Whether or not there is a cube loaded.
 	 * 
-	 * @return - loaded.
+	 * @return cube loaded
 	 */
 	public boolean isLoaded() {
 		if (getCubeDistance() < MAX_LOAD_DISTANCE) {
@@ -127,6 +133,21 @@ public class Intake {
 	}
 	
 	/**
+	 * Gets the velocity of the arm in degrees per second.
+	 * Uses a complementary function to smooth velocity.
+	 * 
+	 * @return the velocity
+	 */
+	public double getVelocity() {
+		double position = getPosition();
+		double velocity = (position - previousPosition) / (1 / Constants.REFRESH_RATE);
+		velocity = 0.9 * previousVelocity + 0.1 * velocity;
+		previousVelocity = velocity;
+		previousPosition = position;
+		return velocity;
+	}
+	
+	/**
 	 * PID controlled move to a defined position.
 	 * 
 	 * @param position - the position in degrees
@@ -148,6 +169,11 @@ public class Intake {
 	 * Whether or not the elevator can move in the current arm position.
 	 * 
 	 * @return - safe
+	
+	/**
+	 * Whether or not the elevator is safe to move given the current position.
+	 * 
+	 * @return movable
 	 */
 	public boolean elevatorSafe() {
 		//Made it equal to inorder to test - Brent
