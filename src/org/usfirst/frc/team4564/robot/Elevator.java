@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 /**A class to control the elevator
@@ -16,16 +17,14 @@ public class Elevator {
 	Intake intake;
 	TalonSRX elevatorLeft = new TalonSRX(Constants.ELEVATOR_LEFT);
 	TalonSRX elevatorRight = new TalonSRX(Constants.ELEVATOR_RIGHT);
+	private Encoder encoder; 
 	//true = pressed
 	private DigitalInput lowerLimit = new DigitalInput(Constants.LOWER_LIMIT);
 	//false = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
-	//in counts
-	double offset = 0;
-	//random value for now
-	final double COUNTS_PER_INCH = 453.42029;
-	//Elevator height in inches(random value for now)
-	final double ELEVATOR_HEIGHT = 65.75;
+	//Elevator height in inches(random value
+	final double ELEVATOR_HEIGHT = 66.5; //Absolute elevator travel is 67 inches
+	final double COUNTS_PER_INCH = 7630/67.0;
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
 	double velocity = 0.0;
@@ -40,15 +39,21 @@ public class Elevator {
 	final double MAX_DOWN_POWER = -0.7;
 	//The minimum power that the elevator can be run at upward
 	final double MIN_UP_POWER = 0.05;
-	final double MIN_DOWN_POWER = 0.07;
+	final double MIN_DOWN_POWER = 0.04;
 	//The last power that was set
 	double lastPower = 0;
 	//The maximum power change
 	final double MAX_DELTA_POWER = 0.1;
-	//In inches per second
+	//In inches per second, for position PID
 	final double MAX_VELOCITY = 12;
 	//Maximum velocity while using the joystick
-	final double MAX_J_VELOCITY = 10;
+	final double MAX_J_VELOCITY = 6;
+	//-1 is not moving, 0 or greater is moving
+	double moveCheck = -1;
+	//For encoder test function, minimum values to move the robot in different directions
+	final double ENCODER_MIN_UP = 0.1, ENCODER_MIN_DOWN = -0.15;
+	//The previous counts of the encoder 
+	double previousCounts = 0.0;
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
 	double posP = 0.1, posI = 0.0, posD = 0.0;
@@ -64,10 +69,11 @@ public class Elevator {
 	
 	public Elevator(Intake intake) {
 		this.intake = intake;
-		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		/*elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
 		elevatorRight.configVelocityMeasurementWindow(8, 0);//defaults to 64, rolling average sample size
 		//defaults to 100 Ms, the time of the sample that the current sample is compare to, changes the units
-		elevatorRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_100Ms, 0);
+		elevatorRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_100Ms, 0);*/
+		encoder = new Encoder(Constants.ELEVATOR_ENCODER_A, Constants.ELEVATOR_ENCODER_B, true, EncodingType.k2X);
 		elevatorLeft.setInverted(true);
 		pid.setVelocityScalars(velP, velI, velD);
 		pid.setVelocityInverted(true);
@@ -85,6 +91,7 @@ public class Elevator {
 		if (!intake.elevatorSafe()) {	
 			power = 0.0;
 		}
+		power = encoderTest(power);
 		if (power > 0.0) {  //Move up
 			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
 				power = 0.0;
@@ -102,10 +109,14 @@ public class Elevator {
 		} else {  //Moving Down
 			if (lowerLimit.get()) { //lower limit true when pressed
 				power = 0.0;
-			} else if (getInches() <= DANGER_ZONE) {
-				power = Math.max(power, Common.map(getInches(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
 			} else {
-				power = Math.max(power, MAX_DOWN_POWER);
+				if(state != States.HOMING) {
+					if (getInches() <= DANGER_ZONE) {
+						power = Math.max(power, Common.map(getInches(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
+					} else {
+						power = Math.max(power, MAX_DOWN_POWER);
+					}
+				}
 			}
 		}
 		lastPower = power;
@@ -131,6 +142,42 @@ public class Elevator {
 		}
 		setPower(power);
 	}
+	
+	
+	/** Test that encoder is registering movement.  Set Power to zero and re-home if not.
+	 *
+	 *@param power-Current power to be tested.
+	 */
+	public double encoderTest(double power) {
+		if (moveCheck == -1) {  //If not currently testing
+			if (power > ENCODER_MIN_UP || power < ENCODER_MIN_DOWN) {  //Is power great enough to move elevator?
+				moveCheck = 1;  //Start check counter 
+			}
+		} else {
+			if (power < ENCODER_MIN_UP && power > ENCODER_MIN_DOWN) {  //Is power not great enough to move elevator?
+				moveCheck = -1; //Stop checking
+			}
+			if (moveCheck >= 5) {  //Test encoder movement after 5 cylces
+				if (getVelocity() == 0) {
+					Common.debug("ENOCDER FAULT: Velocity is still zero, State = HOMING");
+					state =  States.HOMING;
+					power = 0.0;
+				} 
+				if (getEncoder() == previousCounts) {
+					Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder());
+					state = States.HOMING;
+					power = 0.0;
+				}
+				moveCheck = 1;  //Restart counter
+			} else {
+				moveCheck += 1;
+			}
+		}
+		previousCounts = getEncoder();
+		return power;
+	}
+	
+	
 	/**Uses a pid to move the robot at a target velocity
 	 * 
 	 * @param targetVelocity -The target speed for the robot to move in inches per second
@@ -159,6 +206,18 @@ public class Elevator {
 		double pidDisCalc = pid.calc(getInches(), getVelocity());
 		Common.dashNum("pidDisCalc", pidDisCalc);
 		accelPower(pidDisCalc);
+	}
+	
+	/**
+	 * 
+	 * @return -True when it is safe to move the intake over the back
+	 */
+	public boolean intakeSafe() {
+		if (getInches() >= ELEVATOR_HEIGHT-1.0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**Gets if the elevator is at the top
@@ -202,14 +261,15 @@ public class Elevator {
 	 * 
 	 */
 	public void resetEncoder() {
-		offset = elevatorRight.getSensorCollection().getPulseWidthPosition();
+		//offset = elevatorRight.getSensorCollection().getPulseWidthPosition();
+		encoder.reset();
 	}
 	/**Gets the raw encoder counts + the offset in counts 
 	 * 
 	 * @return -The current height of the elevator in counts
 	 */
 	public double getEncoder() {
-		return elevatorRight.getSensorCollection().getPulseWidthPosition() - offset;
+		return encoder.get();
 	}
 	/**Gets the current height of the elevator in inches
 	 * 
@@ -218,13 +278,13 @@ public class Elevator {
 	public double getInches() {
 		return getEncoder()/COUNTS_PER_INCH;
 	}
-	/**Completely untested
+	/**
 	 * 
 	 * @return
 	 */
 	public double getVelocity() {
 		//should return inches per second
-		return (elevatorRight.getSensorCollection().getPulseWidthVelocity()/COUNTS_PER_INCH)*10;
+		return encoder.getRate()/COUNTS_PER_INCH;
 	}
 	/**Function designed for joystick control of elevator
 	 * Only works for one cycle
@@ -253,7 +313,6 @@ public class Elevator {
 	}
 	public void debug() {
 		Common.dashNum("Elevator encoder", getEncoder());
-		Common.dashNum("offset", offset);
 		Common.dashNum("Elevator encoder in inches", getInches());
 		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("upper Limit Triggered", upperLimit.get());
@@ -267,7 +326,6 @@ public class Elevator {
 	 */
 	public void update() {
 		Common.dashNum("Elevator encoder", getEncoder());
-		Common.dashNum("offset", offset);
 		Common.dashNum("Elevator encoder in inches", getInches());
 		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("upper Limit Triggered", upperLimit.get());
@@ -290,6 +348,7 @@ public class Elevator {
 			}
 			break;
 		case IDLE:
+			pid.reset();
 			setPower(0.0);
 			break;
 		case MOVING:

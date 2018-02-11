@@ -104,8 +104,9 @@ public class Robot extends SampleRobot {
     		double turn = 0;
     		forward = j0.getY(GenericHID.Hand.kLeft);
 			turn  = j0.getX(GenericHID.Hand.kLeft);
-    		dt.accelDrive(forward, turn);
+    		//dt.accelDrive(forward, turn);
     		if (j0.getPressed("a")) {
+    			//elevator.joystickControl(j0.getY());
     			elevator.joystickControl(j0.getY());
     		}
     		elevator.update();
