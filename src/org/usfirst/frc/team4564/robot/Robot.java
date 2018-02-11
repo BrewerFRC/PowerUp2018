@@ -63,6 +63,7 @@ public class Robot extends SampleRobot {
 				}
 				auto.setGameData(gameData);
 			}
+			elevator.debug();
 		}
 	}
 	
@@ -117,9 +118,7 @@ public class Robot extends SampleRobot {
 			}
     		
     		if (j0.getPressed("a")) {
-    			double jMap = Common.map(-j0.getY(), -1, 1, -60, 60);
-    			Common.dashNum("jMap", jMap);
-    			elevator.joystickControl(jMap);
+    			elevator.joystickControl(j0.getY());
     		}
     		
     		elevator.update();

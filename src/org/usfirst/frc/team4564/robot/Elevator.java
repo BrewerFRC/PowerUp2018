@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 /**A class to control the elevator
  * 
  * @author Brewer FIRST Robotics Team 4564
@@ -27,7 +28,7 @@ public class Elevator {
 	final double ELEVATOR_HEIGHT = 65.75;
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
-	double speed = 0.0;
+	double velocity = 0.0;
 	double targetHeight = 0.0;
 	double error = 0;
 	//How close to the targetHeight that elevator can be to complete
@@ -46,6 +47,8 @@ public class Elevator {
 	final double MAX_DELTA_POWER = 0.1;
 	//In inches per second
 	final double MAX_VELOCITY = 12;
+	//Maximum velocity while using the joystick
+	final double MAX_J_VELOCITY = 10;
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
 	double posP = 0.1, posI = 0.0, posD = 0.0;
@@ -69,6 +72,8 @@ public class Elevator {
 		pid.setVelocityScalars(velP, velI, velD);
 		pid.setVelocityInverted(true);
 		pid.setPositionScalars(posP, posI, posD);
+		Thread t = new Thread(new UpperLimitTask());
+		t.start();
 	}
 	
 	/**A safe function to set the power of the elevator, cannot exceed MAX_POWER
@@ -86,6 +91,8 @@ public class Elevator {
 			} else if(!upperLimit.get()) {  //Have we made it to the upper limit trigger point(limit switch false = reached)
 				if (getInches() < UPPER_LIMIT_POINT) {  //Make sure encoder has counted enough inches
 					power = 0.0;
+					Common.debug("Upper Limit fail, HOMING");
+					state = States.HOMING;
 				}
 			} else if(getInches()>= ELEVATOR_HEIGHT-DANGER_ZONE) {
 				power = Math.min(power, Common.map(ELEVATOR_HEIGHT-getInches(), 0.0, DANGER_ZONE, MIN_UP_POWER, MAX_UP_POWER));
@@ -129,6 +136,15 @@ public class Elevator {
 	 * @param targetVelocity -The target speed for the robot to move in inches per second
 	 */
 	public void pidVelMove(double targetVelocity) {
+		/*if (targetVelocity >= 0.0) {
+			if (getInches() >= ELEVATOR_HEIGHT - DANGER_ZONE) {
+				targetVelocity = Math.min(targetVelocity, Common.map(getInches(), ELEVATOR_HEIGHT-DANGER_ZONE, ELEVATOR_HEIGHT, 0, MAX_J_VELOCITY));
+			}
+		} else {
+			if (getInches() >= DANGER_ZONE) {
+				targetVelocity = Math.max(targetVelocity, Common.map(getInches(), 0, DANGER_ZONE, 0, -MAX_J_VELOCITY));
+			}
+		}*/
 		pid.setTargetVelocity(targetVelocity);
 		double pidVelCalc = pid.calcVelocity(getVelocity());
 		Common.dashNum("pidVelCalc", pidVelCalc);
@@ -212,12 +228,14 @@ public class Elevator {
 	}
 	/**Function designed for joystick control of elevator
 	 * Only works for one cycle
-	 * @param speed -The speed for -1.0(down) to 1.0(up) to move the elevator at
+	 * @param jInput -The velocity mapped for 1.0(max down) to -1.0(max up) to move the elevator at
 	 */
-	public void joystickControl(double speed) {
+	public void joystickControl(double jInput) {
 		//overrules moveToHeight()
 		if (state != States.STOPPED && state != States.HOMING){
-			this.speed = speed;
+			double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);
+			Common.dashNum("jMap", jMap);
+			velocity = jMap;
 			//Common.debug("New state Joystick");
 			state = States.JOYSTICK;
 		}
@@ -232,6 +250,16 @@ public class Elevator {
 			Common.debug("New State Moving");
 			state = States.MOVING;
 		}
+	}
+	public void debug() {
+		Common.dashNum("Elevator encoder", getEncoder());
+		Common.dashNum("offset", offset);
+		Common.dashNum("Elevator encoder in inches", getInches());
+		Common.dashBool("upper limits safe", upperLimitSafe());
+		Common.dashBool("upper Limit Triggered", upperLimit.get());
+		Common.dashBool("at bottom", atBottom());
+		Common.dashStr("Elevator State", state.toString());
+		Common.dashNum("Elevator Velocity", getVelocity());
 	}
 	/**Update function that should be the last run of all elevator functions.
 	 * Exports certain values to smart dashboard and runs the state process of the elevator
@@ -282,7 +310,7 @@ public class Elevator {
 			}*/
 			break;
 		case JOYSTICK:
-			pidVelMove(speed);
+			pidVelMove(velocity);
 			//accleMove(speed);
 			//Common.debug("new State Idle");
 			state = States.IDLE;
@@ -290,4 +318,28 @@ public class Elevator {
 		}
 	}
 	
+	public class UpperLimitTask implements Runnable {
+		//private long previousTime;
+		//private int counter = 0;
+		public void run() {
+			while (true) {
+				//counter++;
+				if(!upperLimit.get()) {  //Have we made it to the upper limit trigger point(limit switch false = reached)
+					if (getInches() < UPPER_LIMIT_POINT) {  //Make sure encoder has counted enough inches
+						Common.debug("Upper Limit fail, HOMING");
+						state = States.HOMING;
+					}
+				}
+				/*if (counter == 99) {
+					long time = Common.time();
+					System.out.println("Time: " + (time - previousTime));
+					previousTime = time;
+					counter = 0;
+				}*/
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+			}
+		}
+	}
 }
