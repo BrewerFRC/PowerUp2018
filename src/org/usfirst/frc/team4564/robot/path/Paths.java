@@ -9,7 +9,7 @@ package org.usfirst.frc.team4564.robot.path;
  * @author Jacob Cote
  */
 public class Paths {
-	public static Path TEST_FAR_SCALE, TEST_NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH_LEFT, FAR_SWITCH_RIGHT, NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT, FAR_SCALE_SWITCH_LEFT, FAR_SCALE_SWITCH_RIGHT, NEAR_SCALE_SWITCH_LEFT, NEAR_SCALE_SWITCH_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE;
+	public static Path TEST_FAR_SCALE, TEST_NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH_LEFT, FAR_SWITCH_RIGHT, NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT, FAR_SCALE_SWITCH_LEFT, FAR_SCALE_SWITCH_RIGHT, NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE;
 	
 	public Paths() {
 		// Old Paths Written
@@ -70,11 +70,11 @@ public class Paths {
 			.addPowerTurn(10.2, .65)
 			.addDriveStraight(-84.5, 10.2, .65, "finalDrive");
 		
-		NEAR_SCALE_SWITCH_LEFT = new Path()
+		NEAR_SCALE_LEFT = new Path()
 			.addDriveStraight(-53.37, 0, .65, "startDrive")
 			.addDriveStraight(-155.13, 15, .65, "finalDrive");
 		
-		NEAR_SCALE_SWITCH_RIGHT = new Path()
+		NEAR_SCALE_RIGHT = new Path()
 			.addDriveStraight(-53.37, 0, .65, "startDrive")
 			.addDriveStraight(-155.13, -15, .65, "finalDrive");
 		
@@ -97,11 +97,9 @@ public class Paths {
 		FAR_SWITCH_RIGHT.reset();
 		NEAR_SWITCH_LEFT.reset();
 		NEAR_SWITCH_RIGHT.reset();
-		NEAR_SCALE_SWITCH_LEFT.reset();
-		NEAR_SCALE_SWITCH_RIGHT.reset();
+		NEAR_SCALE_LEFT.reset();
+		NEAR_SCALE_RIGHT.reset();
 		CROSS_LINE.reset();
-		FAR_SCALE_SWITCH_LEFT.reset();
-		NEAR_SCALE_SWITCH_RIGHT.reset();
 		FAR_SCALE_RIGHT.reset();
 		FAR_SCALE_LEFT.reset();
 	}

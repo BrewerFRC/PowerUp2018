@@ -68,31 +68,71 @@ public class Auto {
 				return Paths.CROSS_LINE;
 			case SCALE_ALWAYS:
 				if (gameData.charAt(1) == position) {
-					return Paths.TEST_NEAR_SCALE;
+					if (position == 'L') {
+						return Paths.NEAR_SCALE_LEFT;
+					}
+					else {
+						return Paths.NEAR_SCALE_RIGHT;
+					}
 				}
-				return Paths.TEST_FAR_SCALE;
+				if (position == 'L') {
+					return Paths.FAR_SCALE_LEFT;
+				}
+				else {
+					return Paths.FAR_SCALE_RIGHT;
+				}
 			case SCALE_CLOSE:
 				if (gameData.charAt(1) == position) {
-					return Paths.TEST_NEAR_SCALE;
+					if (position == 'L') {
+						return Paths.NEAR_SCALE_LEFT;
+					}
+					else {
+						return Paths.NEAR_SCALE_RIGHT;
+					}
 				}
 				if (tryAlternative) {
 					if (gameData.charAt(0) == position) {
-						return Paths.NEAR_SWITCH;
+						if (position == 'L') {
+							return Paths.NEAR_SWITCH_LEFT;
+						}
+						else {
+							return Paths.NEAR_SWITCH_RIGHT;
+						}
 					}
 				}
 				break;
 			case SWITCH_ALWAYS:
 				if (gameData.charAt(0) == position) {
-					return Paths.NEAR_SWITCH;
+					if (position == 'L') {
+						return Paths.NEAR_SWITCH_LEFT;
+					}
+					else {
+						return Paths.NEAR_SWITCH_RIGHT;
+					}
 				}
-				return Paths.FAR_SWITCH;
+				if (position == 'L') {
+					return Paths.FAR_SWITCH_LEFT;
+				}
+				else {
+					return Paths.FAR_SWITCH_RIGHT;
+				}
 			case SWITCH_CLOSE:
 				if (gameData.charAt(0) == position) {
-					return Paths.NEAR_SWITCH;
+					if (position == 'L') {
+						return Paths.NEAR_SWITCH_LEFT;
+					}
+					else {
+						return Paths.NEAR_SWITCH_RIGHT;
+					}
 				}
 				if (tryAlternative) {
 					if (gameData.charAt(1) == position) {
-						return Paths.TEST_NEAR_SCALE;
+						if (position == 'L') {
+							return Paths.NEAR_SCALE_LEFT;
+						}
+						else {
+							return Paths.NEAR_SCALE_RIGHT;
+						}
 					}
 				}
 				break;
