@@ -33,13 +33,13 @@ public class Elevator {
 	//How close to the targetHeight that elevator can be to complete
 	final double ACCEPTABLE_ERROR = 1.5;
 	//The location of the upper limit switch in inches
-	final double UPPER_LIMIT_POINT = 57.7;
+	final double UPPER_LIMIT_POINT = 57.5;
 	//The maximum power that the elevator can be run at upward
 	final double MAX_UP_POWER = 1.0;
-	final double MAX_DOWN_POWER = -0.7;
+	final double MAX_DOWN_POWER = -0.9;
 	//The minimum power that the elevator can be run at upward
 	final double MIN_UP_POWER = 0.05;
-	final double MIN_DOWN_POWER = 0.04;
+	final double MIN_DOWN_POWER = -0.02;
 	//The last power that was set
 	double lastPower = 0;
 	//The maximum power change
@@ -47,7 +47,7 @@ public class Elevator {
 	//In inches per second, for position PID
 	final double MAX_VELOCITY = 12;
 	//Maximum velocity while using the joystick
-	final double MAX_J_VELOCITY = 6;
+	final double MAX_J_VELOCITY = 45;
 	//-1 is not moving, 0 or greater is moving
 	double moveCheck = -1;
 	//For encoder test function, minimum values to move the robot in different directions
@@ -91,7 +91,6 @@ public class Elevator {
 		if (!intake.elevatorSafe()) {	
 			power = 0.0;
 		}
-		power = encoderTest(power);
 		if (power > 0.0) {  //Move up
 			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
 				power = 0.0;
@@ -119,6 +118,7 @@ public class Elevator {
 				}
 			}
 		}
+		power = encoderTest(power);
 		lastPower = power;
 		elevatorRight.set(ControlMode.PercentOutput, power);
 		elevatorLeft.set(ControlMode.PercentOutput, power);
@@ -158,15 +158,17 @@ public class Elevator {
 				moveCheck = -1; //Stop checking
 			}
 			if (moveCheck >= 5) {  //Test encoder movement after 5 cylces
-				if (getVelocity() == 0) {
-					Common.debug("ENOCDER FAULT: Velocity is still zero, State = HOMING");
-					state =  States.HOMING;
-					power = 0.0;
-				} 
-				if (getEncoder() == previousCounts) {
-					Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder());
-					state = States.HOMING;
-					power = 0.0;
+				if (state != States.HOMING) {
+					if (getVelocity() == 0) {
+						Common.debug("ENCODER FAULT: Velocity is still zero, State = HOMING");
+						state = States.HOMING;
+						power = 0.0;
+					} 
+					if (getEncoder() == previousCounts) {
+						Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder());
+						state = States.HOMING;
+						power = 0.0;
+					}
 				}
 				moveCheck = 1;  //Restart counter
 			} else {
@@ -353,7 +355,6 @@ public class Elevator {
 			break;
 		case MOVING:
 			pidDisMove(targetHeight);
-			state = States.IDLE;
 			/*error = targetHeight - getInches();
 			if (Math.abs(error) < ACCEPTABLE_ERROR) {
 				setPower(0.0);
@@ -372,7 +373,9 @@ public class Elevator {
 			pidVelMove(velocity);
 			//accleMove(speed);
 			//Common.debug("new State Idle");
-			state = States.IDLE;
+			if (state == States.JOYSTICK){
+				state = States.IDLE;
+			}
 			break;
 		}
 	}
