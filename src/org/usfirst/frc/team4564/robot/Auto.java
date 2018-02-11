@@ -68,12 +68,12 @@ public class Auto {
 				return Paths.CROSS_LINE;
 			case SCALE_ALWAYS:
 				if (gameData.charAt(1) == position) {
-					return Paths.NEAR_SCALE;
+					return Paths.TEST_NEAR_SCALE;
 				}
-				return Paths.FAR_SCALE;
+				return Paths.TEST_FAR_SCALE;
 			case SCALE_CLOSE:
 				if (gameData.charAt(1) == position) {
-					return Paths.NEAR_SCALE;
+					return Paths.TEST_NEAR_SCALE;
 				}
 				if (tryAlternative) {
 					if (gameData.charAt(0) == position) {
@@ -92,7 +92,7 @@ public class Auto {
 				}
 				if (tryAlternative) {
 					if (gameData.charAt(1) == position) {
-						return Paths.NEAR_SCALE;
+						return Paths.TEST_NEAR_SCALE;
 					}
 				}
 				break;
