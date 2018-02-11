@@ -22,10 +22,9 @@ import edu.wpi.first.wpilibj.Timer;
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
-	private AnalogInput pot = new AnalogInput(2);
-	private DriveTrain dt = new DriveTrain();
-	private Intake intake = new Intake();
-	private Elevator elevator = new Elevator(intake);
+	private static DriveTrain dt = new DriveTrain();
+	private static Intake intake = new Intake();
+	private static Elevator elevator = new Elevator(intake);
 	private Auto auto = new Auto();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
@@ -46,7 +45,6 @@ public class Robot extends SampleRobot {
 	@Override
 	public void disabled() {
 		while (isDisabled()) {
-			Common.dashNum("Pot Out", pot.getValue());
 			Common.dashNum("Average Distance", dt.getAverageDist());
 			Common.dashNum("Left Counts", dt.getLeftCounts());
 			Common.dashNum("Right Counts", dt.getRightCounts());
@@ -57,11 +55,11 @@ public class Robot extends SampleRobot {
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
 				if (gameData.length() == 3) {
+					auto.setGameData(gameData);
 					Common.dashBool("Do You Have Game Data", true);
 				} else {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
-				auto.setGameData(gameData);
 			}
 			elevator.debug();
 		}
@@ -106,8 +104,8 @@ public class Robot extends SampleRobot {
     		
     		double forward = 0;
     		double turn = 0;
-    		forward = j0.getY(GenericHID.Hand.kLeft);
-			turn  = j0.getX(GenericHID.Hand.kLeft);
+    		forward = -j0.getY(GenericHID.Hand.kLeft);
+			turn  = -j0.getX(GenericHID.Hand.kLeft);
 			
 			if (j0.getPressed("b")) {
 				double[] power = path.getDrive();
@@ -128,4 +126,8 @@ public class Robot extends SampleRobot {
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
     }
+	
+	public static Elevator getElevator() {
+		return elevator;
+	}
 }

@@ -153,7 +153,12 @@ public class Intake {
 	 * @param position - the position in degrees
 	 */
 	public void movePosition(double position) {
-		pid.setTargetPosition(position);
+		if (!Robot.getElevator().intakeSafe()) {
+			pid.setTargetPosition(getPosition());
+		}
+		else {
+			pid.setTargetPosition(position);
+		}
 		setIntakeArmPower(pid.calc(getPosition(), getVelocity()));
 	}
 	
@@ -163,7 +168,12 @@ public class Intake {
 	 * @param velocity - the velocity in degrees/second.
 	 */
 	public void moveVelocity(double velocity) {
-		pid.setTargetVelocity(velocity);
+		if (!Robot.getElevator().intakeSafe()) {
+			pid.setTargetVelocity(0);
+		}
+		else {
+			pid.setTargetVelocity(velocity);
+		}
 		setIntakeArmPower(pid.calcVelocity(getVelocity()));
 	}
 	
