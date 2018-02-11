@@ -10,7 +10,7 @@ import org.usfirst.frc.team4564.robot.PID;
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
  */
-public class PIDDrive extends Stage {
+public class PIDDrive extends Drive {
 	private static final double P = 0.017, I = 0, D = 1.5;
 	
 	private PID pid;
@@ -25,15 +25,8 @@ public class PIDDrive extends Stage {
 		this.angle = angle;
 	}
 	
-	public void start() {
-		DriveTrain.instance().resetEncoders();
-		Heading heading = DriveTrain.instance().getHeading();
-		heading.setAngle(angle);
-		heading.setHeadingHold(true);
-	}
-	
 	public boolean isComplete() {
-		return DriveTrain.instance().getAverageDist() >= pid.getTarget();
+		return super.isComplete(pid.getTarget());
 	}
 	
 	public double[] getDrive() {
@@ -42,6 +35,6 @@ public class PIDDrive extends Stage {
 	
 	public double[] getDrive(double curDistance) {
 		double power = pid.calc(curDistance);
-		return new double[] {power, power};
+		return super.getDrive(new double[] {power, power}, pid.getTarget());
 	}
 }

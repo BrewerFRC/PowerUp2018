@@ -1,7 +1,6 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
 
 /**
  * Ultrasonic control class
@@ -14,11 +13,16 @@ import edu.wpi.first.wpilibj.DigitalOutput;
  *  @author Brent Roberts
 */
 public class Bat {
+	private static Bat instance;
 	int cycleDelay = Constants.REFRESH_RATE/10;
 	long cycleTime = 0;
 	int timePerPulse = 50;
 	
 	AnalogInput sonic = new AnalogInput(Constants.SONIC_PIN);
+	
+	public Bat() {
+		instance = this;
+	}
 	
 	//Constants
 	//Stolen from 2017
@@ -29,5 +33,7 @@ public class Bat {
 		return sonic.getVoltage()/VOLTS_PER_INCH;
 	}
 	
-	
+	public static Bat getInstance() {
+		return instance;
+	}
 }
