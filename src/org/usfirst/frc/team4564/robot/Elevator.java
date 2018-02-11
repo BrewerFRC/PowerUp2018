@@ -52,6 +52,8 @@ public class Elevator {
 	double moveCheck = -1;
 	//For encoder test function, minimum values to move the robot in different directions
 	final double ENCODER_MIN_UP = 0.1, ENCODER_MIN_DOWN = -0.15;
+	//For Velocity ramping
+	final double DANGER_VEL_ZONE = 30;
 	//The previous counts of the encoder 
 	double previousCounts = 0.0;
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
@@ -185,15 +187,17 @@ public class Elevator {
 	 * @param targetVelocity -The target speed for the robot to move in inches per second
 	 */
 	public void pidVelMove(double targetVelocity) {
-		/*if (targetVelocity >= 0.0) {
-			if (getInches() >= ELEVATOR_HEIGHT - DANGER_ZONE) {
-				targetVelocity = Math.min(targetVelocity, Common.map(getInches(), ELEVATOR_HEIGHT-DANGER_ZONE, ELEVATOR_HEIGHT, 0, MAX_J_VELOCITY));
+		if (targetVelocity >= 0.0) {
+			if (getInches() >= ELEVATOR_HEIGHT - DANGER_VEL_ZONE) {
+				double rampMap = Common.map(ELEVATOR_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, 0, MAX_J_VELOCITY);
+				targetVelocity = Math.min(targetVelocity, rampMap);
 			}
 		} else {
 			if (getInches() >= DANGER_ZONE) {
-				targetVelocity = Math.max(targetVelocity, Common.map(getInches(), 0, DANGER_ZONE, 0, -MAX_J_VELOCITY));
+				double rampMap = Common.map(getInches(), 0, DANGER_ZONE, 0, -MAX_J_VELOCITY);
+				targetVelocity = Math.max(targetVelocity, rampMap);
 			}
-		}*/
+		}
 		pid.setTargetVelocity(targetVelocity);
 		double pidVelCalc = pid.calcVelocity(getVelocity());
 		Common.dashNum("pidVelCalc", pidVelCalc);

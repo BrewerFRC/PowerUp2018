@@ -58,10 +58,10 @@ public class Robot extends SampleRobot {
 				Common.dashStr("Game Data", gameData);
 				if (gameData.length() == 3) {
 					Common.dashBool("Do You Have Game Data", true);
+					auto.setGameData(gameData);
 				} else {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
-				auto.setGameData(gameData);
 			}
 			elevator.debug();
 		}
