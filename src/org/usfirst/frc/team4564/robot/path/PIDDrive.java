@@ -33,6 +33,9 @@ public class PIDDrive extends Stage {
 	}
 	
 	public boolean isComplete() {
+		if (!super.eventsFinished()) {
+			return false;
+		}
 		return DriveTrain.instance().getAverageDist() >= pid.getTarget();
 	}
 	

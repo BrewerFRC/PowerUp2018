@@ -10,6 +10,20 @@ package org.usfirst.frc.team4564.robot.path;
 public abstract class Event {
 	protected Stage stage;
 	protected boolean complete = false;
+	protected boolean holdStage;
+	
+	public Event(boolean holdStage) {
+		this.holdStage = holdStage;
+	}
+	
+	/**
+	 * Whether or not event must complete for the Path to progress to the next stage.
+	 * 
+	 * @return hold stage
+	 */
+	public boolean isHoldStage() {
+		return holdStage;
+	}
 	
 	/**
 	 * Sets the stage this event is attached to.

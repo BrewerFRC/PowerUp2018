@@ -51,7 +51,21 @@ public abstract class Stage {
 	 */
 	public void addEvent(Event event) {
 		this.events.add(event);
-	  }
+	}
+	
+	/**
+	 * Whether or not events marked holdStage have completed.
+	 * 
+	 * @return events finished
+	 */
+	public boolean eventsFinished() {
+		for (Event e : events) {
+			if (e.isHoldStage() && !e.complete()) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	/**
 	 * Complete the initializing steps of the stage.

@@ -28,6 +28,9 @@ public class PowerTurn extends Stage {
 	}
 	
 	public boolean isComplete() {
+		if (!super.eventsFinished()) {
+			return false;
+		}
 		return (startingAngle < target) ? 
 				DriveTrain.instance().getHeading().getAngle() >= target : DriveTrain.instance().getHeading().getAngle() <= target;
 	}

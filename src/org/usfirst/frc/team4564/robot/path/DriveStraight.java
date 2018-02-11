@@ -31,6 +31,9 @@ public class DriveStraight extends Stage {
 	}
 	
 	public boolean isComplete() {
+		if (!super.eventsFinished()) {
+			return false;
+		}
 		if (DriveTrain.instance().getAverageDist() >= target) {
 			System.out.println("DriveStraight: " + this.name + " - Complete");
 		}
@@ -38,6 +41,9 @@ public class DriveStraight extends Stage {
 	}
 	
 	public double[] getDrive() {
+		if (isComplete()) {
+			return new double[] {0, 0};
+		}
 		return new double[] {power, power};
 	}
 }

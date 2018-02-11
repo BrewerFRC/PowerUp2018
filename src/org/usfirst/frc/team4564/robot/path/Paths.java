@@ -25,11 +25,13 @@ public class Paths {
 				 //.addDriveStraight(36, 0, 0.6, "finalDrive");
 		
 		FAR_SWITCH = new Path().addPIDDrive(60, 0, 0.4, 0.7, true, "eventTest")
-				.addEvent(new Event() {
+				.addEvent(new Event(false) {
 					private long startTime;
 					private boolean triggered;
 					@Override
-					public void start() {}
+					public void start() {
+						triggered = false;
+					}
 					@Override
 					public void trigger() {
 						if (complete) {

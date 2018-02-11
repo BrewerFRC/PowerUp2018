@@ -1,9 +1,7 @@
 package org.usfirst.frc.team4564.robot;
-import org.usfirst.frc.team4564.robot.path.Event;
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
-import edu.wpi.first.wpilibj.AnalogInput;
-import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -22,7 +20,6 @@ import edu.wpi.first.wpilibj.Timer;
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
-	private AnalogInput pot = new AnalogInput(2);
 	private DriveTrain dt = new DriveTrain();
 	private Intake intake = new Intake();
 	private Elevator elevator = new Elevator(intake);
@@ -46,7 +43,6 @@ public class Robot extends SampleRobot {
 	@Override
 	public void disabled() {
 		while (isDisabled()) {
-			Common.dashNum("Pot Out", pot.getValue());
 			Common.dashNum("Average Distance", dt.getAverageDist());
 			Common.dashNum("Left Counts", dt.getLeftCounts());
 			Common.dashNum("Right Counts", dt.getRightCounts());
