@@ -116,8 +116,9 @@ public class Robot extends SampleRobot {
 			else {
 				dt.accelDrive(forward, turn);
 			}
-    		
+			
     		if (j0.getPressed("a")) {
+    			//elevator.joystickControl(j0.getY());
     			elevator.joystickControl(j0.getY());
     		}
     		

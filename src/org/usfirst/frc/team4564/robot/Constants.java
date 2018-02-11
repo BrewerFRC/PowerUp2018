@@ -24,6 +24,7 @@ public class Constants {
 	//Encoders
 	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,
 	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
+	ELEVATOR_ENCODER_A = 5, ELEVATOR_ENCODER_B = 6,
 	
 	//Sonic
 	SONIC_PIN = 0,
