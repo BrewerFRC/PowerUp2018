@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Spark;
  * A class to control the intake arm and loader.
  * 
  * @author Brewer FIRST Robotics Team 4564
- * @author Sam Woodward
  * @author Evan McCoy
+ * @author Sam Woodward
  */
 public class Intake {
 	private static final Spark
@@ -153,7 +153,8 @@ public class Intake {
 	 * @param position - the position in degrees
 	 */
 	public void movePosition(double position) {
-		
+		pid.setTargetPosition(position);
+		setIntakeArmPower(pid.calc(getPosition(), getVelocity()));
 	}
 	
 	/**
@@ -162,7 +163,8 @@ public class Intake {
 	 * @param velocity - the velocity in degrees/second.
 	 */
 	public void moveVelocity(double velocity) {
-		
+		pid.setTargetVelocity(velocity);
+		setIntakeArmPower(pid.calcVelocity(getVelocity()));
 	}
 	
 	/**

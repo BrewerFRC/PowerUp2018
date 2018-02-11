@@ -1,9 +1,6 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-
-import org.usfirst.frc.team4564.robot.path.Pathfinding;
-
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -34,11 +31,8 @@ public class DriveTrain extends DifferentialDrive {
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
 	private Heading heading;
-	private Pathfinding path = new Pathfinding();
 	private double driveSpeed = 0, turnSpeed = 0;
 	private double tankLeft = 0, tankRight = 0;
-	private double targetHeading;
-	private boolean headingHold;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -77,17 +71,6 @@ public class DriveTrain extends DifferentialDrive {
 	public void updatePIDs() {
 		pidL.update();
 		pidR.update();
-	}
-	
-	/**
-	 * Drive the robot on controlled left and right velocity targets.
-	 */
-	public void pidVelDrive() {
-		//pidL.setTarget(18);
-		//pidR.setTarget(54);
-		path.update();
-		this.tankDrive(path.left(), path.right());
-		//this.tankDrive(-pidL.calc(getLeftVelocity()), -pidR.calc(getRightVelocity()));
 	}
 	
 	/**
