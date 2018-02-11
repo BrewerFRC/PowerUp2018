@@ -2,8 +2,8 @@ package org.usfirst.frc.team4564.robot;
 
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
+
 import edu.wpi.first.wpilibj.AnalogInput;
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -63,6 +63,7 @@ public class Robot extends SampleRobot {
 				}
 				auto.setGameData(gameData);
 			}
+			elevator.debug();
 		}
 	}
 	
@@ -117,9 +118,7 @@ public class Robot extends SampleRobot {
 			}
     		
     		if (j0.getPressed("a")) {
-    			double jMap = Common.map(-j0.getY(), -1, 1, -60, 60);
-    			Common.dashNum("jMap", jMap);
-    			elevator.joystickControl(jMap);
+    			elevator.joystickControl(j0.getY());
     		}
     		
     		elevator.update();
