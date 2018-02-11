@@ -57,6 +57,7 @@ public class Robot extends SampleRobot {
 				if (gameData.length() == 3) {
 					auto.setGameData(gameData);
 					Common.dashBool("Do You Have Game Data", true);
+					auto.setGameData(gameData);
 				} else {
 					Common.dashBool("Do You Have Game Data" , false);
 				}
@@ -100,13 +101,10 @@ public class Robot extends SampleRobot {
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		
-    		//Common.dashNum("Ultrasonic", bat.getDistance());
-    		
     		double forward = 0;
     		double turn = 0;
     		forward = -j0.getY(GenericHID.Hand.kLeft);
 			turn  = -j0.getX(GenericHID.Hand.kLeft);
-			
 			if (j0.getPressed("b")) {
 				double[] power = path.getDrive();
 				dt.accelTankDrive(power[0], power[1]);
