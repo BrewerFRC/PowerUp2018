@@ -19,7 +19,7 @@ public class Constants {
 	DRIVE_FL = 0, DRIVE_FR = 2, DRIVE_BL = 1, DRIVE_BR = 3,
 	
 	//Intake Motors
-	LEFT_INTAKE = 4, RIGHT_INTAKE = 5, INTAKE_ARM = 6, 
+	LEFT_INTAKE = 4, RIGHT_INTAKE = 5, INTAKE_ARM = 6,
 	
 	//Encoders
 	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,

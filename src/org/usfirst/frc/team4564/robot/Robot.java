@@ -50,7 +50,7 @@ public class Robot extends SampleRobot {
 			Common.dashNum("Average Distance", dt.getAverageDist());
 			Common.dashNum("Left Counts", dt.getLeftCounts());
 			Common.dashNum("Right Counts", dt.getRightCounts());
-			Common.dashNum("IR Output", intake.getDistance() );
+			Common.dashNum("IR Output", intake.getCubeDistance() );
 			Common.dashBool("Is Loaded", intake.isLoaded());
 			
 			gameData = DriverStation.getInstance().getGameSpecificMessage();

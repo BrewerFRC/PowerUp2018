@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * @author Evan McCoy
  * @author Jacob Cote
  */
-public class Xbox extends XboxController{
+public class Xbox extends XboxController {
 	private Map<String, Supplier<Boolean>> functionMap = new HashMap<String, Supplier<Boolean>>();
 	private Map<String, Boolean> whenMap = new HashMap<String, Boolean>();
 	
@@ -162,7 +162,5 @@ public class Xbox extends XboxController{
 			return this.getRawButton(10);
 		});
 		whenMap.put("rightThumb", false);
-		
-		
 	}
 }
