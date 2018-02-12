@@ -41,8 +41,5 @@ public class Constants {
 	//potentiometer intake
 	INTAKE_POT = 2
 
-	
-
-	
 	;
 }

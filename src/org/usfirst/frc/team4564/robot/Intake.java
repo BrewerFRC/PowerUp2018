@@ -181,11 +181,6 @@ public class Intake {
 	 * Whether or not the elevator can move in the current arm position.
 	 * 
 	 * @return - safe
-	
-	/**
-	 * Whether or not the elevator is safe to move given the current position.
-	 * 
-	 * @return movable
 	 */
 	public boolean elevatorSafe() {
 		//Made it equal to inorder to test - Brent
