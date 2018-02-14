@@ -141,6 +141,10 @@ public class Intake {
 		return Common.map(position, MIN_POSITION, MAX_POSITION, MIN_ANGLE, MAX_ANGLE);		
 	}
 	
+	public int getRawPosition() {
+		return pot.getValue();
+	}
+	
 	/**
 	 * Gets the velocity of the arm in degrees per second.
 	 * Uses a complementary function to smooth velocity.

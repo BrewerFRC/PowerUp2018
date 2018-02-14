@@ -2,6 +2,7 @@ package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -18,7 +19,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static double DRIVEACCEL = .00;
+	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .05, ACCEL_HG_HE, ACCEL_LG_LE, ACCEL_LG_HE;
 
 	public static final double TURNACCEL = .06;
 
@@ -39,10 +40,9 @@ public class DriveTrain extends DifferentialDrive {
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
 	private Heading heading;
+	private Solenoid shifter;
 	private double driveSpeed = 0, turnSpeed = 0;
 	private double tankLeft = 0, tankRight = 0;
-	private double targetHeading;
-	private boolean headingHold;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -58,11 +58,26 @@ public class DriveTrain extends DifferentialDrive {
 		encoderR.setDistancePerPulse(0.0098209719);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading();
+		shifter = new Solenoid(Constants.PCM_CAN_ID, Constants.SHIFTER);
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
 		
 		instance = this;
+	}
+	
+	/**
+	 * Shifts the drivetrain gearbox to high gear.
+	 */
+	public void shiftHigh() {
+		shifter.set(false);
+	}
+	
+	/**
+	 * Shifts the drivetrain gearbox to low gear.
+	 */
+	public void shiftLow() {
+		shifter.set(true);
 	}
 	
 	/**
@@ -190,6 +205,7 @@ public class DriveTrain extends DifferentialDrive {
 	 * @return double - the allowed drive value for this cycle.
 	 */
 	 public double driveAccelCurve(double target) {
+		// double DRIVEACCEL = ;
 		 if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
             if (driveSpeed > target) {
                 driveSpeed = driveSpeed - DRIVEACCEL;
