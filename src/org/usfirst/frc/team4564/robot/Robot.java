@@ -25,7 +25,7 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt = new DriveTrain();
 	private static Intake intake = new Intake();
 	private static Elevator elevator = new Elevator(intake);
-	private static Compressor compressor = new Compressor(0);
+	private static Compressor compressor = new Compressor(1);
 	private Auto auto = new Auto();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
@@ -104,7 +104,7 @@ public class Robot extends SampleRobot {
     		
     		double forward = 0;
     		double turn = 0;
-    		
+    		compressor.setClosedLoopControl(true);
     		if (j0.when("dPadLeft")) {
     			DriveTrain.DRIVEACCEL -= 0.005;
     		}

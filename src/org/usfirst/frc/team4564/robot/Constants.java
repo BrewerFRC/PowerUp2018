@@ -39,7 +39,9 @@ public class Constants {
 	IR_SENSOR = 3,
 			
 	//potentiometer intake
-	INTAKE_POT = 2
+	INTAKE_POT = 2,
 
+	//Pneumatics
+	PCM_CAN_ID = 1, SHIFTER = 0
 	;
 }
