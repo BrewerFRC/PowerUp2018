@@ -119,13 +119,13 @@ public class Robot extends SampleRobot {
 				dt.accelTankDrive(power[0], power[1]);
 			}
 			else {
-				dt.accelDrive(forward, turn);
+				dt.accelDrive(forward, 0);
 			}
 			
 			if (j0.getPressed("x")) {
 				elevator.moveToHeight(30);
 			}
-    		//elevator.joystickControl(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15));
+    		elevator.joystickControl(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15));
     		
     		elevator.update();
     		
