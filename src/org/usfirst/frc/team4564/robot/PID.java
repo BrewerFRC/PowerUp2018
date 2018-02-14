@@ -65,6 +65,7 @@ public class PID {
 		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
 		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
 		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
+		SmartDashboard.putNumber(this.name + "DShow", this.d);
 		SmartDashboard.putNumber(this.name + "Target", getTarget());
 	}
 	

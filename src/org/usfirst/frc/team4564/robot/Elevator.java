@@ -44,7 +44,7 @@ public class Elevator {
 	//The maximum power change
 	final double MAX_DELTA_POWER = 0.1;
 	//In inches per second, for position PID
-	final double MAX_POS_VELOCITY = 12, MIN_POS_VELOCITY = 2;
+	final double MAX_POS_VELOCITY = 45;
 	//Maximum velocity while using the joystick
 	final double MAX_J_VELOCITY = 45;
 	//-1 is not moving, 0 or greater is moving
@@ -57,7 +57,7 @@ public class Elevator {
 	double previousCounts = 0.0;
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_POS_VELOCITY, MAX_POS_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
-	double posP = 0.1, posI = 0.0, posD = 0.0;
+	double posP = 5, posI = 0.0, posD = 0.0;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
