@@ -256,6 +256,14 @@ public class Elevator {
 		}
 	}
 	
+	/** Gets the elevator height as a percentage
+	 * 
+	 * @return -Elevator height as a percentage
+	 */
+	public double getElevatorPercent() {
+		return Common.map(getInches(), 0, ELEVATOR_HEIGHT, 0, 1);
+	}
+	
 	/**
 	 * Starts homing the elevator
 	 */
