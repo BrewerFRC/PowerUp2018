@@ -3,7 +3,7 @@ package org.usfirst.frc.team4564.robot;
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
 
-import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -25,6 +25,7 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt = new DriveTrain();
 	private static Intake intake = new Intake();
 	private static Elevator elevator = new Elevator(intake);
+	private static Compressor compressor = new Compressor(0);
 	private Auto auto = new Auto();
 	private Xbox j0 = new Xbox(0);
 	private Xbox j1 = new Xbox(1);
@@ -50,7 +51,7 @@ public class Robot extends SampleRobot {
 			Common.dashNum("Right Counts", dt.getRightCounts());
 			Common.dashNum("IR Output", intake.getCubeDistance() );
 			Common.dashBool("Is Loaded", intake.isLoaded());
-			
+			compressor.setClosedLoopControl(true);
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
