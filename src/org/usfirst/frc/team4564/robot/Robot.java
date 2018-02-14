@@ -35,6 +35,7 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
+		intake.setElevatorInstance(elevator);
 		//Initialize all paths.
 		new Paths();
 		//elevator.resetEncoder();
@@ -101,7 +102,8 @@ public class Robot extends SampleRobot {
     	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		
+    		Common.dashNum("Left Counts", dt.getLeftCounts());
+			Common.dashNum("Right Counts", dt.getRightCounts());
     		double forward = 0;
     		double turn = 0;
     		compressor.setClosedLoopControl(true);
@@ -114,14 +116,12 @@ public class Robot extends SampleRobot {
     		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
     		
     		forward = -j0.getY(GenericHID.Hand.kLeft);
-			turn  = 0;//-j0.getX(GenericHID.Hand.kLeft);
-			if (j0.getPressed("b")) {
+			turn  = -j0.getX(GenericHID.Hand.kLeft);
+			/*if (j0.getPressed("b")) {
 				double[] power = path.getDrive();
 				dt.accelTankDrive(power[0], power[1]);
-			}
-			else {
-				dt.accelDrive(forward, 0);
-			}
+			}*/
+			dt.accelDrive(forward, turn);
 			
 			if (j0.getPressed("x")) {
 				elevator.moveToHeight(30);
