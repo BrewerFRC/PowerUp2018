@@ -18,17 +18,15 @@ public class Intake {
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
-	private Elevator elevator;
 	
 	private double MAX_ELEVATOR_SAFE = 4096, MIN_ELEVATOR_SAFE = 0, 
-			MIN_POSITION = 0, MAX_POSITION = 4096, 
-			MIN_ANGLE = 0, MAX_ANGLE = 90,
+			MIN_POSITION = 210, MAX_POSITION = 3593, 
+			MIN_ANGLE = -18.1276, MAX_ANGLE = 209.0041,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
 			P_VEL = 0, I_VEL = 0, D_VEL = 0;
 	private double previousReading = 0;
-	
 	private double previousPosition = 0;
 	private double previousVelocity = 0;
 	
@@ -36,15 +34,6 @@ public class Intake {
 		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
-	}
-	
-	/**
-	 * Sets the elevator instance to be used to determine elevator safe state.
-	 * 
-	 * @param elevator - the elevator instance
-	 */
-	public void setElevatorInstance(Elevator elevator) {
-		this.elevator = elevator;
 	}
 	
 	/**
@@ -60,7 +49,7 @@ public class Intake {
 		else if (power < 0 && getPosition() <= MIN_ANGLE) {
 			power = 0.0;
 		}
-		else if (!elevator.intakeSafe()) {
+		else if (!Robot.getElevator().intakeSafe()) {
 			power = 0.0;
 		}
 		//intakeArm.set(power);
@@ -156,7 +145,7 @@ public class Intake {
 	 * Gets the velocity of the arm in degrees per second.
 	 * Uses a complementary function to smooth velocity.
 	 * 
-	 * @return the velocity
+	 * @return -the velocity in degrees per second
 	 */
 	public double getVelocity() {
 		double position = getPosition();
@@ -203,8 +192,7 @@ public class Intake {
 	 * @return - safe
 	 */
 	public boolean elevatorSafe() {
-		//Made it equal to inorder to test - Brent
-		if (getPosition() >= MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
+		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
 			return true;
 		}
 		return false;

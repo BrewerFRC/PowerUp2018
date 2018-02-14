@@ -35,7 +35,6 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
-		intake.setElevatorInstance(elevator);
 		//Initialize all paths.
 		new Paths();
 		//elevator.resetEncoder();
