@@ -35,6 +35,7 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
+		intake.setElevatorInstance(elevator);
 		//Initialize all paths.
 		new Paths();
 		//elevator.resetEncoder();
@@ -101,7 +102,8 @@ public class Robot extends SampleRobot {
     	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		
+    		Common.dashNum("Left Counts", dt.getLeftCounts());
+			Common.dashNum("Right Counts", dt.getRightCounts());
     		double forward = 0;
     		double turn = 0;
     		

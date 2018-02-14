@@ -18,10 +18,11 @@ public class Intake {
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
+	private Elevator elevator;
 	
 	private double MAX_ELEVATOR_SAFE = 4096, MIN_ELEVATOR_SAFE = 0, 
 			MIN_POSITION = 0, MAX_POSITION = 4096, 
-			MIN_ANGLE = 0, MAX_ANGLE = 180,
+			MIN_ANGLE = 0, MAX_ANGLE = 90,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
@@ -38,12 +39,31 @@ public class Intake {
 	}
 	
 	/**
+	 * Sets the elevator instance to be used to determine elevator safe state.
+	 * 
+	 * @param elevator - the elevator instance
+	 */
+	public void setElevatorInstance(Elevator elevator) {
+		this.elevator = elevator;
+	}
+	
+	/**
 	 * Sets the power of the intake arm.
 	 * 
 	 * @param power - the power
 	 */
 	public void setIntakeArmPower(double power) {
-		intakeArm.set(power);
+		//Position limits
+		if (power > 0 && getPosition() >= MAX_ANGLE) {
+			power = 0.0;
+		}
+		else if (power < 0 && getPosition() <= MIN_ANGLE) {
+			power = 0.0;
+		}
+		else if (!elevator.intakeSafe()) {
+			power = 0.0;
+		}
+		//intakeArm.set(power);
 	}
 	
 	/**
