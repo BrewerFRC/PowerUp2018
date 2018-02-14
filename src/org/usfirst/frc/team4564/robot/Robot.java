@@ -103,8 +103,17 @@ public class Robot extends SampleRobot {
     		
     		double forward = 0;
     		double turn = 0;
+    		
+    		if (j0.when("dPadLeft")) {
+    			DriveTrain.DRIVEACCEL -= 0.005;
+    		}
+    		if (j0.when("dPadRight")) {
+    			DriveTrain.DRIVEACCEL += 0.005;
+    		}
+    		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
+    		
     		forward = -j0.getY(GenericHID.Hand.kLeft);
-			turn  = -j0.getX(GenericHID.Hand.kLeft);
+			turn  = 0;//-j0.getX(GenericHID.Hand.kLeft);
 			if (j0.getPressed("b")) {
 				double[] power = path.getDrive();
 				dt.accelTankDrive(power[0], power[1]);

@@ -18,7 +18,15 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static final double DRIVEACCEL = .06, TURNACCEL = .06, TANKACCEL = 0.01, TANKMIN = 0.40, TURNMAX = .8;
+	public static double DRIVEACCEL = .00;
+
+	public static final double TURNACCEL = .06;
+
+	public static final double TANKACCEL = 0.01;
+
+	public static final double TANKMIN = 0.40;
+
+	public static final double TURNMAX = .8;
 	
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
