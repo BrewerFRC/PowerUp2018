@@ -44,7 +44,7 @@ public class Elevator {
 	//The maximum power change
 	final double MAX_DELTA_POWER = 0.1;
 	//In inches per second, for position PID
-	final double MAX_VELOCITY = 12;
+	final double MAX_POS_VELOCITY = 12, MIN_POS_VELOCITY = 2;
 	//Maximum velocity while using the joystick
 	final double MAX_J_VELOCITY = 45;
 	//-1 is not moving, 0 or greater is moving
@@ -55,16 +55,15 @@ public class Elevator {
 	final double DANGER_VEL_ZONE = 30;
 	//The previous counts of the encoder 
 	double previousCounts = 0.0;
-	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
+	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_POS_VELOCITY, MAX_POS_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
 	double posP = 0.1, posI = 0.0, posD = 0.0;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
 		HOMING,  //Brings elevator slowly to the bottom most position possible, sets the offset. Must be done before any use of elevator.
-		IDLE, //State of the elevator doing nothing, both types of elevator usage can be used from this state.
+		HOLDING, //State of the elevator holding position, both types of elevator usage can be used from this state.
 		MOVING, //State of elevator moving to a target position within the ACCEPTABLE_ERROR.
-		MOVE_COMPLETE, //State of the elevator when it has reached its target once.  Continues running the position PID.
 		JOYSTICK; //Moves the elevator by a desired power returns to IDLE after setting the power once.
 	}
 	States state = States.STOPPED;
@@ -80,6 +79,7 @@ public class Elevator {
 		pid.setVelocityScalars(velP, velI, velD);
 		pid.setVelocityInverted(true);
 		pid.setPositionScalars(posP, posI, posD);
+		pid.setPositionInverted(true);
 		Thread t = new Thread(new UpperLimitTask());
 		t.start();
 	}
@@ -317,11 +317,13 @@ public class Elevator {
 	public void joystickControl(double jInput) {
 		//overrules moveToHeight()
 		if (state != States.STOPPED && state != States.HOMING){
-			double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);
-			Common.dashNum("jMap", jMap);
-			velocity = jMap;
-			//Common.debug("New state Joystick");
-			state = States.JOYSTICK;
+			if (jInput != 0) {
+				double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);
+				Common.dashNum("jMap", jMap);
+				velocity = jMap;
+				//Common.debug("New state Joystick");
+				state = States.JOYSTICK;
+			}
 		}
 	}
 	
@@ -365,14 +367,14 @@ public class Elevator {
 	 * Exports certain values to smart dashboard and runs the state process of the elevator
 	 */
 	public void update() {
-		Common.dashNum("Elevator encoder", getEncoder());
+		pid.update();
+		//Common.dashNum("Elevator encoder", getEncoder());
 		Common.dashNum("Elevator encoder in inches", getInches());
 		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("upper Limit Triggered", upperLimit.get());
 		Common.dashBool("at bottom", atBottom());
 		Common.dashStr("Elevator State", state.toString());
 		Common.dashNum("Elevator Velocity", getVelocity());
-		pid.update();
 		switch(state) {
 		case STOPPED:
 			setPower(0.0);
@@ -381,23 +383,19 @@ public class Elevator {
 			if (lowerLimit.get()) {
 				resetEncoder();
 				setPower(0.0);
-				Common.debug("New state Idle");
-				state = States.IDLE;
+				Common.debug("New state Holding");
+				state = States.HOLDING;
 			} else {
 				setPower(-0.1);
 			}
 			break;
-		case IDLE:
-			pid.reset();
-			setPower(0.0);
+		case HOLDING:
+			pidDisMove();
 			break;
 		case MOVING:
 			if (isComplete()) {
-				state = States.MOVE_COMPLETE;
+				state = States.HOLDING;
 			}
-			pidDisMove();
-			break;
-		case MOVE_COMPLETE:
 			pidDisMove();
 			break;
 		case JOYSTICK:
@@ -405,7 +403,8 @@ public class Elevator {
 			//accleMove(speed);
 			//Common.debug("new State Idle");
 			if (state == States.JOYSTICK){
-				state = States.IDLE;
+				state = States.HOLDING;
+				pid.setTargetPosition(getInches());
 			}
 			break;
 		}

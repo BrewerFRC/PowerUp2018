@@ -33,6 +33,8 @@ public class DriveTrain extends DifferentialDrive {
 	private Heading heading;
 	private double driveSpeed = 0, turnSpeed = 0;
 	private double tankLeft = 0, tankRight = 0;
+	private double targetHeading;
+	private boolean headingHold;
 	
 	/**
 	 * Creates an instance of DriveTrain.
