@@ -28,7 +28,13 @@ public class Intake {
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
-			MAX_POWER = 0.,
+			//Down powers
+			MIN_DOWN_POWER = 0, MAX_DOWN_POWER = -0.1,
+			//up powers
+			MIN_UP_POWER = 0, MAX_UP_POWER = 0.5,
+			//Max power change in accel limit
+			MAX_DELTA_POWER = 0.01,
+			lastPower = 0,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
@@ -42,6 +48,8 @@ public class Intake {
 		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
+		intakeArm.setInverted(true);
+		leftIntake.setInverted(true);
 	}
 	
 	/**
@@ -49,7 +57,7 @@ public class Intake {
 	 * 
 	 * @param power - the power
 	 */
-	public void setIntakeArmPower(double power) {
+	public void setArmPower(double power) {
 		double maxAngle = 0.0;
 		if (Robot.getElevator().intakeSafe()) {
 			maxAngle = MAX_ANGLE;
@@ -57,24 +65,46 @@ public class Intake {
 		else {
 			maxAngle = MAX_ELEVATOR_SAFE;
 		}
-		if (power > 0 && getPosition() >= MAX_ANGLE) {
-			power = 0.0;
+		if (power > 0.0) {
+			if (getPosition() >= maxAngle) {
+			 power = 0.0;
+			} else if(getPosition() >= maxAngle-DANGER_ZONE) {
+				power = Math.min(power, Common.map(maxAngle - getPosition(), 0.0, DANGER_ZONE, MIN_UP_POWER, MAX_UP_POWER));
+			} else {
+				power = Math.min(power, MAX_UP_POWER);
+			}
 		}
 		else if (power < 0.0) {
 			if (getPosition() >= maxAngle) { 
 				power = 0.0;
 			} else {
-					if (getPosition() <= DANGER_ZONE) {
-						//power = Math.max(power, Common.map(getPosition(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
+					if (getPosition() <= MIN_ANGLE + DANGER_ZONE) {
+						power = Math.max(power, Common.map(getPosition(), MIN_ANGLE, MIN_ANGLE + DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
 					} else {
-						//power = Math.max(power, MAX_DOWN_POWER);
+						power = Math.max(power, MAX_DOWN_POWER);
 					}
 				}
 		}
 		else if (!Robot.getElevator().intakeSafe()) {
 			power = 0.0;
 		}
-		//intakeArm.set(power);
+		lastPower = power;
+		Common.dashNum("Intake arm Power", power);
+		intakeArm.set(power);
+	}
+	
+	public void setAccelArmPower(double targetPower) {
+		double power = 0; 	
+		if (Math.abs(lastPower - targetPower) > MAX_DELTA_POWER) {
+			if (lastPower > targetPower) {
+				power = lastPower - MAX_DELTA_POWER;
+			} else {
+				power = lastPower + MAX_DELTA_POWER;
+			}
+		} else {
+			power = targetPower;
+		}
+		setArmPower(power);
 	}
 	
 	/**
@@ -194,7 +224,7 @@ public class Intake {
 		else {
 			pid.setTargetPosition(position);
 		}
-		setIntakeArmPower(pid.calc(getPosition(), getVelocity()));
+		setAccelArmPower(pid.calc(getPosition(), getVelocity()));
 	}
 	
 	/**
@@ -209,7 +239,7 @@ public class Intake {
 		else {
 			pid.setTargetVelocity(velocity);
 		}
-		setIntakeArmPower(pid.calcVelocity(getVelocity()));
+		setAccelArmPower(pid.calcVelocity(getVelocity()));
 	}
 	
 	/**

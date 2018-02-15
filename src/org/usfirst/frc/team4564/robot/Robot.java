@@ -123,13 +123,29 @@ public class Robot extends SampleRobot {
 				dt.accelTankDrive(power[0], power[1]);
 			}*/
 			dt.accelDrive(forward, turn);
-			
+/*			
 			if (j0.getPressed("x")) {
 				elevator.moveToHeight(30);
 			}
     		elevator.joystickControl(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15));
     		
     		elevator.update();
+*/    		
+    		if (j0.getPressed("x")) {
+    			intake.setArmPower(-0.2);
+    		} else if (j0.getPressed("y")) {
+    			intake.setArmPower(0.5);
+    		} else {
+    			intake.setArmPower(0.0);
+    		}
+    			
+    		if (j0.getPressed("a")) {
+    			intake.setIntakePower(1.0);
+    		} else if (j0.getPressed("b")) {
+    			intake.setIntakePower(-1.0);
+    		} else {
+    			intake.setIntakePower(0.0);
+    		}
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
