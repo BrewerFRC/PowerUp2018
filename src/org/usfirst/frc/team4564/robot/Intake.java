@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
+import org.usfirst.frc.team4564.robot.Elevator.States;
+
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Spark;
 
@@ -8,6 +10,7 @@ import edu.wpi.first.wpilibj.Spark;
  * 
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
+ * @author Brent Roberts
  * @author Sam Woodward
  */
 public class Intake {
@@ -19,13 +22,18 @@ public class Intake {
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
 	
-	private double MAX_ELEVATOR_SAFE = 4096, MIN_ELEVATOR_SAFE = 0, 
+	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, 
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -18.1276, MAX_ANGLE = 209.0041,
+			MIN_ANGLE = -10, MAX_ANGLE = 190, 
+			MAX_ABS_ANGLE = 209.0041,
+			//The degrees that the power ramping takes place in at the limits
+			DANGER_ZONE = 25,
+			MAX_POWER = 0.,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
-			P_VEL = 0, I_VEL = 0, D_VEL = 0;
+			P_VEL = 0, I_VEL = 0, D_VEL = 0,
+			COUNTS_PER_DEGREE = 14.89444444;
 	private double previousReading = 0;
 	private double previousPosition = 0;
 	private double previousVelocity = 0;
@@ -42,12 +50,26 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setIntakeArmPower(double power) {
-		//Position limits
+		double maxAngle = 0.0;
+		if (Robot.getElevator().intakeSafe()) {
+			maxAngle = MAX_ANGLE;
+		} 
+		else {
+			maxAngle = MAX_ELEVATOR_SAFE;
+		}
 		if (power > 0 && getPosition() >= MAX_ANGLE) {
 			power = 0.0;
 		}
-		else if (power < 0 && getPosition() <= MIN_ANGLE) {
-			power = 0.0;
+		else if (power < 0.0) {
+			if (getPosition() >= maxAngle) { 
+				power = 0.0;
+			} else {
+					if (getPosition() <= DANGER_ZONE) {
+						//power = Math.max(power, Common.map(getPosition(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
+					} else {
+						//power = Math.max(power, MAX_DOWN_POWER);
+					}
+				}
 		}
 		else if (!Robot.getElevator().intakeSafe()) {
 			power = 0.0;
@@ -138,7 +160,7 @@ public class Intake {
 	 */
 	public double getPosition() {
 		double position = pot.getValue();
-		return Common.map(position, MIN_POSITION, MAX_POSITION, MIN_ANGLE, MAX_ANGLE);		
+		return MAX_ABS_ANGLE - (position - 210) / COUNTS_PER_DEGREE;
 	}
 	
 	public int getRawPosition() {

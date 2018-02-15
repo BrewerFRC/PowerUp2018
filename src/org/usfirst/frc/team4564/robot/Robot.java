@@ -52,6 +52,7 @@ public class Robot extends SampleRobot {
 			Common.dashNum("IR Output", intake.getCubeDistance() );
 			Common.dashBool("Is Loaded", intake.isLoaded());
 			Common.dashNum("Intake Arm Position", intake.getRawPosition());
+			Common.dashNum("Intake Arm Degrees", intake.getPosition());
 			compressor.setClosedLoopControl(true);
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {

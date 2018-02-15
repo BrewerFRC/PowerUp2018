@@ -222,7 +222,7 @@ public class Elevator {
 	 * @return - True when it is safe to move the intake over the back
 	 */
 	public boolean intakeSafe() {
-		if (getInches() >= ELEVATOR_HEIGHT-1.0) {
+		if (getInches() >= ELEVATOR_HEIGHT-1.4) {
 			return true;
 		} else {
 			return false;

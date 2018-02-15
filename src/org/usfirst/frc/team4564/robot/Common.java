@@ -51,7 +51,7 @@ public class Common {
 	 * @return double - A value in the output range that is proportional to the input
 	 */
 	public static double map(double input, double minInput, double maxInput, double minOutput, double maxOutput) {
-		input = Math.max(Math.min(input, minInput), maxOutput); 
+		input = Math.min(Math.max(input, minInput), maxInput);
 		double inputRange = maxInput - minInput;
 		double inputPercentage = (input-minInput)/inputRange;
 		double outputRange = maxOutput - minOutput;

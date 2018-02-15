@@ -29,6 +29,7 @@ public class DriveTrain extends DifferentialDrive {
 
 	public static final double TURNMAX = .8;
 	
+	private static final double DISTANCE_PER_PULSE_L = 0.0098195208, DISTANCE_PER_PULSE_R = 0.0098293515;
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
@@ -51,11 +52,11 @@ public class DriveTrain extends DifferentialDrive {
 	public DriveTrain() {
 		super(left, right);
 		
-		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
-		encoderL.setDistancePerPulse(0.0098209719);
+		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, false, EncodingType.k4X);
+		encoderL.setDistancePerPulse(DISTANCE_PER_PULSE_L);
 		encoderL.setSamplesToAverage(10);
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, true, EncodingType.k4X);
-		encoderR.setDistancePerPulse(0.0098209719);
+		encoderR.setDistancePerPulse(DISTANCE_PER_PULSE_R);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading();
 		shifter = new Solenoid(Constants.PCM_CAN_ID, Constants.SHIFTER);
