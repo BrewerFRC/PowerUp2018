@@ -22,14 +22,21 @@ public class Intake {
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
 	
-	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, 
+	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
 			MIN_ANGLE = -10, MAX_ANGLE = 190, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
-			MAX_POWER = 0.,
+			//Down powers
+			MIN_DOWN_POWER = 0, MAX_DOWN_POWER = -0.1,
+			//up powers
+			MIN_UP_POWER = 0, MAX_UP_POWER = 0.5,
+			//Max power change in accel limit
+			MAX_DELTA_POWER = 0.01,
+			lastPower = 0,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
+			//The maximum IR distance a loaded cube to be
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
 			P_VEL = 0, I_VEL = 0, D_VEL = 0,
@@ -42,6 +49,8 @@ public class Intake {
 		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
+		intakeArm.setInverted(true);
+		leftIntake.setInverted(true);
 	}
 	
 	/**
@@ -49,7 +58,7 @@ public class Intake {
 	 * 
 	 * @param power - the power
 	 */
-	public void setIntakeArmPower(double power) {
+	public void setArmPower(double power) {
 		double maxAngle = 0.0;
 		if (Robot.getElevator().intakeSafe()) {
 			maxAngle = MAX_ANGLE;
@@ -57,24 +66,56 @@ public class Intake {
 		else {
 			maxAngle = MAX_ELEVATOR_SAFE;
 		}
-		if (power > 0 && getPosition() >= MAX_ANGLE) {
-			power = 0.0;
-		}
-		else if (power < 0.0) {
-			if (getPosition() >= maxAngle) { 
+		if (power > 0.0) {
+			if (getPosition() >= maxAngle) {
+			 power = 0.0;
+			}
+		} else {
+			if (getPosition() <= MIN_ANGLE) { 
 				power = 0.0;
+			}
+		}
+		power = rampPower(power);
+		intakeArm.set(power);
+		lastPower = power;
+		Common.dashNum("Intake arm Power", power);
+	}
+	
+	public void setAccelArmPower(double targetPower) {
+		double power = 0; 	
+		if (Math.abs(lastPower - targetPower) > MAX_DELTA_POWER) {
+			if (lastPower > targetPower) {
+				power = lastPower - MAX_DELTA_POWER;
 			} else {
-					if (getPosition() <= DANGER_ZONE) {
-						//power = Math.max(power, Common.map(getPosition(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
-					} else {
-						//power = Math.max(power, MAX_DOWN_POWER);
-					}
-				}
+				power = lastPower + MAX_DELTA_POWER;
+			}
+		} else {
+			power = targetPower;
 		}
-		else if (!Robot.getElevator().intakeSafe()) {
-			power = 0.0;
+		setArmPower(power);
+	}
+	
+	public double rampPower(double power) {
+		double maxPower = 0.0;
+		double minPower = 0.0;
+		if (getPosition() < 90) {
+			if (power > 0.0) {
+				maxPower = Common.map(getPosition(), MIN_ANGLE, 90, 0.5, 0.3);
+				power = Math.min(power, maxPower);
+			} else {
+				minPower = Common.map(getPosition(), MIN_ANGLE, 90, -0.0, -0.3);
+				power = Math.max(power, minPower);
+			}
+		} else {
+			if (power > 0.0 ) {
+				maxPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, 0.3, 0.0);
+				power = Math.min(power, maxPower);
+			} else {
+				minPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, -0.3, -0.5);
+				power = Math.max(power, minPower);
+			}
 		}
-		//intakeArm.set(power);
+		return power;
 	}
 	
 	/**
@@ -101,6 +142,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setIntakePower(double power) {
+		if (power > 0.0 && getCubeDistance() == 0.0) {
+			power = 0.0;
+		}
 		rightIntake.set(power);
 		leftIntake.set(power);
 		
@@ -194,7 +238,7 @@ public class Intake {
 		else {
 			pid.setTargetPosition(position);
 		}
-		setIntakeArmPower(pid.calc(getPosition(), getVelocity()));
+		setAccelArmPower(pid.calc(getPosition(), getVelocity()));
 	}
 	
 	/**
@@ -209,7 +253,7 @@ public class Intake {
 		else {
 			pid.setTargetVelocity(velocity);
 		}
-		setIntakeArmPower(pid.calcVelocity(getVelocity()));
+		setAccelArmPower(pid.calcVelocity(getVelocity()));
 	}
 	
 	/**
@@ -218,7 +262,7 @@ public class Intake {
 	 * @return - safe
 	 */
 	public boolean elevatorSafe() {
-		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
+		if (getPosition() < MAX_ELEVATOR_SAFE) {
 			return true;
 		}
 		return false;

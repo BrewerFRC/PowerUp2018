@@ -24,8 +24,8 @@ public class Elevator {
 	//false = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
 	//Elevator height in inches(random value
-	final double ELEVATOR_HEIGHT = 66.5; //Absolute elevator travel is 67 inches
-	final double COUNTS_PER_INCH = 7630/67.0;
+	final double ELEVATOR_HEIGHT = 66.25; //Absolute elevator travel is 66.75 inches
+	final double COUNTS_PER_INCH = 7414/65.5;
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
 	double velocity = 0.0;
@@ -50,7 +50,7 @@ public class Elevator {
 	//-1 is not moving, 0 or greater is moving
 	double moveCheck = -1;
 	//For encoder test function, minimum values to move the robot in different directions
-	final double ENCODER_MIN_UP = 0.1, ENCODER_MIN_DOWN = -0.15;
+	final double ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.1;
 	//For Velocity ramping
 	final double DANGER_VEL_ZONE = 30;
 	//The previous counts of the encoder 
@@ -91,8 +91,8 @@ public class Elevator {
 	 */
 	public void setPower(double power) {
 		// Check safeties and stop power if necessary
-		if (!intake.elevatorSafe()) {	
-			power = 0.0;
+		if (!intake.elevatorSafe() && power < MIN_UP_POWER) {//Don't let elevator drop if intake arm is in a unsafe position
+			power = MIN_UP_POWER;
 		}
 		if (power > 0.0) {  //Move up
 			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
@@ -391,6 +391,7 @@ public class Elevator {
 			if (lowerLimit.get()) {
 				resetEncoder();
 				setPower(0.0);
+				pid.setTargetPosition(0);
 				Common.debug("New state Holding");
 				state = States.HOLDING;
 			} else {
