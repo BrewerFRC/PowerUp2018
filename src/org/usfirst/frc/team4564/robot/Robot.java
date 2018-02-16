@@ -76,7 +76,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Paths.reset();
-		Path path = Paths.TEST_FAR_SCALE;
+		Path path = Paths.TEST_NEAR_SCALE;
 		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();

@@ -21,7 +21,9 @@ public class Paths {
 			.addPowerTurn(0, 0.65)
 			.addPIDDrive(48, 0, 0.4, 0.8, true, "driveScale");
 		
-		TEST_NEAR_SCALE = new Path().addPIDDrive(60, 0, 0.4, 0.7, true, "startDrive");
+		TEST_NEAR_SCALE = new Path().addDriveStraight(48, 0, 0.7, "testDrive")
+				.addDriveStraight(60, -20, 0.7, "testDriveTurn");
+			//addPIDDrive(60, 0, 0.4, 0.7, true, "startDrive");
 			 //.addDriveStraight(203.4, 11.8, 0.6, "angledDrive")
 			 //.addDriveStraight(36, 0, 0.6, "finalDrive");
 		
