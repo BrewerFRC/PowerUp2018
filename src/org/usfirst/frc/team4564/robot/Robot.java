@@ -46,13 +46,6 @@ public class Robot extends SampleRobot {
 	@Override
 	public void disabled() {
 		while (isDisabled()) {
-			Common.dashNum("Average Distance", dt.getAverageDist());
-			Common.dashNum("Left Counts", dt.getLeftCounts());
-			Common.dashNum("Right Counts", dt.getRightCounts());
-			Common.dashNum("IR Output", intake.getCubeDistance() );
-			Common.dashBool("Is Loaded", intake.isLoaded());
-			Common.dashNum("Intake Arm Position", intake.getRawPosition());
-			Common.dashNum("Intake Arm Degrees", intake.getPosition());
 			compressor.setClosedLoopControl(true);
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
@@ -66,6 +59,7 @@ public class Robot extends SampleRobot {
 				}
 			}
 			elevator.debug();
+			dashBoard();
 		}
 	}
 	
@@ -83,10 +77,10 @@ public class Robot extends SampleRobot {
 			
 			path.drive();
 			
-			Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
 			//System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
 			//		"; Motor Powers: " + power[0] + ":" + power[1]);
 			
+			dashBoard();
 			Timer.delay(Math.max(0, (1000.0/Constants.REFRESH_RATE - (Common.time() - time))/1000));
 		}
 	}
@@ -103,8 +97,6 @@ public class Robot extends SampleRobot {
     	elevator.home();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		Common.dashNum("Left Counts", dt.getLeftCounts());
-			Common.dashNum("Right Counts", dt.getRightCounts());
     		double forward = 0;
     		double turn = 0;
     		compressor.setClosedLoopControl(true);
@@ -114,8 +106,8 @@ public class Robot extends SampleRobot {
     		if (j0.when("dPadRight")) {
     			DriveTrain.DRIVEACCEL += 0.005;
     		}
-    		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
     		
+    		// Drivetrain
     		forward = -j0.getY(GenericHID.Hand.kLeft);
 			turn  = -j0.getX(GenericHID.Hand.kLeft);
 			/*if (j0.getPressed("b")) {
@@ -123,22 +115,27 @@ public class Robot extends SampleRobot {
 				dt.accelTankDrive(power[0], power[1]);
 			}*/
 			dt.accelDrive(forward, turn);
+			
+			// Elevator
 /*			
 			if (j0.getPressed("x")) {
 				elevator.moveToHeight(30);
 			}
-    		elevator.joystickControl(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15));
-    		
+*/			
+			elevator.joystickControl(j0.deadzone(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15)));
     		elevator.update();
-*/    		
+    		
+    		// Intake Arm
     		if (j0.getPressed("x")) {
-    			intake.setArmPower(-0.2);
+    			intake.setArmPower(-0.5);
     		} else if (j0.getPressed("y")) {
     			intake.setArmPower(0.5);
     		} else {
     			intake.setArmPower(0.0);
     		}
-    			
+    		
+    		
+    		// Intake in/out
     		if (j0.getPressed("a")) {
     			intake.setIntakePower(1.0);
     		} else if (j0.getPressed("b")) {
@@ -146,11 +143,30 @@ public class Robot extends SampleRobot {
     		} else {
     			intake.setIntakePower(0.0);
     		}
-    		
+    		dashBoard();
+    		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
     }
+	
+	public void dashBoard() {
+		Common.dashBool("Intake elevatorSafe", intake.elevatorSafe());
+		Common.dashNum("Intake Arm Degrees", intake.getPosition());
+		Common.dashBool("Elevator intakeSafe", elevator.intakeSafe());
+		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
+		Common.dashNum("Left Counts", dt.getLeftCounts());
+		Common.dashNum("Right Counts", dt.getRightCounts());
+		Common.dashNum("gyroAngle", DriveTrain.instance().getHeading().getAngle());
+		Common.dashNum("Average Distance", dt.getAverageDist());
+		Common.dashNum("Left Counts", dt.getLeftCounts());
+		Common.dashNum("Right Counts", dt.getRightCounts());
+		Common.dashNum("IR Output", intake.getCubeDistance() );
+		Common.dashBool("Is Loaded", intake.isLoaded());
+		Common.dashNum("Intake Arm Position", intake.getRawPosition());
+		Common.dashNum("Intake Arm Degrees", intake.getPosition());
+		Common.dashNum("Elevator encoder", elevator.getEncoder());
+	}
 	
 	public static Elevator getElevator() {
 		return elevator;

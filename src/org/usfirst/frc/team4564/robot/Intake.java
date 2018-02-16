@@ -22,7 +22,7 @@ public class Intake {
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
 	
-	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, 
+	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
 			MIN_ANGLE = -10, MAX_ANGLE = 190, 
 			MAX_ABS_ANGLE = 209.0041,
@@ -36,6 +36,7 @@ public class Intake {
 			MAX_DELTA_POWER = 0.01,
 			lastPower = 0,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
+			//The maximum IR distance a loaded cube to be
 			MAX_LOAD_DISTANCE = 10,
 			P_POS = 0, I_POS = 0, D_POS = 0,
 			P_VEL = 0, I_VEL = 0, D_VEL = 0,
@@ -68,29 +69,16 @@ public class Intake {
 		if (power > 0.0) {
 			if (getPosition() >= maxAngle) {
 			 power = 0.0;
-			} else if(getPosition() >= maxAngle-DANGER_ZONE) {
-				power = Math.min(power, Common.map(maxAngle - getPosition(), 0.0, DANGER_ZONE, MIN_UP_POWER, MAX_UP_POWER));
-			} else {
-				power = Math.min(power, MAX_UP_POWER);
+			}
+		} else {
+			if (getPosition() <= MIN_ANGLE) { 
+				power = 0.0;
 			}
 		}
-		else if (power < 0.0) {
-			if (getPosition() >= maxAngle) { 
-				power = 0.0;
-			} else {
-					if (getPosition() <= MIN_ANGLE + DANGER_ZONE) {
-						power = Math.max(power, Common.map(getPosition(), MIN_ANGLE, MIN_ANGLE + DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
-					} else {
-						power = Math.max(power, MAX_DOWN_POWER);
-					}
-				}
-		}
-		else if (!Robot.getElevator().intakeSafe()) {
-			power = 0.0;
-		}
+		power = rampPower(power);
+		intakeArm.set(power);
 		lastPower = power;
 		Common.dashNum("Intake arm Power", power);
-		intakeArm.set(power);
 	}
 	
 	public void setAccelArmPower(double targetPower) {
@@ -105,6 +93,29 @@ public class Intake {
 			power = targetPower;
 		}
 		setArmPower(power);
+	}
+	
+	public double rampPower(double power) {
+		double maxPower = 0.0;
+		double minPower = 0.0;
+		if (getPosition() < 90) {
+			if (power > 0.0) {
+				maxPower = Common.map(getPosition(), MIN_ANGLE, 90, 0.5, 0.3);
+				power = Math.min(power, maxPower);
+			} else {
+				minPower = Common.map(getPosition(), MIN_ANGLE, 90, -0.0, -0.3);
+				power = Math.max(power, minPower);
+			}
+		} else {
+			if (power > 0.0 ) {
+				maxPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, 0.3, 0.0);
+				power = Math.min(power, maxPower);
+			} else {
+				minPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, -0.3, -0.5);
+				power = Math.max(power, minPower);
+			}
+		}
+		return power;
 	}
 	
 	/**
@@ -131,6 +142,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setIntakePower(double power) {
+		if (power > 0.0 && getCubeDistance() == 0.0) {
+			power = 0.0;
+		}
 		rightIntake.set(power);
 		leftIntake.set(power);
 		
@@ -248,7 +262,7 @@ public class Intake {
 	 * @return - safe
 	 */
 	public boolean elevatorSafe() {
-		if (getPosition() > MIN_ELEVATOR_SAFE && getPosition() < MAX_ELEVATOR_SAFE) {
+		if (getPosition() < MAX_ELEVATOR_SAFE) {
 			return true;
 		}
 		return false;

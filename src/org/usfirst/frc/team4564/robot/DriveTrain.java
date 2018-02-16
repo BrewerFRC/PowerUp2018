@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .05, ACCEL_HG_HE, ACCEL_LG_LE, ACCEL_LG_HE;
+	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .05, ACCEL_HG_HE, ACCEL_LG_LE, ACCEL_LG_HE, DRIVEMIN = 0.4;
 
 	public static final double TURNACCEL = .06;
 
@@ -206,17 +206,31 @@ public class DriveTrain extends DifferentialDrive {
 	 * @return double - the allowed drive value for this cycle.
 	 */
 	 public double driveAccelCurve(double target) {
-		// double DRIVEACCEL = ;
-		 if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
+		//If the magnitude of current is less than the minimum
+		if (Math.abs(driveSpeed) < DRIVEMIN) {
+			//Move to the lesser value of the minimum or the target, including desired direction.
+			if (target > 0) {
+				driveSpeed = Math.min(DRIVEMIN, target);
+			}
+			else {
+				driveSpeed = Math.max(-DRIVEMIN, target);
+			}
+		}
+		//If the magnitude of current is greater than the minimum
+		//If the difference is greater than the allowed acceleration
+		if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
+			//Accelerate in the correct direction
             if (driveSpeed > target) {
                 driveSpeed = driveSpeed - DRIVEACCEL;
             } else {
                 driveSpeed = driveSpeed + DRIVEACCEL;
             }
-        } else {
+        }
+		//If the difference is less than the allowed acceleration, reach target
+		else {
             driveSpeed = target;
         }
-        return driveSpeed;
+		return driveSpeed;
 	 }
 	 
 	 /**
