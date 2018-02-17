@@ -100,18 +100,18 @@ public class Intake {
 		double minPower = 0.0;
 		if (getPosition() < 90) {
 			if (power > 0.0) {
-				maxPower = Common.map(getPosition(), MIN_ANGLE, 90, 0.5, 0.3);
+				maxPower = Common.map(getPosition(), MIN_ANGLE, 90, 0.7, 0.4);
 				power = Math.min(power, maxPower);
 			} else {
-				minPower = Common.map(getPosition(), MIN_ANGLE, 90, -0.0, -0.3);
+				minPower = Common.map(getPosition(), MIN_ANGLE, 90, -0.0, -0.4);
 				power = Math.max(power, minPower);
 			}
 		} else {
 			if (power > 0.0 ) {
-				maxPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, 0.3, 0.0);
+				maxPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, 0.4, 0.0);
 				power = Math.min(power, maxPower);
 			} else {
-				minPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, -0.3, -0.5);
+				minPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, -0.4, -0.7);
 				power = Math.max(power, minPower);
 			}
 		}
