@@ -95,6 +95,7 @@ public class Robot extends SampleRobot {
     	Path path = Paths.TEST_FAR_SCALE;
     	path.start();
     	elevator.home();
+    	intake.reset();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -126,17 +127,17 @@ public class Robot extends SampleRobot {
     		elevator.update();
     		
     		// Intake Arm
-    		if (j0.getPressed("x")) {
+    		if (j0.getPressed("y")) {
     			//intake.setArmPower(-1.0);
-        		intake.moveVelocity(10);
-    		} else if (j0.getPressed("y")) {
-    			intake.moveVelocity(-10);
+        		intake.moveVelocity(40);
+    		} else if (j0.getPressed("x")) {
+    			intake.moveVelocity(-40);
     			//intake.setArmPower(1.0);
     		} else {
-    			intake.setArmPower(0.0);
+    			intake.moveVelocity(0.0);
+    			//intake.setArmPower(0.0);
     		}
     		
-    		intake.moveVelocity(10);
     		// Intake in/out
     		if (j0.getPressed("a")) {
     			intake.setIntakePower(1.0);
@@ -179,6 +180,7 @@ public class Robot extends SampleRobot {
 		Common.dashNum("IR Output", intake.getCubeDistance() );
 		Common.dashBool("Is fully loaded", intake.isFullyLoaded());
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
+		Common.dashNum("Bat", bat.getDistance());
 	}
 	
 	public static Elevator getElevator() {

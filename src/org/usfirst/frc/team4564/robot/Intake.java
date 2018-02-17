@@ -21,10 +21,9 @@ public class Intake {
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
-	
 	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -10, MAX_ANGLE = 180, 
+			MIN_ANGLE = -12, MAX_ANGLE = 180, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
@@ -33,15 +32,15 @@ public class Intake {
 			//up powers
 			MIN_UP_POWER = 0, MAX_UP_POWER = 0.5,
 			//Max power change in accel limit
-			MAX_DELTA_POWER = 0.01,
+			MAX_DELTA_POWER = 0.1,
 			lastPower = 0,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			//The maximum IR distance a loaded cube to be
 			PARTIALLY_LOADED_DISTANCE = 10,
 			//maximum IR distance a fully loaded cube can be
 			FULLY_LOADED_DISTANCE = 3,
-			P_POS = 0, I_POS = 0, D_POS = 0,
-			P_VEL = 0.05, I_VEL = 0, D_VEL = 0,
+			P_POS = 0.01, I_POS = 0, D_POS = 0,
+			P_VEL = 0.00035, I_VEL = 0, D_VEL = 0.1,
 			COUNTS_PER_DEGREE = 14.89444444;
 	private long intakeTime = 0;
 	private double previousReading = 0;
@@ -51,7 +50,7 @@ public class Intake {
 	private long previousMillis = Common.time();
 	
 	public Intake() {
-		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
+		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0.01, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
 		pid.setVelocityInverted(true);
@@ -76,7 +75,8 @@ public class Intake {
 		}
 		if (power > 0.0) {
 			if (getPosition() >= maxAngle) {
-			 power = 0.0;
+				power = 0.0;
+				pid.reset();
 			}
 		} else {
 			if (getPosition() <= MIN_ANGLE) { 
@@ -85,11 +85,10 @@ public class Intake {
 		}
 		power = rampPower(power);
 		intakeArm.set(power);
-		lastPower = power;
 		Common.dashNum("Intake arm Power", power);
 	}
 	
-	public void setAccelArmPower(double targetPower) {
+	private void setAccelArmPower(double targetPower) {
 		double power = 0; 	
 		if (Math.abs(lastPower - targetPower) > MAX_DELTA_POWER) {
 			if (lastPower > targetPower) {
@@ -100,10 +99,14 @@ public class Intake {
 		} else {
 			power = targetPower;
 		}
+		Common.dashNum("Intake arm Power", power);
+		Common.dashNum("Intake Last Power", lastPower);
 		setArmPower(power);
+		lastPower = power;
 	}
 	
 	public double rampPower(double power) {
+		
 		final double MIDDLE_POWER = 0.5;
 		final double MAX_POWER = 0.9;
 		final double MIN_POWER = 0.0;
@@ -129,6 +132,7 @@ public class Intake {
 		} else {
 			if ( power > 0.0) {
 				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, 0.25);
+				Common.dashNum("Max Power Map", maxPower);
 				power = Math.min(power, maxPower);
 			} else {
 				minPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, -MIN_POWER, -MIDDLE_POWER);
@@ -260,13 +264,7 @@ public class Intake {
 	 * @param position - the position in degrees
 	 */
 	public void movePosition(double position) {
-		if (!Robot.getElevator().intakeSafe()) {
-			pid.setTargetPosition(getPosition());
-		}
-		else {
-			pid.setTargetPosition(position);
-		}
-		setAccelArmPower(pid.calc(getPosition(), getVelocity()));
+		setArmPower(pid.calc(getPosition(), getVelocity()));
 	}
 	
 	/**
@@ -275,7 +273,14 @@ public class Intake {
 	 * @param velocity - the velocity in degrees/second.
 	 */
 	public void moveVelocity(double velocity) {
-		if (!Robot.getElevator().intakeSafe() && getPosition() > MAX_ELEVATOR_SAFE) {
+		double maxAngle = 0.0;
+		if (Robot.getElevator().intakeSafe()) {
+			maxAngle = MAX_ANGLE;
+		} 
+		else {
+			maxAngle = MAX_ELEVATOR_SAFE;
+		}
+		if (!Robot.getElevator().intakeSafe() && getPosition() > maxAngle) {
 			pid.setTargetVelocity(0);
 		}
 		else {
@@ -296,6 +301,10 @@ public class Intake {
 		return false;
 	}
 	
+	public void reset() {
+		pid.reset();
+	}
+	
 	public void update() {
 		pid.update();
 	}
@@ -307,12 +316,12 @@ public class Intake {
 			while (true) {
 				double previousPosition = position;
 				position = MAX_ABS_ANGLE - (getRawPosition() - 210) / COUNTS_PER_DEGREE; //210 is the lowest potentiometer reading when arm is fully down
-				position = 0.2 * position + 0.8 * previousPosition;
+				position = 0.05 * position + 0.95 * previousPosition;
 				
 				double previousVelocity = velocity;
 				long millis = Common.time();
 				velocity = (position - previousPosition) / ((millis - previousMillis) / 1000.0);
-				velocity = 0.98 * previousVelocity + 0.02 * velocity;
+				velocity = 0.97 * previousVelocity + 0.03 * velocity;
 				previousMillis = millis;
 				try {
 					Thread.sleep(5);

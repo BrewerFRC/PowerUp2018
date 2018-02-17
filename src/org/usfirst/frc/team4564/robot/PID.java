@@ -258,7 +258,9 @@ public class PID {
 			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
 		}
 		SmartDashboard.putNumber(this.name + "Calc", this.output);
+		double r = (inverted) ? -this.output : this.output;
+		SmartDashboard.putNumber(this.name + "InvertedCalc", r);
 
-		return (inverted) ? -this.output : this.output;
+		return r;
 	}
 }
