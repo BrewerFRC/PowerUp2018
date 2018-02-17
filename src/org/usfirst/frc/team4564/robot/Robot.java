@@ -70,7 +70,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Paths.reset();
-		Path path = Paths.TEST_NEAR_SCALE;
+		Path path = Paths.NEAR_SCALE_LEFT;
 		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
@@ -135,7 +135,7 @@ public class Robot extends SampleRobot {
     		else if (operator.when("b")) {
     			intake.movePosition(intake.MAX_ANGLE);
     		}
-    		double intakePow = operator.deadzone(operator.getY(GenericHID.Hand.kRight));
+    		double intakePow = -operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15);
     		if (intakePow > 0.0) {
     			intake.moveVelocity(60);
     		}
@@ -145,6 +145,7 @@ public class Robot extends SampleRobot {
     		else {
     			intake.moveVelocity(0.0);
     		}
+    		intake.update();
     		
     		//Intake
     		if (driver.getPressed("a")) {

@@ -26,7 +26,7 @@ public class Intake {
 			//The angle at which the intake is horizontal out the front.
 			FRONT_HORIZONTAL = 0,
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -12, MAX_ANGLE = 180, 
+			MIN_ANGLE = -12, MAX_ANGLE = 160, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
@@ -42,9 +42,9 @@ public class Intake {
 			//maximum IR distance a fully loaded cube can be
 			FULLY_LOADED_DISTANCE = 3;
 	
-	private double P_POS = 0, I_POS = 0, D_POS = 0,
-			P_VEL = 0, I_VEL = 0, D_VEL = 0,
-			lastPower = 0, previousReading = 0, previousPosition = 0, previousVelocity = 0;
+	private double P_POS = 0.01, I_POS = 0, D_POS = 0,
+			P_VEL = 0.00035, I_VEL = 0, D_VEL = 0.1,
+			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
 	public double velocity = 0.0;

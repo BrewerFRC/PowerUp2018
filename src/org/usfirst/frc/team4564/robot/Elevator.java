@@ -46,7 +46,7 @@ public class Elevator {
 			//Maximum velocity while using the joystick
 			MAX_J_VELOCITY = 45,
 			//For encoder test function, minimum values to move the robot in different directions
-			ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.1,
+			ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.12,
 			//For Velocity ramping
 			DANGER_VEL_ZONE = 30;
 	
@@ -171,12 +171,12 @@ public class Elevator {
 			if (moveCheck >= 5) {  //Test encoder movement after 5 cylces
 				if (state != States.HOMING) {
 					if (getVelocity() == 0) {
-						Common.debug("ENCODER FAULT: Velocity is still zero, State = HOMING");
+						Common.debug("ENCODER FAULT: Velocity is still zero, State = HOMING"+"power:"+power);
 						state = States.HOMING;
 						power = 0.0;
 					} 
 					if (getEncoder() == previousCounts) {
-						Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder());
+						Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder()+"power"+power);
 						state = States.HOMING;
 						power = 0.0;
 					}
