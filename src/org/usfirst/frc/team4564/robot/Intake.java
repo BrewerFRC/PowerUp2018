@@ -24,7 +24,7 @@ public class Intake {
 	
 	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -10, MAX_ANGLE = 190, 
+			MIN_ANGLE = -10, MAX_ANGLE = 180, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
@@ -37,20 +37,28 @@ public class Intake {
 			lastPower = 0,
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			//The maximum IR distance a loaded cube to be
-			MAX_LOAD_DISTANCE = 10,
+			PARTIALLY_LOADED_DISTANCE = 10,
+			//maximum IR distance a fully loaded cube can be
+			FULLY_LOADED_DISTANCE = 3,
 			P_POS = 0, I_POS = 0, D_POS = 0,
-			P_VEL = 0, I_VEL = 0, D_VEL = 0,
+			P_VEL = 0.05, I_VEL = 0, D_VEL = 0,
 			COUNTS_PER_DEGREE = 14.89444444;
+	private long intakeTime = 0;
 	private double previousReading = 0;
-	private double previousPosition = 0;
-	private double previousVelocity = 0;
+	private double previousPosition = 0.0;
+	public double velocity = 0.0;
+	public double position;
+	private long previousMillis = Common.time();
 	
 	public Intake() {
 		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
+		pid.setVelocityInverted(true);
 		intakeArm.setInverted(true);
 		leftIntake.setInverted(true);
+		Thread t = new Thread(new PotUpdate());
+		t.start();
 	}
 	
 	/**
@@ -96,22 +104,34 @@ public class Intake {
 	}
 	
 	public double rampPower(double power) {
+		final double MIDDLE_POWER = 0.5;
+		final double MAX_POWER = 0.9;
+		final double MIN_POWER = 0.0;
 		double maxPower = 0.0;
 		double minPower = 0.0;
-		if (getPosition() < 90) {
-			if (power > 0.0) {
-				maxPower = Common.map(getPosition(), MIN_ANGLE, 90, 0.7, 0.4);
-				power = Math.min(power, maxPower);
+		if (Robot.getElevator().intakeSafe())
+			if (getPosition() < 90) {
+				if (power > 0.0) {
+					maxPower = Common.map(getPosition(), MIN_ANGLE, 90, MAX_POWER, MIDDLE_POWER);
+					power = Math.min(power, maxPower);
+				} else {
+					minPower = Common.map(getPosition(), MIN_ANGLE, 90, -MIN_POWER, -MIDDLE_POWER);
+					power = Math.max(power, minPower);
+				}
 			} else {
-				minPower = Common.map(getPosition(), MIN_ANGLE, 90, -0.0, -0.4);
-				power = Math.max(power, minPower);
-			}
+				if (power > 0.0 ) {
+					maxPower = Common.map(getPosition(), 90, MAX_ANGLE, MIDDLE_POWER, MIN_POWER);
+					power = Math.min(power, maxPower);
+				} else {
+					minPower = Common.map(getPosition(), 90, MAX_ANGLE, -MIDDLE_POWER, -MAX_POWER);
+					power = Math.max(power, minPower);
+				}
 		} else {
-			if (power > 0.0 ) {
-				maxPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, 0.4, 0.0);
+			if ( power > 0.0) {
+				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, 0.25);
 				power = Math.min(power, maxPower);
 			} else {
-				minPower = Common.map(getPosition(), 90, MAX_ABS_ANGLE, -0.4, -0.7);
+				minPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, -MIN_POWER, -MIDDLE_POWER);
 				power = Math.max(power, minPower);
 			}
 		}
@@ -124,6 +144,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setLeftIntakePower(double power) {
+		if (power > 0.0 && isFullyLoaded()) {
+			power = 0.0;
+		}
 		leftIntake.set(power);
 	}
 	
@@ -133,6 +156,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setRightIntakePower(double power) {
+		if (power > 0.0 && isFullyLoaded()) {
+			power = 0.0;
+		}
 		rightIntake.set(power);
 	}
 	
@@ -142,11 +168,8 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setIntakePower(double power) {
-		if (power > 0.0 && getCubeDistance() == 0.0) {
-			power = 0.0;
-		}
-		rightIntake.set(power);
-		leftIntake.set(power);
+		setRightIntakePower(power);
+		setLeftIntakePower(power);
 		
 	}
 	
@@ -167,17 +190,21 @@ public class Intake {
 	}
 	
 	/**
-	 * Whether or not there is a cube loaded.
+	 * Whether or not there is a cube partially or fully loaded.
 	 * 
 	 * @return cube loaded
 	 */
-	public boolean isLoaded() {
-		if (getCubeDistance() < MAX_LOAD_DISTANCE) {
-			return true;
-		}
-		else {
-			return false;
-		}
+	public boolean isPartiallyLoaded() {
+		return (getCubeDistance() < PARTIALLY_LOADED_DISTANCE);
+	}
+	
+	/**
+	 * Detects fully loaded cube
+	 * 
+	 * @return -true will cube is loaded fully
+	 */
+	public boolean isFullyLoaded() {
+		return (getCubeDistance() < FULLY_LOADED_DISTANCE);
 	}
 	
 	/**
@@ -187,11 +214,18 @@ public class Intake {
 	 * @return - whether the cube is loaded
 	 */
 	public boolean loadCube(double power) {
-		if (isLoaded()) {
-			setIntakePower(0);
-			return true;
+		if (isPartiallyLoaded()) {
+			if (Common.time() > intakeTime) {
+				setIntakePower(0);
+				intakeTime = 0;
+				return true;
+			} else {
+				setIntakePower(power);
+				return false;
+			}
 		}
 		else {
+			intakeTime = Common.time()+250;
 			setIntakePower(power);
 			return false;
 		}
@@ -203,8 +237,7 @@ public class Intake {
 	 * @return - the position
 	 */
 	public double getPosition() {
-		double position = pot.getValue();
-		return MAX_ABS_ANGLE - (position - 210) / COUNTS_PER_DEGREE;
+		return position;
 	}
 	
 	public int getRawPosition() {
@@ -218,11 +251,6 @@ public class Intake {
 	 * @return -the velocity in degrees per second
 	 */
 	public double getVelocity() {
-		double position = getPosition();
-		double velocity = (position - previousPosition) / (1 / Constants.REFRESH_RATE);
-		velocity = 0.9 * previousVelocity + 0.1 * velocity;
-		previousVelocity = velocity;
-		previousPosition = position;
 		return velocity;
 	}
 	
@@ -247,7 +275,7 @@ public class Intake {
 	 * @param velocity - the velocity in degrees/second.
 	 */
 	public void moveVelocity(double velocity) {
-		if (!Robot.getElevator().intakeSafe()) {
+		if (!Robot.getElevator().intakeSafe() && getPosition() > MAX_ELEVATOR_SAFE) {
 			pid.setTargetVelocity(0);
 		}
 		else {
@@ -267,4 +295,31 @@ public class Intake {
 		}
 		return false;
 	}
+	
+	public void update() {
+		pid.update();
+	}
+
+	public class PotUpdate implements Runnable {
+
+		@Override
+		public void run() {
+			while (true) {
+				double previousPosition = position;
+				position = MAX_ABS_ANGLE - (getRawPosition() - 210) / COUNTS_PER_DEGREE; //210 is the lowest potentiometer reading when arm is fully down
+				position = 0.2 * position + 0.8 * previousPosition;
+				
+				double previousVelocity = velocity;
+				long millis = Common.time();
+				velocity = (position - previousPosition) / ((millis - previousMillis) / 1000.0);
+				velocity = 0.98 * previousVelocity + 0.02 * velocity;
+				previousMillis = millis;
+				try {
+					Thread.sleep(5);
+				} catch (InterruptedException e) {}
+			}
+		}
+		
+	}
+
 }

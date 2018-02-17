@@ -127,14 +127,16 @@ public class Robot extends SampleRobot {
     		
     		// Intake Arm
     		if (j0.getPressed("x")) {
-    			intake.setArmPower(-0.5);
+    			//intake.setArmPower(-1.0);
+        		intake.moveVelocity(10);
     		} else if (j0.getPressed("y")) {
-    			intake.setArmPower(0.5);
+    			intake.moveVelocity(-10);
+    			//intake.setArmPower(1.0);
     		} else {
     			intake.setArmPower(0.0);
     		}
     		
-    		
+    		intake.moveVelocity(10);
     		// Intake in/out
     		if (j0.getPressed("a")) {
     			intake.setIntakePower(1.0);
@@ -152,7 +154,7 @@ public class Robot extends SampleRobot {
     				dt.shiftLow();
     			}
     		}
-    		
+    		intake.update();
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
@@ -163,7 +165,10 @@ public class Robot extends SampleRobot {
 	public void dashBoard() {
 		Common.dashBool("Intake elevatorSafe", intake.elevatorSafe());
 		Common.dashNum("Intake Arm Degrees", intake.getPosition());
+		Common.dashNum("Intake Arm Position", intake.getRawPosition());
+		Common.dashNum("Intake arm velocity", intake.getVelocity());
 		Common.dashBool("Elevator intakeSafe", elevator.intakeSafe());
+		Common.dashNum("Elevator encoder", elevator.getEncoder());
 		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
 		Common.dashNum("Left Counts", dt.getLeftCounts());
 		Common.dashNum("Right Counts", dt.getRightCounts());
@@ -172,10 +177,8 @@ public class Robot extends SampleRobot {
 		Common.dashNum("Left Counts", dt.getLeftCounts());
 		Common.dashNum("Right Counts", dt.getRightCounts());
 		Common.dashNum("IR Output", intake.getCubeDistance() );
-		Common.dashBool("Is Loaded", intake.isLoaded());
-		Common.dashNum("Intake Arm Position", intake.getRawPosition());
-		Common.dashNum("Intake Arm Degrees", intake.getPosition());
-		Common.dashNum("Elevator encoder", elevator.getEncoder());
+		Common.dashBool("Is fully loaded", intake.isFullyLoaded());
+		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 	}
 	
 	public static Elevator getElevator() {

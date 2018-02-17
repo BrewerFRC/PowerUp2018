@@ -93,6 +93,7 @@ public class Elevator {
 		// Check safeties and stop power if necessary
 		if (!intake.elevatorSafe() && power < MIN_UP_POWER) {//Don't let elevator drop if intake arm is in a unsafe position
 			power = MIN_UP_POWER;
+			pid.reset();
 		}
 		if (power > 0.0) {  //Move up
 			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
