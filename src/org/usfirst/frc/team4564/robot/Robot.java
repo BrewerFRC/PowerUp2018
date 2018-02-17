@@ -95,6 +95,7 @@ public class Robot extends SampleRobot {
     	Path path = Paths.TEST_FAR_SCALE;
     	path.start();
     	elevator.home();
+    	intake.reset();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -146,10 +147,7 @@ public class Robot extends SampleRobot {
     		}
     		
     		//Intake
-    		if (driver.getPressed("a") || operator.getPressed("a")) {
-    			intake.setIntakePower(1.0);
-    		}
-    		else if (operator.getPressed("leftTrigger")) {
+    		if (operator.getPressed("leftTrigger")) {
     			intake.setIntakePower(-0.5);
     		}
     		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
@@ -158,7 +156,7 @@ public class Robot extends SampleRobot {
     		else {
     			intake.setIntakePower(0.0);
     		}
-    		
+    		intake.update();
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
@@ -169,7 +167,10 @@ public class Robot extends SampleRobot {
 	public void dashBoard() {
 		Common.dashBool("Intake elevatorSafe", intake.elevatorSafe());
 		Common.dashNum("Intake Arm Degrees", intake.getPosition());
+		Common.dashNum("Intake Arm Position", intake.getRawPosition());
+		Common.dashNum("Intake arm velocity", intake.getVelocity());
 		Common.dashBool("Elevator intakeSafe", elevator.intakeSafe());
+		Common.dashNum("Elevator encoder", elevator.getEncoder());
 		Common.dashNum("Drive Acceleration", DriveTrain.DRIVEACCEL);
 		Common.dashNum("Left Counts", dt.getLeftCounts());
 		Common.dashNum("Right Counts", dt.getRightCounts());
@@ -178,10 +179,9 @@ public class Robot extends SampleRobot {
 		Common.dashNum("Left Counts", dt.getLeftCounts());
 		Common.dashNum("Right Counts", dt.getRightCounts());
 		Common.dashNum("IR Output", intake.getCubeDistance() );
-		Common.dashBool("Is Loaded", intake.isLoaded());
-		Common.dashNum("Intake Arm Position", intake.getRawPosition());
-		Common.dashNum("Intake Arm Degrees", intake.getPosition());
-		Common.dashNum("Elevator encoder", elevator.getEncoder());
+		Common.dashBool("Is fully loaded", intake.isFullyLoaded());
+		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
+		Common.dashNum("Bat", bat.getDistance());
 	}
 	
 	public static Elevator getElevator() {
