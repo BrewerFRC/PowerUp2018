@@ -134,7 +134,16 @@ public class Robot extends SampleRobot {
     		else if (operator.when("b")) {
     			intake.movePosition(intake.MAX_ANGLE);
     		}
-    		//TODO: Add joystick control for intake.
+    		double intakePow = operator.deadzone(operator.getY(GenericHID.Hand.kRight));
+    		if (intakePow > 0) {
+    			intake.moveVelocity(60);
+    		}
+    		else if (intakePow < 0) {
+    			intake.moveVelocity(-60);
+    		}
+    		else {
+    			intake.moveVelocity(0);
+    		}
     		
     		//Intake
     		if (driver.getPressed("a") || operator.getPressed("a")) {
