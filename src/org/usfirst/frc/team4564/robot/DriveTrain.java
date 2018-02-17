@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .05, ACCEL_HG_HE, ACCEL_LG_LE, ACCEL_LG_HE, DRIVEMIN = 0.4;
+	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .053, ACCEL_HG_HE = 0.01, ACCEL_LG_LE = 0.04, ACCEL_LG_HE = 0.01, DRIVEMIN = 0.4;
 
 	public static final double TURNACCEL = .06;
 
@@ -79,6 +79,15 @@ public class DriveTrain extends DifferentialDrive {
 	 */
 	public void shiftLow() {
 		shifter.set(true);
+	}
+	
+	/**
+	 * Whether or not the drivetrain is in low gear.
+	 * 
+	 * @return - is low
+	 */
+	public boolean isShiftedLow() {
+		return shifter.get();
 	}
 	
 	/**
@@ -200,12 +209,34 @@ public class DriveTrain extends DifferentialDrive {
 	}
 	
 	/**
+	 * Gets the drive acceleration value based on the elevator height and gear.
+	 * 
+	 * @return - the drive acceleration value
+	 */
+	public double getDriveAccel() {
+		Elevator e = Robot.getElevator();
+		double percentHeight = e.getInches() / e.ELEVATOR_HEIGHT;
+		
+		if (isShiftedLow()) {
+			Common.dashStr("Gear", "Low");
+			Common.dashNum("Calculated Acceleration", (1.0 - percentHeight) * (ACCEL_LG_LE - ACCEL_LG_HE) + ACCEL_LG_HE);
+			return (1.0 - percentHeight) * (ACCEL_LG_LE - ACCEL_LG_HE) + ACCEL_LG_HE;
+		}
+		else {
+			Common.dashStr("Gear", "High");
+			Common.dashNum("Calculated Acceleration", (1.0 - percentHeight) * (ACCEL_HG_LE - ACCEL_HG_HE) + ACCEL_HG_HE);
+			return (1.0 - percentHeight) * (ACCEL_HG_LE - ACCEL_HG_HE) + ACCEL_HG_HE;
+		}
+	}
+	
+	/**
 	 * Gradually accelerate to a specified drive value.
 	 * 
 	 * @param target - the target drive value from -1 to 1
 	 * @return double - the allowed drive value for this cycle.
 	 */
-	 public double driveAccelCurve(double target) {
+	public double driveAccelCurve(double target) {
+		double DRIVEACCEL = getDriveAccel();
 		//If the magnitude of current is less than the minimum
 		if (Math.abs(driveSpeed) < DRIVEMIN) {
 			//Move to the lesser value of the minimum or the target, including desired direction.

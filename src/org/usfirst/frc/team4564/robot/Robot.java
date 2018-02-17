@@ -70,7 +70,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Paths.reset();
-		Path path = Paths.TEST_FAR_SCALE;
+		Path path = Paths.TEST_NEAR_SCALE;
 		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
@@ -143,6 +143,16 @@ public class Robot extends SampleRobot {
     		} else {
     			intake.setIntakePower(0.0);
     		}
+    		
+    		if (j0.when("rightBumper")) {
+    			if (dt.isShiftedLow()) {
+    				dt.shiftHigh();
+    			}
+    			else {
+    				dt.shiftLow();
+    			}
+    		}
+    		
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;

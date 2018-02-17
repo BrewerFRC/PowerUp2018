@@ -37,7 +37,7 @@ public class Elevator {
 	final double MAX_UP_POWER = 1.0;
 	final double MAX_DOWN_POWER = -0.9;
 	//The minimum power that the elevator can be run at upward
-	final double MIN_UP_POWER = 0.05;
+	final double MIN_UP_POWER = 0.09;
 	final double MIN_DOWN_POWER = -0.02;
 	//The last power that was set
 	double lastPower = 0;
