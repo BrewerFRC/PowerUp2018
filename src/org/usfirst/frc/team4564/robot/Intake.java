@@ -22,7 +22,9 @@ public class Intake {
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
 	private PositionByVelocityPID pid;
 	
-	private double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
+	public final double MAX_ELEVATOR_SAFE = 64, //Safe angles when elevator is not at top
+			//The angle at which the intake is horizontal out the front.
+			FRONT_HORIZONTAL = 0,
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
 			MIN_ANGLE = -10, MAX_ANGLE = 190, 
 			MAX_ABS_ANGLE = 209.0041,
@@ -34,16 +36,16 @@ public class Intake {
 			MIN_UP_POWER = 0, MAX_UP_POWER = 0.5,
 			//Max power change in accel limit
 			MAX_DELTA_POWER = 0.01,
-			lastPower = 0,
+			
 			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
 			//The maximum IR distance a loaded cube to be
 			MAX_LOAD_DISTANCE = 10,
-			P_POS = 0, I_POS = 0, D_POS = 0,
-			P_VEL = 0, I_VEL = 0, D_VEL = 0,
+			
 			COUNTS_PER_DEGREE = 14.89444444;
-	private double previousReading = 0;
-	private double previousPosition = 0;
-	private double previousVelocity = 0;
+	
+	private double P_POS = 0, I_POS = 0, D_POS = 0,
+			P_VEL = 0, I_VEL = 0, D_VEL = 0,
+			lastPower = 0, previousReading = 0, previousPosition = 0, previousVelocity = 0;
 	
 	public Intake() {
 		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0, "intake");

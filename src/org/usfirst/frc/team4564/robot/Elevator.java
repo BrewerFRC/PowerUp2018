@@ -24,37 +24,43 @@ public class Elevator {
 	//false = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
 	//Elevator height in inches(random value
-	final double ELEVATOR_HEIGHT = 66.25; //Absolute elevator travel is 66.75 inches
-	final double COUNTS_PER_INCH = 7414/65.5;
+	final double COUNTS_PER_INCH = 7414/65.5, 
+			//Absolute elevator travel is 66.75 inches
+			ELEVATOR_HEIGHT = 66.25,
+			//The height the elevator should be positioned at to drop in the switch.
+			SWITCH_HEIGHT = 25,
+			//How close to the targetHeight that elevator can be to complete
+			ACCEPTABLE_ERROR = 1.0,
+			//The location of the upper limit switch in inches
+			UPPER_LIMIT_POINT = 57.5,
+			//The maximum power that the elevator can be run at upward
+			MAX_UP_POWER = 1.0,
+			MAX_DOWN_POWER = -0.9,
+			//The minimum power that the elevator can be run at upward
+			MIN_UP_POWER = 0.09,
+			MIN_DOWN_POWER = -0.02,
+			//The maximum power change
+			MAX_DELTA_POWER = 0.1,
+			//In inches per second, for position PID
+			MAX_POS_VELOCITY = 45,
+			//Maximum velocity while using the joystick
+			MAX_J_VELOCITY = 45,
+			//For encoder test function, minimum values to move the robot in different directions
+			ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.1,
+			//For Velocity ramping
+			DANGER_VEL_ZONE = 30;
+	
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
-	double velocity = 0.0;
-	//How close to the targetHeight that elevator can be to complete
-	final double ACCEPTABLE_ERROR = 1.0;
-	//The location of the upper limit switch in inches
-	final double UPPER_LIMIT_POINT = 57.5;
-	//The maximum power that the elevator can be run at upward
-	final double MAX_UP_POWER = 1.0;
-	final double MAX_DOWN_POWER = -0.9;
-	//The minimum power that the elevator can be run at upward
-	final double MIN_UP_POWER = 0.09;
-	final double MIN_DOWN_POWER = -0.02;
-	//The last power that was set
-	double lastPower = 0;
-	//The maximum power change
-	final double MAX_DELTA_POWER = 0.1;
-	//In inches per second, for position PID
-	final double MAX_POS_VELOCITY = 45;
-	//Maximum velocity while using the joystick
-	final double MAX_J_VELOCITY = 45;
-	//-1 is not moving, 0 or greater is moving
-	double moveCheck = -1;
-	//For encoder test function, minimum values to move the robot in different directions
-	final double ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.1;
-	//For Velocity ramping
-	final double DANGER_VEL_ZONE = 30;
-	//The previous counts of the encoder 
-	double previousCounts = 0.0;
+	
+	double velocity = 0.0,
+			//The last power that was set
+			lastPower = 0,
+			//-1 is not moving, 0 or greater is moving
+			moveCheck = -1,
+			//The previous counts of the encoder 
+			previousCounts = 0.0;
+	
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_POS_VELOCITY, MAX_POS_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
 	double posP = 5, posI = 0.0, posD = 0.0;

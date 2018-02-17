@@ -27,8 +27,8 @@ public class Robot extends SampleRobot {
 	private static Elevator elevator = new Elevator(intake);
 	private static Compressor compressor = new Compressor(1);
 	private Auto auto = new Auto();
-	private Xbox j0 = new Xbox(0);
-	private Xbox j1 = new Xbox(1);
+	private Xbox driver = new Xbox(0);
+	private Xbox operator = new Xbox(1);
 	private Bat bat = new Bat();
 	
 	private String gameData;
@@ -100,57 +100,54 @@ public class Robot extends SampleRobot {
     		double forward = 0;
     		double turn = 0;
     		compressor.setClosedLoopControl(true);
-    		if (j0.when("dPadLeft")) {
-    			DriveTrain.DRIVEACCEL -= 0.005;
-    		}
-    		if (j0.when("dPadRight")) {
-    			DriveTrain.DRIVEACCEL += 0.005;
-    		}
     		
-    		// Drivetrain
-    		forward = -j0.getY(GenericHID.Hand.kLeft);
-			turn  = -j0.getX(GenericHID.Hand.kLeft);
-			/*if (j0.getPressed("b")) {
-				double[] power = path.getDrive();
-				dt.accelTankDrive(power[0], power[1]);
-			}*/
+    		//Drivetrain
+    		//	Shifting
+    		if (driver.when("leftBumper")) {
+    			dt.shiftHigh();
+    		}
+    		else if (driver.when("rightBumper")) {
+    			dt.shiftLow();
+    		}
+    		forward = -driver.getY(GenericHID.Hand.kLeft);
+			turn  = -driver.getX(GenericHID.Hand.kLeft);	
 			dt.accelDrive(forward, turn);
 			
-			// Elevator
-/*			
-			if (j0.getPressed("x")) {
-				elevator.moveToHeight(30);
+			//Elevator
+			//	Move to scale height
+			if (operator.when("dPadUp")) {
+				elevator.moveToHeight(elevator.ELEVATOR_HEIGHT);
 			}
-*/			
-			elevator.joystickControl(j0.deadzone(j0.deadzone(j0.getY(GenericHID.Hand.kRight), 0.15)));
+			if (operator.when("dPadDown")) {
+				elevator.moveToHeight(elevator.SWITCH_HEIGHT);
+			}
+			elevator.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
     		elevator.update();
     		
-    		// Intake Arm
-    		if (j0.getPressed("x")) {
-    			intake.setArmPower(-0.5);
-    		} else if (j0.getPressed("y")) {
-    			intake.setArmPower(0.5);
-    		} else {
-    			intake.setArmPower(0.0);
+    		//Intake Arm
+    		if (operator.when("x")) {
+    			intake.movePosition(intake.FRONT_HORIZONTAL);
     		}
+    		else if (operator.when("y")) {
+    			intake.movePosition(intake.MAX_ELEVATOR_SAFE);
+    		}
+    		else if (operator.when("b")) {
+    			intake.movePosition(intake.MAX_ANGLE);
+    		}
+    		//TODO: Add joystick control for intake.
     		
-    		
-    		// Intake in/out
-    		if (j0.getPressed("a")) {
+    		//Intake
+    		if (driver.getPressed("a") || operator.getPressed("a")) {
     			intake.setIntakePower(1.0);
-    		} else if (j0.getPressed("b")) {
-    			intake.setIntakePower(-1.0);
-    		} else {
-    			intake.setIntakePower(0.0);
     		}
-    		
-    		if (j0.when("rightBumper")) {
-    			if (dt.isShiftedLow()) {
-    				dt.shiftHigh();
-    			}
-    			else {
-    				dt.shiftLow();
-    			}
+    		else if (operator.getPressed("leftTrigger")) {
+    			intake.setIntakePower(-0.5);
+    		}
+    		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
+    			intake.setIntakePower(-1.0);
+    		}
+    		else {
+    			intake.setIntakePower(0.0);
     		}
     		
     		dashBoard();
