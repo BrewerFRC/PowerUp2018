@@ -37,7 +37,7 @@ public class Elevator {
 			MAX_UP_POWER = 1.0,
 			MAX_DOWN_POWER = -0.9,
 			//The minimum power that the elevator can be run at upward
-			MIN_UP_POWER = 0.09,
+			MIN_UP_POWER = 0.1,
 			MIN_DOWN_POWER = -0.02,
 			//The maximum power change
 			MAX_DELTA_POWER = 0.1,
@@ -331,6 +331,7 @@ public class Elevator {
 	 */
 	public void joystickControl(double jInput) {
 		//overrules moveToHeight()
+		Common.dashNum("Elevator Joystick", jInput);
 		if (state != States.STOPPED && state != States.HOMING){
 			if (jInput != 0) {
 				double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);

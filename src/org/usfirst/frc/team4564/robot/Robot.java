@@ -105,10 +105,10 @@ public class Robot extends SampleRobot {
     		//Drivetrain
     		//	Shifting
     		if (driver.when("leftBumper")) {
-    			dt.shiftHigh();
+    			dt.shiftLow();
     		}
     		else if (driver.when("rightBumper")) {
-    			dt.shiftLow();
+    			dt.shiftHigh();
     		}
     		forward = -driver.getY(GenericHID.Hand.kLeft);
 			turn  = -driver.getX(GenericHID.Hand.kLeft);	
@@ -122,7 +122,7 @@ public class Robot extends SampleRobot {
 			if (operator.when("dPadDown")) {
 				elevator.moveToHeight(elevator.SWITCH_HEIGHT);
 			}
-			elevator.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
+			elevator.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kLeft), 0.15));
     		elevator.update();
     		
     		//Intake Arm
@@ -136,18 +136,21 @@ public class Robot extends SampleRobot {
     			intake.movePosition(intake.MAX_ANGLE);
     		}
     		double intakePow = operator.deadzone(operator.getY(GenericHID.Hand.kRight));
-    		if (intakePow > 0) {
+    		if (intakePow > 0.0) {
     			intake.moveVelocity(60);
     		}
-    		else if (intakePow < 0) {
+    		else if (intakePow < 0.0) {
     			intake.moveVelocity(-60);
     		}
     		else {
-    			intake.moveVelocity(0);
+    			intake.moveVelocity(0.0);
     		}
     		
     		//Intake
-    		if (operator.getPressed("leftTrigger")) {
+    		if (driver.getPressed("a")) {
+    			intake.setIntakePower(1.0);
+    		}
+    		else if (operator.getPressed("leftTrigger")) {
     			intake.setIntakePower(-0.5);
     		}
     		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
