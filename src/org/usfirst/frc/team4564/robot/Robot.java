@@ -71,6 +71,7 @@ public class Robot extends SampleRobot {
 	public void autonomous() {
 		Paths.reset();
 		Path path = Paths.NEAR_SCALE_LEFT;
+		path.reset();
 		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();

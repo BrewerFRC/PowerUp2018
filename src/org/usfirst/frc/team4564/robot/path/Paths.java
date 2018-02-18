@@ -76,12 +76,12 @@ public class Paths {
 			.addDriveStraight(-84.5, 10.2, .65, "finalDrive");
 		
 		NEAR_SCALE_LEFT = new Path()
-			.addDriveStraight(-159.2, 0, .65, "startDrive")
-			.addDriveStraight(-106.3, 12.4, .65, "finalDrive");
+			.addDriveStraight(-159.2+30, 0, -.65, "startDrive")
+			.addDriveStraight(-106.3, 12.4, -.65, "finalDrive");
 		
 		NEAR_SCALE_RIGHT = new Path()
-			.addDriveStraight(-159.2, 0, .65, "startDrive")
-			.addDriveStraight(-106.3, -12.4, .65, "finalDrive");
+			.addDriveStraight(-159.2, 0, -.65, "startDrive")
+			.addDriveStraight(-106.3, -12.4, -.65, "finalDrive");
 		
 		// Combo Paths
 		FAR_SCALE_SWITCH_LEFT = new Path();
