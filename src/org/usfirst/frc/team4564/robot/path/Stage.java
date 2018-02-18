@@ -1,5 +1,8 @@
 package org.usfirst.frc.team4564.robot.path;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An interface representing a generic stage of driving in a Path.
  * Created January 2018
@@ -9,6 +12,7 @@ package org.usfirst.frc.team4564.robot.path;
  * 
  */
 public abstract class Stage {
+	private List<Event> events = new ArrayList<Event>();
 	private boolean hold;
 	private boolean persist;
 	
@@ -20,6 +24,47 @@ public abstract class Stage {
 	public Stage(boolean hold, boolean persist) {
 		this.hold = hold;
 		this.persist = persist;
+	}
+	
+	/**
+	 * Resets the stage.
+	 */
+	public void reset() {
+		for (Event event : events) {
+			event.reset();
+		}
+	}
+	
+	/**
+	 * Runs trigger routine for all events.  Should only activate events which have met a starting condition.
+	 */
+	public void triggerEvents() {
+		for (Event event : events) {
+			event.trigger();
+		}
+	 }
+	  	
+	/**
+	 * Adds an event to the Stage.
+	 * 
+	 * @param event - the event
+	 */
+	public void addEvent(Event event) {
+		this.events.add(event);
+	}
+	
+	/**
+	 * Whether or not events marked holdStage have completed.
+	 * 
+	 * @return events finished
+	 */
+	public boolean eventsFinished() {
+		for (Event e : events) {
+			if (e.isHoldStage() && !e.complete()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**

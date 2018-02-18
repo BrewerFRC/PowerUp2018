@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot.path;
 
+import org.usfirst.frc.team4564.robot.Common;
+
 /**
  * A class containing pre-built Paths.
  * Created February 2018
