@@ -31,10 +31,12 @@ public class DriveStraight extends Stage {
 	}
 	
 	public boolean isComplete() {
-		if (DriveTrain.instance().getAverageDist() >= target) {
+		if (Math.abs(DriveTrain.instance().getAverageDist()) >= Math.abs(target)) {
 			System.out.println("DriveStraight: " + this.name + " - Complete");
+			return true;
+		} else {
+			return false;
 		}
-		return DriveTrain.instance().getAverageDist() >= target;
 	}
 	
 	public double[] getDrive() {
