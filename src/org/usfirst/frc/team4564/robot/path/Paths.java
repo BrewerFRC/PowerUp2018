@@ -17,12 +17,7 @@ public class Paths {
 	public Paths() {
 		// Old Paths Written
 		TEST_FAR_SCALE = new Path()
-			.addDriveStraight(60, 0, 0.65, "startDrive")
-			.addPowerTurn(90, 0.65)
-			.addDriveStraight(72, 90, 0.7, "middleDrive")
-			.addDriveStraight(36, 90, 0.65, "finalDrive")
-			.addPowerTurn(0, 0.65)
-			.addPIDDrive(48, 0, 0.4, 0.8, true, "driveScale");
+			.addDriveStraight(0, 0, 0.65, "startDrive");
 		
 		TEST_NEAR_SCALE = new Path().addDriveStraight(-78, 0, -0.7, "testDrive")
 				.addDriveStraight(-140, 18, -0.7, "testDriveTurn");

@@ -70,7 +70,7 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Paths.reset();
-		Path path = Paths.NEAR_SCALE_LEFT;
+		Path path = Paths.TEST_NEAR_SCALE;
 		path.reset();
 		path.start();
 		while (isEnabled() && isAutonomous()) {
