@@ -35,22 +35,26 @@ public class DriveStraight extends Stage {
 	}
 	
 	public boolean isComplete() {
-		if (!super.eventsFinished()) {
+		if (!super.eventsFinished() || !isDistanceComplete()) {
 			return false;
 		}
+		return true;
+	}
+	
+	public boolean isDistanceComplete() {
 		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
-			System.out.println("DriveStraight: " + this.name + " - Complete");
+			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
 		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
-			System.out.println("DriveStraight: " + this.name + " - Complete");
+			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
 		return false;
 	}
 	
 	public double[] getDrive() {
-		if (isComplete()) {
+		if (isDistanceComplete()) {
 			return new double[] {0, 0};
 		}
 		return new double[] {power, power};

@@ -346,6 +346,7 @@ public class DriveTrain extends DifferentialDrive {
 	 * @return the new motor power.
 	 */
 	private double accelSide(double current, double target) {
+		double TANKACCEL = getDriveAccel();
 		//If the magnitude of current is less than the minimum
 		if (Math.abs(current) < TANKMIN) {
 			//Move to the lesser value of the minimum or the target, including desired direction.

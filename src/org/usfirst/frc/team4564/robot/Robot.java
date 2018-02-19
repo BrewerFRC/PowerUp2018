@@ -44,6 +44,7 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void disabled() {
+		//dt.getHeading().calibrate();
 		while (isDisabled()) {
 			compressor.setClosedLoopControl(true);
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
@@ -69,14 +70,17 @@ public class Robot extends SampleRobot {
 	@Override
 	public void autonomous() {
 		Paths.reset();
-		Path path = Paths.TEST_NEAR_SCALE;
+		Path path = Paths.FAR_SCALE_LEFT;
 		path.reset();
 		path.start();
+		elevator.home();
+		dt.getHeading().reset();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
 			path.drive();
-			
+			elevator.update();
+			intake.update();
 			//System.out.println("Left/Right Distance: " + dt.getLeftDist() + ":" + dt.getRightDist() +
 			//		"; Motor Powers: " + power[0] + ":" + power[1]);
 			
@@ -92,7 +96,7 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
     	long time;
     	Paths.reset();
-    	Path path = Paths.TEST_FAR_SCALE;
+    	Path path = Paths.FAR_SCALE_LEFT;
     	path.start();
     	elevator.home();
     	intake.reset();
@@ -130,23 +134,21 @@ public class Robot extends SampleRobot {
     			intake.movePosition(intake.FRONT_HORIZONTAL);
     		}
     		else if (operator.when("y")) {
-    			intake.movePosition(intake.MAX_ELEVATOR_SAFE);
+    			intake.movePosition(intake.MAX_ELEVATOR_SAFE-10);
     		}
     		else if (operator.when("b")) {
     			intake.movePosition(intake.MAX_ANGLE);
     		}
-    		double intakePow = -operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15);
-    		if (intakePow > 0.0) {
-    			intake.moveVelocity(60);
+    		/*double intakePow = operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15);
+    		if (intakePow < 0.0) {
+    			intake.joystickControl(60);
     		}
-    		else if (intakePow < 0.0) {
-    			intake.moveVelocity(-60);
-    		}
-    		else {
-    			intake.moveVelocity(0.0);
-    		}
+    		else if (intakePow > 0.0) {
+    			intake.joystickControl(-60);
+    		}*/
+    		intake.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
     		intake.update();
-    		
+
     		//Intake
     		if (driver.getPressed("a")) {
     			intake.setIntakePower(1.0);
@@ -160,7 +162,6 @@ public class Robot extends SampleRobot {
     		else {
     			intake.setIntakePower(0.0);
     		}
-    		intake.update();
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
@@ -186,9 +187,13 @@ public class Robot extends SampleRobot {
 		Common.dashBool("Is fully loaded", intake.isFullyLoaded());
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 		Common.dashNum("Bat", bat.getDistance());
+		Common.dashStr("Intake arm State", intake.state.toString());
 	}
 	
 	public static Elevator getElevator() {
 		return elevator;
+	}
+	public static Intake getIntake() {
+		return intake;
 	}
 }

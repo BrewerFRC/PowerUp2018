@@ -31,7 +31,17 @@ public abstract class Stage {
 	 */
 	public void reset() {
 		for (Event event : events) {
+			event.start();
 			event.reset();
+		}
+	}
+	
+	/**
+	 * Runs the start routine for all events.
+	 */
+	public void startEvents() {
+		for (Event event : events) {
+			event.start();
 		}
 	}
 	
@@ -43,6 +53,10 @@ public abstract class Stage {
 			event.trigger();
 		}
 	 }
+	
+	public boolean eventComplete(int index) {
+		return events.get(index).complete;
+	}
 	  	
 	/**
 	 * Adds an event to the Stage.

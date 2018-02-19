@@ -14,11 +14,13 @@ public class PowerTurn extends Stage {
 	private double target;
 	private double power;
 	private double startingAngle;
+	private boolean backward;
 	
-	public PowerTurn(double target, double power) {
+	public PowerTurn(double target, double power, boolean backward) {
 		super(true);
 		this.target = target;
 		this.power = power;
+		this.backward = backward;
 	}
 	
 	public void start() {
@@ -40,9 +42,19 @@ public class PowerTurn extends Stage {
 			return new double[] {power, power};
 		}
 		if (target < DriveTrain.instance().getHeading().getAngle()) {
-			return new double[] {-0.3, power};
+			if (backward) {
+				return new double[] {-power, 0};
+			}
+			else {
+				return new double[] {0, power};
+			}
 		}
-		return new double[] {power, -0.3};
+		if (backward) {
+			return new double[] {0, -power};
+		}
+		else {
+			return new double[] {power, 0};
+		}
 	}
 	
 	/**
@@ -56,8 +68,8 @@ public class PowerTurn extends Stage {
 	public static class PowerTurnOverlay extends PowerTurn {
 		private Stage previousStage;
 		
-		public PowerTurnOverlay(double target, double power, Stage previousStage) {
-			super(target, power);
+		public PowerTurnOverlay(double target, double power, boolean backward, Stage previousStage) {
+			super(target, power, backward);
 			this.previousStage = previousStage;
 		}
 		

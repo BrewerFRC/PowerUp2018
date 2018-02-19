@@ -23,6 +23,7 @@ public class Path {
 		dt.getHeading().reset();
 		dt.resetEncoders();
 		stages.get(0).start();
+		stages.get(0).startEvents();
 	}
 	
 	/**
@@ -62,6 +63,7 @@ public class Path {
 			if (state < stages.size()) {
 				edge[1] = stages.get(state);
 				stages.get(state).start();
+				stages.get(state).startEvents();
 				if (stages.get(state - 1).isHeld()) {
 					return stages.get(state - 1).getDrive();
 				}
@@ -163,8 +165,8 @@ public class Path {
 	 * @param power - the power to apply to the turning wheel
 	 * @return the current Path instance
 	 */
-	public Path addPowerTurn(double targetAngle, double power) {
-		stages.add(new PowerTurn(targetAngle, power));
+	public Path addPowerTurn(double targetAngle, double power, boolean backward) {
+		stages.add(new PowerTurn(targetAngle, power, backward));
 		return this;
 	}
 	
@@ -176,8 +178,8 @@ public class Path {
 	 * @param power - the power to apply to the turning wheel
 	 * @return the current Path instance
 	 */
-	public Path addPowerTurnOverlay(double targetAngle, double power) {
-		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, stages.get(stages.size() - 1)));
+	public Path addPowerTurnOverlay(double targetAngle, double power, boolean backward) {
+		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, backward, stages.get(stages.size() - 1)));
 		return this;
 	}
 	

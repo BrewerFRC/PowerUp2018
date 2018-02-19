@@ -40,6 +40,10 @@ public class Heading {
 		resetPID();
 	}
 	
+	public void calibrate() {
+		gyro.calibrate();
+	}
+	
 	/**
 	 * Resets gyro PID
 	 */

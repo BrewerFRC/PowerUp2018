@@ -26,7 +26,7 @@ public class Intake {
 			//The angle at which the intake is horizontal out the front.
 			FRONT_HORIZONTAL = 0,
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -12, MAX_ANGLE = 160, 
+			MIN_ANGLE = -12, MAX_ANGLE = 170, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
@@ -36,26 +36,38 @@ public class Intake {
 			MIN_UP_POWER = 0, MAX_UP_POWER = 0.5,
 			//Max power change in accel limit
 			MAX_DELTA_POWER = 0.1,
-			MIN_VELOCITY = 0, MAX_VELOCITY = 45,
+			MAX_VELOCITY = 120,
 			COUNTS_PER_DEGREE = 14.89444444,
 			PARTIALLY_LOADED_DISTANCE = 10,
 			//maximum IR distance a fully loaded cube can be
-			FULLY_LOADED_DISTANCE = 3;
+			FULLY_LOADED_DISTANCE = 3,
+			//How close to the targetHeight that elevator can be to complete
+			ACCEPTABLE_ERROR = 2.0;
 	
-	private double P_POS = 0.01, I_POS = 0, D_POS = 0,
+	private double P_POS = 5.0, I_POS = 0, D_POS = 300,
 			P_VEL = 0.00035, I_VEL = 0, D_VEL = 0.1,
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
 	public double velocity = 0.0;
+	public double targetVelocity = 0.0;
 	public double position;
 	private long previousMillis = Common.time();
 	
+	public enum States {
+		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
+		HOLDING, //State of the elevator holding position, both types of elevator usage can be used from this state.
+		MOVING, //State of elevator moving to a target position within the ACCEPTABLE_ERROR.
+		JOYSTICK; //Moves the elevator by a desired power returns to IDLE after setting the power once.
+	}
+	States state = States.STOPPED;
+	
 	public Intake() {
-		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, MIN_VELOCITY, MAX_VELOCITY, 0.01, "intake");
+		pid = new PositionByVelocityPID(MIN_ANGLE, MAX_ANGLE, -MAX_VELOCITY, MAX_VELOCITY, 0.01, "intake");
 		pid.setPositionScalars(P_POS, I_POS, D_POS);
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
 		pid.setVelocityInverted(true);
+		pid.setPositionInverted(true);
 		intakeArm.setInverted(true);
 		leftIntake.setInverted(true);
 		Thread t = new Thread(new PotUpdate());
@@ -68,13 +80,7 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setArmPower(double power) {
-		double maxAngle = 0.0;
-		if (Robot.getElevator().intakeSafe()) {
-			maxAngle = MAX_ANGLE;
-		} 
-		else {
-			maxAngle = MAX_ELEVATOR_SAFE;
-		}
+		double maxAngle = getMaxAngle();
 		if (power > 0.0) {
 			if (getPosition() >= maxAngle) {
 				power = 0.0;
@@ -109,8 +115,8 @@ public class Intake {
 	
 	public double rampPower(double power) {
 		
-		final double MIDDLE_POWER = 0.5;
-		final double MAX_POWER = 0.9;
+		final double MIDDLE_POWER = 0.7;
+		final double MAX_POWER = 1.0;
 		final double MIN_POWER = 0.0;
 		double maxPower = 0.0;
 		double minPower = 0.0;
@@ -133,8 +139,8 @@ public class Intake {
 				}
 		} else {
 			if ( power > 0.0) {
-				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, 0.25);
-				Common.dashNum("Max Power Map", maxPower);
+				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, 0.05);
+				//Common.dashNum("Max Power Map", maxPower);
 				power = Math.min(power, maxPower);
 			} else {
 				minPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, -MIN_POWER, -MIDDLE_POWER);
@@ -266,7 +272,17 @@ public class Intake {
 	 * @param position - the position in degrees
 	 */
 	public void movePosition(double position) {
-		setArmPower(pid.calc(getPosition(), getVelocity()));
+		pid.setTargetPosition(position);
+		state = States.MOVING;
+	}
+	
+	/**
+	 * Uses a PID to move the robot at the PID target positon.
+	 */
+	public void pidPosMove() {
+		double pidPosCalc = pid.calc(getPosition(), getVelocity());
+		Common.dashNum("pidPosCalc for intake arm", pidPosCalc);
+		setAccelArmPower(pidPosCalc);
 	}
 	
 	/**
@@ -275,15 +291,9 @@ public class Intake {
 	 * @param velocity - the velocity in degrees/second.
 	 */
 	public void moveVelocity(double velocity) {
-		double maxAngle = 0.0;
-		if (Robot.getElevator().intakeSafe()) {
-			maxAngle = MAX_ANGLE;
-		} 
-		else {
-			maxAngle = MAX_ELEVATOR_SAFE;
-		}
+		double maxAngle = getMaxAngle();
 		if (!Robot.getElevator().intakeSafe() && getPosition() > maxAngle) {
-			pid.setTargetVelocity(0);
+			pid.setTargetVelocity(0.0);
 		}
 		else {
 			pid.setTargetVelocity(velocity);
@@ -307,8 +317,67 @@ public class Intake {
 		pid.reset();
 	}
 	
+	/**
+	 * Function designed for joystick control of intake arm.
+	 * Only works for one cycle.
+	 * 
+	 * @param jInput -The velocity mapped for 1.0(max down) to -1.0(max up) to move the elevator at
+	 */
+	public void joystickControl(double jInput) {
+		//overrules movePosition()
+		if (jInput != 0) {
+			double jMap = Common.map(-jInput, -1, 1, -MAX_VELOCITY, MAX_VELOCITY);
+			Common.dashNum("jMap intake", jMap);
+			targetVelocity = jMap;
+			//Common.debug("New intake state Joystick");
+			state = States.JOYSTICK;
+		}
+	}
+	
+	public double getMaxAngle() {
+		if (Robot.getElevator().intakeSafe()) {
+			return MAX_ANGLE;
+		} 
+		else {
+			return MAX_ELEVATOR_SAFE;
+		}
+	}
+	
+	/**
+	 * Whether or not the elevator is within acceptable range of the position target.
+	 * 
+	 * @return - complete
+	 */
+	public boolean isComplete() {
+		return Math.abs(pid.getTargetPosition() - getPosition()) < ACCEPTABLE_ERROR;
+	}
+	
 	public void update() {
 		pid.update();
+		switch(state) {
+			case STOPPED:
+				setAccelArmPower(0.0);
+				break;
+			case HOLDING:
+				pidPosMove();
+				//moveVelocity(0.0);
+				break;
+			case MOVING:
+				if (isComplete()) {
+					state = States.HOLDING;
+				}
+				pidPosMove();
+				break;
+			case JOYSTICK:
+				moveVelocity(targetVelocity);
+				//accleMove(speed);
+				//Common.debug("new State Idle");
+				if (state == States.JOYSTICK){
+					state = States.HOLDING;
+					pid.setTargetPosition(Math.min(getPosition(), getMaxAngle()-1));
+				}
+				break;
+		}
 	}
 
 	public class PotUpdate implements Runnable {

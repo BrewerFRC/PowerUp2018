@@ -24,7 +24,7 @@ public class Elevator {
 	//false = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
 	//Elevator height in inches(random value
-	final double COUNTS_PER_INCH = 7414/65.5, 
+	public final double COUNTS_PER_INCH = 7414/65.5, 
 			//Absolute elevator travel is 66.75 inches
 			ELEVATOR_HEIGHT = 66.25,
 			//The height the elevator should be positioned at to drop in the switch.
@@ -199,12 +199,12 @@ public class Elevator {
 	public void pidVelMove(double targetVelocity) {
 		if (targetVelocity >= 0.0) {
 			if (getInches() >= ELEVATOR_HEIGHT - DANGER_VEL_ZONE) {
-				double rampMap = Common.map(ELEVATOR_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, 0, MAX_J_VELOCITY);
+				double rampMap = Common.map(ELEVATOR_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, 0.1, MAX_J_VELOCITY);
 				targetVelocity = Math.min(targetVelocity, rampMap);
 			}
 		} else {
 			if (getInches() >= DANGER_ZONE) {
-				double rampMap = Common.map(getInches(), 0, DANGER_ZONE, 0, -MAX_J_VELOCITY);
+				double rampMap = Common.map(getInches(), 0, DANGER_ZONE, 0.1, -MAX_J_VELOCITY);
 				targetVelocity = Math.max(targetVelocity, rampMap);
 			}
 		}
