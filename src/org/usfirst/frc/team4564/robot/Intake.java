@@ -4,6 +4,7 @@ import org.usfirst.frc.team4564.robot.Elevator.States;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * A class to control the intake arm and loader.
@@ -44,8 +45,8 @@ public class Intake {
 			//How close to the targetHeight that elevator can be to complete
 			ACCEPTABLE_ERROR = 2.0;
 	
-	private double P_POS = 5.0, I_POS = 0, D_POS = 300,
-			P_VEL = 0.00035, I_VEL = 0, D_VEL = 0.1,
+	private double P_POS = 3.0, I_POS = 0, D_POS = 700,
+			P_VEL = 0.0002, I_VEL = 0, D_VEL = 0.05, G = 0.1,
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
@@ -72,6 +73,7 @@ public class Intake {
 		leftIntake.setInverted(true);
 		Thread t = new Thread(new PotUpdate());
 		t.start();
+		SmartDashboard.putNumber("G", G);
 	}
 	
 	/**
@@ -252,6 +254,11 @@ public class Intake {
 		return position;
 	}
 	
+	/**
+	 * Returns the raw sensor reading for the arm potentiometer.
+	 * 
+	 * @return - the raw sensor value between 0 and 4096
+	 */
 	public int getRawPosition() {
 		return pot.getValue();
 	}
@@ -282,7 +289,7 @@ public class Intake {
 	public void pidPosMove() {
 		double pidPosCalc = pid.calc(getPosition(), getVelocity());
 		Common.dashNum("pidPosCalc for intake arm", pidPosCalc);
-		setAccelArmPower(pidPosCalc);
+		setAccelArmPower(pidPosCalc + G * Math.cos(Math.max(0, getPosition())));
 	}
 	
 	/**
@@ -298,7 +305,8 @@ public class Intake {
 		else {
 			pid.setTargetVelocity(velocity);
 		}
-		setAccelArmPower(pid.calcVelocity(getVelocity()));
+		double calc = pid.calcVelocity(getVelocity()) + G * Math.cos(Math.max(0, getPosition()));
+		setAccelArmPower(calc);
 	}
 	
 	/**
@@ -354,6 +362,7 @@ public class Intake {
 	
 	public void update() {
 		pid.update();
+		G = SmartDashboard.getNumber("G", G);
 		switch(state) {
 			case STOPPED:
 				setAccelArmPower(0.0);
@@ -374,7 +383,7 @@ public class Intake {
 				//Common.debug("new State Idle");
 				if (state == States.JOYSTICK){
 					state = States.HOLDING;
-					pid.setTargetPosition(Math.min(getPosition(), getMaxAngle()-1));
+					pid.setTargetPosition(Math.max(MIN_ANGLE + 1, Math.min(getPosition() + velocity*0.1, getMaxAngle()-1)));
 				}
 				break;
 		}
