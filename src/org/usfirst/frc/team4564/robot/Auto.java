@@ -66,7 +66,7 @@ public class Auto {
 		switch (mode) {
 			case CROSS_LINE:
 				return Paths.CROSS_LINE;
-			case SCALE_ALWAYS:
+			case SCALE:
 				if (gameData.charAt(1) == position) {
 					if (position == 'L') {
 						return Paths.NEAR_SCALE_LEFT;
@@ -81,27 +81,7 @@ public class Auto {
 				else {
 					return Paths.FAR_SCALE_RIGHT;
 				}
-			case SCALE_CLOSE:
-				if (gameData.charAt(1) == position) {
-					if (position == 'L') {
-						return Paths.NEAR_SCALE_LEFT;
-					}
-					else {
-						return Paths.NEAR_SCALE_RIGHT;
-					}
-				}
-				if (tryAlternative) {
-					if (gameData.charAt(0) == position) {
-						if (position == 'L') {
-							return Paths.NEAR_SWITCH_LEFT;
-						}
-						else {
-							return Paths.NEAR_SWITCH_RIGHT;
-						}
-					}
-				}
-				break;
-			case SWITCH_ALWAYS:
+			case SWITCH:
 				if (gameData.charAt(0) == position) {
 					if (position == 'L') {
 						return Paths.NEAR_SWITCH_LEFT;
@@ -116,7 +96,7 @@ public class Auto {
 				else {
 					return Paths.FAR_SWITCH_RIGHT;
 				}
-			case SWITCH_CLOSE:
+			case CLOSE:
 				if (gameData.charAt(0) == position) {
 					if (position == 'L') {
 						return Paths.NEAR_SWITCH_LEFT;
@@ -125,17 +105,22 @@ public class Auto {
 						return Paths.NEAR_SWITCH_RIGHT;
 					}
 				}
-				if (tryAlternative) {
-					if (gameData.charAt(1) == position) {
-						if (position == 'L') {
-							return Paths.NEAR_SCALE_LEFT;
-						}
-						else {
-							return Paths.NEAR_SCALE_RIGHT;
-						}
+				else if (gameData.charAt(1) == position) {
+					if (position == 'L') {
+						return Paths.NEAR_SCALE_LEFT;
+					}
+					else {
+						return Paths.NEAR_SCALE_RIGHT;
 					}
 				}
-				break;
+				else {
+					if (position == 'L') {
+						return Paths.FAR_SCALE_LEFT;
+					}
+					else {
+						return Paths.FAR_SCALE_RIGHT;
+					}
+				}
 		}
 		return Paths.CROSS_LINE;
 	}
@@ -147,10 +132,9 @@ public class Auto {
 	 * @author Evan McCoy
 	 */
 	private enum Mode {
-		SCALE_ALWAYS("scale_always"), 
-		SCALE_CLOSE("scale_close"),
-		SWITCH_ALWAYS("switch_always"),
-		SWITCH_CLOSE("switch_close"),
+		SCALE("scale"), 
+		SWITCH("switch"),
+		CLOSE("close"),
 		CROSS_LINE("cross_line");
 		
 		public String name;

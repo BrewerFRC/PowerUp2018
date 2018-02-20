@@ -48,10 +48,11 @@ public class Intake {
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
-	public double velocity = 0.0;
+	public double velocity = 0.0, lastVelocityTarget = 0;
 	public double targetVelocity = 0.0;
 	public double position = 64;
 	private long previousMillis = Common.time();
+	private boolean previousIntakeSafe = false;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
@@ -301,6 +302,10 @@ public class Intake {
 	public void moveVelocity(double velocity) {
 		double maxAngle = getMaxAngle();
 		double calc = 0;
+		//If velocity changes direction, reset pid to speed up response.
+		if ((lastVelocityTarget > 0 && velocity < 0) || (lastVelocityTarget < 0 && velocity > 0)) {
+			pid.resetVelocityPID();
+		}
 		if (!Robot.getElevator().intakeSafe() && getPosition() > maxAngle) {
 			pid.setTargetVelocity(0.0);
 		}
@@ -314,6 +319,7 @@ public class Intake {
 			calc = pid.calcVelocity(getVelocity());
 		}
 		setAccelArmPower(calc);
+		lastVelocityTarget = velocity;
 	}
 	
 	/**
@@ -352,9 +358,11 @@ public class Intake {
 	
 	public double getMaxAngle() {
 		if (Robot.getElevator().intakeSafe()) {
+			Common.dashBool("MAX_ANGLE", true);
 			return MAX_ANGLE;
 		} 
 		else {
+			Common.dashBool("MAX_ANGLE", false);
 			return MAX_ELEVATOR_SAFE;
 		}
 	}
@@ -376,8 +384,13 @@ public class Intake {
 				setAccelArmPower(0.0);
 				break;
 			case HOLDING:
-				//pidPosMove();
-				moveVelocity(0.0);
+				if (!previousIntakeSafe && Robot.getElevator().intakeSafe()) {
+					pid.resetVelocityPID();
+				}
+				previousIntakeSafe = Robot.getElevator().intakeSafe();
+				pidPosMove();
+				
+				//moveVelocity(0.0);
 				break;
 			case MOVING:
 				if (isComplete()) {
@@ -391,6 +404,7 @@ public class Intake {
 				//Common.debug("new State Idle");
 				if (state == States.JOYSTICK){
 					state = States.HOLDING;
+					Common.debug("New target position: " + Math.max(MIN_ANGLE + 1, Math.min(getPosition() + velocity*0.1, getMaxAngle()-1)));
 					pid.setTargetPosition(Math.max(MIN_ANGLE + 1, Math.min(getPosition() + velocity*0.1, getMaxAngle()-1)));
 				}
 				break;

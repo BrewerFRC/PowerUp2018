@@ -19,10 +19,10 @@ public class Paths {
 			TEST_FAR_SCALE, TEST_NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH_LEFT,
 			FAR_SWITCH_RIGHT, NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT, FAR_SCALE_SWITCH_LEFT, FAR_SCALE_SWITCH_RIGHT,
 			NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE,
-			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT;
+			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT, TWO_CUBE_LEFT_NO_DROP;
 	
 	public Paths() {
-		// Old Paths Written
+		// Old Paths Written_
 		TEST_FAR_SCALE = new Path()
 			.addDriveStraight(0, 0, 0.65, "startDrive");
 		
@@ -81,7 +81,7 @@ public class Paths {
 			})
 			.addEvent(intakeOverOnElevatorHeight)
 			.addEvent(shootOnEventOneComplete)
-			.addEvent(intakeZeroOnEventTwoComplete)
+			.addEvent(intakeHomeOnEventTwoComplete)
 			.addEvent(elevatorZeroOnEventTwoComplete);
 			//.addDriveStraight(-2, -19.1, -.75, "finalDrive");
 		
@@ -106,7 +106,7 @@ public class Paths {
 				})
 				.addEvent(intakeOverOnElevatorHeight)
 				.addEvent(shootOnEventOneComplete)
-				.addEvent(intakeZeroOnEventTwoComplete)
+				.addEvent(intakeHomeOnEventTwoComplete)
 				.addEvent(elevatorZeroOnEventTwoComplete);
 		
 		NEAR_SCALE_LEFT = new Path()
@@ -133,7 +133,7 @@ public class Paths {
 				})
 				.addEvent(intakeOverOnElevatorHeight)
 				.addEvent(shootOnEventOneComplete)
-				.addEvent(intakeZeroOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
+				.addEvent(intakeHomeOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
 		
 		NEAR_SCALE_RIGHT = new Path()
 				.addDriveStraight(-117, 0, -0.85, "testDrive")
@@ -159,7 +159,52 @@ public class Paths {
 				})
 				.addEvent(intakeOverOnElevatorHeight)
 				.addEvent(shootOnEventOneComplete)
-				.addEvent(intakeZeroOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
+				.addEvent(intakeHomeOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
+		
+		TWO_CUBE_LEFT_NO_DROP = new Path()
+				.addDriveStraight(-117, 0, -0.85, "testDrive")
+				.addDriveStraight(-88, 18, -0.85, "testDriveTurn")
+				.addEvent(new Event(true) {
+					boolean distReached = false;
+					@Override
+					public void start() {
+						this.complete = false;
+						this.distReached = false;
+					}
+					@Override
+					public void trigger() {
+						if (DriveTrain.instance().getAverageDist() < -10 && !distReached) {
+							distReached = true;
+							Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
+							Robot.getIntake().movePosition(0.0);
+						}
+						if (Robot.getElevator().isComplete()) {
+							this.complete = true;
+						}
+					}
+				})
+				.addEvent(intakeOverOnElevatorHeight)
+				.addEvent(shootOnEventOneComplete)
+				.addEvent(intakeHomeOnEventTwoComplete)
+				.addEvent(elevatorZeroOnEventTwoComplete)
+				.addDriveStraight(18, 18, 0.65, "DriveBack")
+				.addDriveStraight(12, -18, 0.6, "drive")
+				.addEvent(new Event(true) {
+
+					@Override
+					public void start() {
+					this.complete = false;
+					}
+
+					@Override
+					public void trigger() {
+						if (Robot.getIntake().loadCube(1.0)) {
+							this.complete = true;
+						}
+					}
+				
+				})
+				.addDriveStraight(-12, -18, -0.65, "drive");
 		
 		// Combo Paths
 		FAR_SCALE_SWITCH_LEFT = new Path();
@@ -182,7 +227,7 @@ public class Paths {
 		CROSS_LINE = new Path().addDriveStraight(50, 0, 0.65, "crossLine");
 	}
 	
-	private Event intakeOverOnElevatorHeight = new Event(false) {
+	private Event intakeOverOnElevatorHeight = new Event(true) {
 		@Override
 		public void start() {
 			this.complete = false;
@@ -198,7 +243,7 @@ public class Paths {
 			}
 		}
 	},
-	shootOnEventOneComplete = new Event(false) {
+	shootOnEventOneComplete = new Event(true) {
 		long startTime = -1;
 		@Override
 		public void start() {
@@ -211,12 +256,14 @@ public class Paths {
 				Common.debug("Complete passed on");
 				startTime = Common.time();
 			}
-			if (Common.time() > startTime + 1000 && startTime != -1) {
-				Robot.getIntake().setIntakePower(0.0);
-				this.complete = true;
-			}
-			else if (startTime > 0) {
-				Robot.getIntake().setIntakePower(-0.5);
+			if (!this.complete) {
+				if (Common.time() > startTime + 1000 && startTime != -1) {
+					Robot.getIntake().setIntakePower(0.0);
+					this.complete = true;
+				}
+				else if (startTime > 0) {
+					Robot.getIntake().setIntakePower(-0.5);
+				}
 			}
 		}
 	},
@@ -259,7 +306,7 @@ public class Paths {
 			}
 		}
 	},
-	intakeZeroOnEventTwoComplete = new Event(false) {
+	intakeHomeOnEventTwoComplete = new Event(true) {
 		@Override
 		public void start() {
 			this.complete = false;
@@ -268,26 +315,26 @@ public class Paths {
 		public void trigger() {
 			Intake intake = Robot.getIntake();
 			if (stage.eventComplete(2)) {
-				intake.movePosition(0);
-			}
-			if (intake.isComplete()) {
-				this.complete = true;
+				intake.movePosition(-9);
+				if (intake.isComplete()) {
+					this.complete = true;
+				}
 			}
 		}
 	},
-	elevatorZeroOnEventTwoComplete = new Event(false) {
+	elevatorZeroOnEventTwoComplete = new Event(true) {
 		@Override
 		public void start() {
-			this.complete = true;
+			this.complete = false;
 		}
 		@Override
 		public void trigger() {
 			Elevator elevator = Robot.getElevator();
 			if (stage.eventComplete(2)) {
 				elevator.moveToHeight(0);
-			}
-			if (elevator.isComplete()) {
-				this.complete = true;
+				if (elevator.isComplete()) {
+					this.complete = true;
+				}
 			}
 		}
 	},
