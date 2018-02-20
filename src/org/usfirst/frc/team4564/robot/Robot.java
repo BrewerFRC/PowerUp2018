@@ -69,12 +69,12 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Paths.reset();
-		Path path = Paths.FAR_SCALE_LEFT;
-		path.reset();
-		path.start();
+		Path path = Paths.CENTER_SWITCH_RIGHT;
 		elevator.home();
 		dt.getHeading().reset();
+		intake.reset();
+		path.reset();
+		path.start();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
@@ -95,9 +95,6 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
-    	Paths.reset();
-    	Path path = Paths.FAR_SCALE_LEFT;
-    	path.start();
     	elevator.home();
     	intake.reset();
     	while (isEnabled() && isOperatorControl()) {

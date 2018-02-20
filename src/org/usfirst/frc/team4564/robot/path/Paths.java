@@ -18,108 +18,14 @@ public class Paths {
 	public static Path
 			TEST_FAR_SCALE, TEST_NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH_LEFT,
 			FAR_SWITCH_RIGHT, NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT, FAR_SCALE_SWITCH_LEFT, FAR_SCALE_SWITCH_RIGHT,
-			NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE;
+			NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE,
+			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT;
 	
 	public Paths() {
 		// Old Paths Written
 		TEST_FAR_SCALE = new Path()
 			.addDriveStraight(0, 0, 0.65, "startDrive");
 		
-		TEST_NEAR_SCALE = new Path().addDriveStraight(-78, 0, -0.7, "testDrive")
-				.addDriveStraight(-144, 20, -0.7, "testDriveTurn")
-				.addEvent(new Event(true) {
-					boolean distReached = false;
-					@Override
-					public void start() {
-						this.complete = false;
-						this.distReached = false;
-						Common.debug("Start elevator up.");
-					}
-					@Override
-					public void trigger() {
-						if (DriveTrain.instance().getAverageDist() < -10 && !distReached) {
-							distReached = true;
-							Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
-							Robot.getIntake().movePosition(0.0);
-						}
-						if (Robot.getElevator().isComplete()) {
-							this.complete = true;
-						}
-					}
-				}).addEvent(new Event(true) {
-					@Override
-					public void start() {
-						// TODO Auto-generated method stub
-						this.complete = false;
-					}
-					@Override
-					public void trigger() {
-						Intake intake = Robot.getIntake();
-						// TODO Auto-generated method stub
-						if (Robot.getElevator().getInches() >= 30 && Math.abs(DriveTrain.instance().getAverageVelocity()) < 4) {
-							intake.movePosition(150);
-							if (intake.isComplete()) {
-								this.complete = true;
-							}
-						}
-					}
-				}).addEvent(new Event(true) {
-					long startTime = -1;
-					@Override
-					public void start() {
-						this.complete = false;
-						startTime = -1;
-					}
-					@Override
-					public void trigger() {
-						if (stage.eventComplete(1) && startTime == -1) {
-							Common.debug("Complete passed on");
-							startTime = Common.time();
-						}
-						if (Common.time() > startTime + 1000 && startTime != -1) {
-							Robot.getIntake().setIntakePower(0.0);
-							this.complete = true;
-						}
-						else if (startTime > 0) {
-							Robot.getIntake().setIntakePower(-0.5);
-						}
-					}
-				}).addEvent(new Event(true) {
-					@Override
-					public void start() {
-						this.complete = false;
-					}
-					@Override
-					public void trigger() {
-						Intake intake = Robot.getIntake();
-						if (stage.eventComplete(2)) {
-							intake.movePosition(0);
-						}
-						if (intake.isComplete()) {
-							this.complete = true;
-						}
-					}
-				}).addEvent(new Event(true) {
-					@Override
-					public void start() {
-						this.complete = true;
-					}
-					@Override
-					public void trigger() {
-						Elevator elevator = Robot.getElevator();
-						if (stage.eventComplete(2)) {
-							elevator.moveToHeight(0);
-						}
-						if (elevator.isComplete()) {
-							this.complete = true;
-						}
-					}
-				});
-			//addPIDDrive(60, 0, 0.4, 0.7, true, "startDrive");
-			 //.addDriveStraight(203.4, 11.8, 0.6, "angledDrive")
-			 //.addDriveStraight(36, 0, 0.6, "finalDrive");
-		
-		// New Paths Written
 		// Switch Paths
 		FAR_SWITCH_LEFT = new Path()
 			.addDriveStraight(-193.85, 0, .65, "startDrive")
@@ -138,22 +44,26 @@ public class Paths {
 			.addDriveStraight(24, 0, .65, "cubePickupDriveForward");
 		
 		NEAR_SWITCH_LEFT = new Path()
-			.addDriveStraight(-299.7, 0, .65, "startDrive")
-			.addDriveStraight(111.85, 21.8, .65, "middleDrive")
-			.addDriveStraight(24, -21.8, .65, "cubePickupBackUp")
-			.addDriveStraight(-24, 0, .65, "cubePickupDriveForward");
+			.addDriveStraight(-180, 0, -.75, "startDrive")
+			.addDriveStraight(6, 0, 0.75, "middleDrive")
+			.addPowerTurn(-90, 0.75, false)
+			.addEvent(armUp)
+			.addDrivePower(0.45)
+			.addEvent(shoot);
 		
 		NEAR_SWITCH_RIGHT = new Path()
-			.addDriveStraight(-299.7, 0, .65, "startDrive")
-			.addDriveStraight(111.85, -21.8, .65, "middleDrive")
-			.addDriveStraight(-24, 21.8, .65, "cubePickupBackUp")
-			.addDriveStraight(24, 0, .65, "cubePickupDriveForward");
+			.addDriveStraight(-180, 0, -.75, "startDrive")
+			.addDriveStraight(6, 0, 0.75, "middleDrive")
+			.addPowerTurn(90, 0.75, false)
+			.addEvent(armUp)
+			.addDrivePower(0.45)
+			.addEvent(shoot);
 		
 		//Scale Paths
 		FAR_SCALE_LEFT = new Path()
-			.addDriveStraight(-160, 0, -.85, "startDrive")
+			.addDriveStraight(-164, 0, -.85, "startDrive")
 			.addPowerTurn(90, .75, true)
-			.addDriveStraight(-152, 90, -.85, "middleDrive")
+			.addDriveStraight(-136, 90, -.85, "middleDrive")
 			.addPowerTurn(0, .75, true)
 			.addEvent(new Event(false) {
 				@Override
@@ -168,100 +78,236 @@ public class Paths {
 						this.complete = true;
 					}
 				}
-			}).addEvent(new Event(false) {
-				@Override
-				public void start() {
-					// TODO Auto-generated method stub
-					this.complete = false;
-				}
-				@Override
-				public void trigger() {
-					Intake intake = Robot.getIntake();
-					// TODO Auto-generated method stub
-					if (Robot.getElevator().getInches() >= 30 && Math.abs(DriveTrain.instance().getAverageVelocity()) < 4) {
-						intake.movePosition(150);
-						if (intake.isComplete()) {
-							this.complete = true;
-						}
-					}
-				}
-			}).addEvent(new Event(false) {
-				long startTime = -1;
-				@Override
-				public void start() {
-					this.complete = false;
-					startTime = -1;
-				}
-				@Override
-				public void trigger() {
-					if (stage.eventComplete(1) && startTime == -1) {
-						Common.debug("Complete passed on");
-						startTime = Common.time();
-					}
-					if (Common.time() > startTime + 1000 && startTime != -1) {
-						Robot.getIntake().setIntakePower(0.0);
-						this.complete = true;
-					}
-					else if (startTime > 0) {
-						Robot.getIntake().setIntakePower(-0.5);
-					}
-				}
-			}).addEvent(new Event(false) {
-				@Override
-				public void start() {
-					this.complete = false;
-				}
-				@Override
-				public void trigger() {
-					Intake intake = Robot.getIntake();
-					if (stage.eventComplete(2)) {
-						intake.movePosition(0);
-					}
-					if (intake.isComplete()) {
-						this.complete = true;
-					}
-				}
-			}).addEvent(new Event(false) {
-				@Override
-				public void start() {
-					this.complete = true;
-				}
-				@Override
-				public void trigger() {
-					Elevator elevator = Robot.getElevator();
-					if (stage.eventComplete(2)) {
-						elevator.moveToHeight(0);
-					}
-					if (elevator.isComplete()) {
-						this.complete = true;
-					}
-				}
-			});;
+			})
+			.addEvent(intakeOverOnElevatorHeight)
+			.addEvent(shootOnEventOneComplete)
+			.addEvent(intakeZeroOnEventTwoComplete)
+			.addEvent(elevatorZeroOnEventTwoComplete);
 			//.addDriveStraight(-2, -19.1, -.75, "finalDrive");
 		
 		FAR_SCALE_RIGHT = new Path()
-				.addDriveStraight(-160, 0, -.65, "startDrive")
-				.addPowerTurn(-90, .65, true)
-				.addDriveStraight(-152, -90, -.65, "middleDrive")
-				.addPowerTurn(9.1, .65, true)
-				.addDriveStraight(-2, 19.1, -.65, "finalDrive");
+				.addDriveStraight(-164, 0, -.85, "startDrive")
+				.addPowerTurn(-90, .75, true)
+				.addDriveStraight(-136, -90, -.85, "middleDrive")
+				.addPowerTurn(0, .75, true)
+				.addEvent(new Event(false) {
+					@Override
+					public void start() {
+						this.complete = false;
+						Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
+						Robot.getIntake().movePosition(0.0);
+					}
+					@Override
+					public void trigger() {
+						if (Robot.getElevator().isComplete()) {
+							this.complete = true;
+						}
+					}
+				})
+				.addEvent(intakeOverOnElevatorHeight)
+				.addEvent(shootOnEventOneComplete)
+				.addEvent(intakeZeroOnEventTwoComplete)
+				.addEvent(elevatorZeroOnEventTwoComplete);
 		
 		NEAR_SCALE_LEFT = new Path()
-			.addDriveStraight(-159.2+30, 0, -.65, "startDrive")
-			.addDriveStraight(-106.3, 12.4, -.65, "finalDrive");
+				.addDriveStraight(-117, 0, -0.85, "testDrive")
+				.addDriveStraight(-88, 18, -0.85, "testDriveTurn")
+				.addEvent(new Event(true) {
+					boolean distReached = false;
+					@Override
+					public void start() {
+						this.complete = false;
+						this.distReached = false;
+					}
+					@Override
+					public void trigger() {
+						if (DriveTrain.instance().getAverageDist() < -10 && !distReached) {
+							distReached = true;
+							Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
+							Robot.getIntake().movePosition(0.0);
+						}
+						if (Robot.getElevator().isComplete()) {
+							this.complete = true;
+						}
+					}
+				})
+				.addEvent(intakeOverOnElevatorHeight)
+				.addEvent(shootOnEventOneComplete)
+				.addEvent(intakeZeroOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
 		
 		NEAR_SCALE_RIGHT = new Path()
-			.addDriveStraight(-159.2, 0, -.65, "startDrive")
-			.addDriveStraight(-106.3, -12.4, -.65, "finalDrive");
+				.addDriveStraight(-117, 0, -0.85, "testDrive")
+				.addDriveStraight(-88, -18, -0.85, "testDriveTurn")
+				.addEvent(new Event(true) {
+					boolean distReached = false;
+					@Override
+					public void start() {
+						this.complete = false;
+						this.distReached = false;
+					}
+					@Override
+					public void trigger() {
+						if (DriveTrain.instance().getAverageDist() < -10 && !distReached) {
+							distReached = true;
+							Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
+							Robot.getIntake().movePosition(0.0);
+						}
+						if (Robot.getElevator().isComplete()) {
+							this.complete = true;
+						}
+					}
+				})
+				.addEvent(intakeOverOnElevatorHeight)
+				.addEvent(shootOnEventOneComplete)
+				.addEvent(intakeZeroOnEventTwoComplete).addEvent(elevatorZeroOnEventTwoComplete);
 		
 		// Combo Paths
 		FAR_SCALE_SWITCH_LEFT = new Path();
 
 		FAR_SCALE_SWITCH_RIGHT = new Path();
 		
+		CENTER_SWITCH_LEFT = new Path()
+				.addDriveStraight(96, -30, 0.65, "centerDrive")
+				.addEvent(armUp)
+				.addDriveStraight(36, 0, 0.5, "straightDrive")
+				.addEvent(shootWhenStopped);
+		
+		CENTER_SWITCH_RIGHT = new Path()
+				.addDriveStraight(96, 30, 0.65, "centerDrive")
+				.addEvent(armUp)
+				.addDriveStraight(36, 0, 0.5, "straightDrive")
+				.addEvent(shootWhenStopped);
+		
 		// Misc. Paths
 		CROSS_LINE = new Path().addDriveStraight(50, 0, 0.65, "crossLine");
 	}
+	
+	private Event intakeOverOnElevatorHeight = new Event(false) {
+		@Override
+		public void start() {
+			this.complete = false;
+		}
+		@Override
+		public void trigger() {
+			Intake intake = Robot.getIntake();
+			if (Robot.getElevator().getInches() >= 30 && Math.abs(DriveTrain.instance().getAverageVelocity()) < 4) {
+				intake.movePosition(150);
+				if (intake.getPosition() > 140) {
+					this.complete = true;
+				}
+			}
+		}
+	},
+	shootOnEventOneComplete = new Event(false) {
+		long startTime = -1;
+		@Override
+		public void start() {
+			this.complete = false;
+			startTime = -1;
+		}
+		@Override
+		public void trigger() {
+			if (stage.eventComplete(1) && startTime == -1) {
+				Common.debug("Complete passed on");
+				startTime = Common.time();
+			}
+			if (Common.time() > startTime + 1000 && startTime != -1) {
+				Robot.getIntake().setIntakePower(0.0);
+				this.complete = true;
+			}
+			else if (startTime > 0) {
+				Robot.getIntake().setIntakePower(-0.5);
+			}
+		}
+	},
+	shoot = new Event(false) {
+		long startTime = -1;
+		@Override
+		public void start() {
+			this.complete = false;
+			startTime = Common.time();
+		}
+		@Override
+		public void trigger() {
+			if (Common.time() > startTime + 1000 && startTime != -1) {
+				Robot.getIntake().setIntakePower(0.0);
+				this.complete = true;
+			}
+			else if (startTime > 0) {
+				Robot.getIntake().setIntakePower(-0.6);
+			}
+		}
+	},
+	shootWhenStopped = new Event(false) {
+		long startTime = -1;
+		@Override
+		public void start() {
+			this.complete = false;
+			startTime = -1;
+		}
+		@Override
+		public void trigger() {
+			if (DriveTrain.instance().getAverageVelocity() < 2 && startTime == -1) {
+				startTime = Common.time();
+			}
+			if (Common.time() > startTime + 1000 && startTime != -1) {
+				Robot.getIntake().setIntakePower(0.0);
+				this.complete = true;
+			}
+			else if (startTime > 0) {
+				Robot.getIntake().setIntakePower(-0.6);
+			}
+		}
+	},
+	intakeZeroOnEventTwoComplete = new Event(false) {
+		@Override
+		public void start() {
+			this.complete = false;
+		}
+		@Override
+		public void trigger() {
+			Intake intake = Robot.getIntake();
+			if (stage.eventComplete(2)) {
+				intake.movePosition(0);
+			}
+			if (intake.isComplete()) {
+				this.complete = true;
+			}
+		}
+	},
+	elevatorZeroOnEventTwoComplete = new Event(false) {
+		@Override
+		public void start() {
+			this.complete = true;
+		}
+		@Override
+		public void trigger() {
+			Elevator elevator = Robot.getElevator();
+			if (stage.eventComplete(2)) {
+				elevator.moveToHeight(0);
+			}
+			if (elevator.isComplete()) {
+				this.complete = true;
+			}
+		}
+	},
+	armUp = new Event(false) {
+
+		@Override
+		public void start() {
+			this.complete = false;
+			Common.debug("Arm set");
+			Robot.getIntake().movePosition(Robot.getIntake().MAX_ELEVATOR_SAFE-5);
+		}
+
+		@Override
+		public void trigger() {
+			Common.debug("Arm angle: " + Robot.getIntake().getPosition());
+			if (Robot.getIntake().isComplete()) {
+				this.complete = true;
+			}
+		}
+	};
 	
 	/**
 	 * Resets the state of the pre-builts paths.

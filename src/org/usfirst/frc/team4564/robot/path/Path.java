@@ -158,6 +158,11 @@ public class Path {
 		return this;
 	}
 	
+	public Path addDrivePower(double power) {
+		stages.add(new DrivePower(power));
+		return this;
+	}
+	
 	/**
 	 * Adds another power turn stage with the given parameters.
 	 * 

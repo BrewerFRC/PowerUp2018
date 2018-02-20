@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .053, ACCEL_HG_HE = 0.01, ACCEL_LG_LE = 0.04, ACCEL_LG_HE = 0.01, DRIVEMIN = 0.4;
+	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .047, ACCEL_HG_HE = 0.01, ACCEL_LG_LE = 0.04, ACCEL_LG_HE = 0.01, DRIVEMIN = 0.4;
 
 	public static final double TURNACCEL = .06;
 

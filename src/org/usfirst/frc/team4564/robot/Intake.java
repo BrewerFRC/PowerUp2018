@@ -1,7 +1,5 @@
 package org.usfirst.frc.team4564.robot;
 
-import org.usfirst.frc.team4564.robot.Elevator.States;
-
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,7 +50,7 @@ public class Intake {
 	private long intakeTime = 0;
 	public double velocity = 0.0;
 	public double targetVelocity = 0.0;
-	public double position;
+	public double position = 64;
 	private long previousMillis = Common.time();
 	
 	public enum States {
@@ -69,6 +67,7 @@ public class Intake {
 		pid.setVelocityScalars(P_VEL, I_VEL, D_VEL);
 		pid.setVelocityInverted(true);
 		pid.setPositionInverted(true);
+		pid.setTargetPosition(60);
 		intakeArm.setInverted(true);
 		leftIntake.setInverted(true);
 		Thread t = new Thread(new PotUpdate());
@@ -91,6 +90,7 @@ public class Intake {
 		} else {
 			if (getPosition() <= MIN_ANGLE) { 
 				power = 0.0;
+				pid.reset();
 			}
 		}
 		power = rampPower(power);
@@ -120,6 +120,7 @@ public class Intake {
 		final double MIDDLE_POWER = 0.7;
 		final double MAX_POWER = 1.0;
 		final double MIN_POWER = 0.0;
+		final double LOW_POWER = 0.05;
 		double maxPower = 0.0;
 		double minPower = 0.0;
 		if (Robot.getElevator().intakeSafe())
@@ -141,11 +142,11 @@ public class Intake {
 				}
 		} else {
 			if ( power > 0.0) {
-				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, 0.05);
+				maxPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, MAX_POWER, LOW_POWER);
 				//Common.dashNum("Max Power Map", maxPower);
 				power = Math.min(power, maxPower);
 			} else {
-				minPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, -MIN_POWER, -MIDDLE_POWER);
+				minPower = Common.map(getPosition(), MIN_ANGLE, MAX_ELEVATOR_SAFE, -LOW_POWER, -MIDDLE_POWER);
 				power = Math.max(power, minPower);
 			}
 		}
@@ -299,13 +300,19 @@ public class Intake {
 	 */
 	public void moveVelocity(double velocity) {
 		double maxAngle = getMaxAngle();
+		double calc = 0;
 		if (!Robot.getElevator().intakeSafe() && getPosition() > maxAngle) {
 			pid.setTargetVelocity(0.0);
 		}
 		else {
 			pid.setTargetVelocity(velocity);
 		}
-		double calc = pid.calcVelocity(getVelocity()) + G * Math.cos(Math.max(0, getPosition()));
+		if (velocity >= 0.0) {
+			calc = pid.calcVelocity(getVelocity()) + G * Math.cos(Math.max(0, getPosition()));
+		}
+		else {
+			calc = pid.calcVelocity(getVelocity());
+		}
 		setAccelArmPower(calc);
 	}
 	
@@ -322,6 +329,7 @@ public class Intake {
 	}
 	
 	public void reset() {
+		state = States.STOPPED;
 		pid.reset();
 	}
 	
@@ -368,8 +376,8 @@ public class Intake {
 				setAccelArmPower(0.0);
 				break;
 			case HOLDING:
-				pidPosMove();
-				//moveVelocity(0.0);
+				//pidPosMove();
+				moveVelocity(0.0);
 				break;
 			case MOVING:
 				if (isComplete()) {

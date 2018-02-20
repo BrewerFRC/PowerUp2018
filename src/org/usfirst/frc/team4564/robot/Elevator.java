@@ -26,7 +26,7 @@ public class Elevator {
 	//Elevator height in inches(random value
 	public final double COUNTS_PER_INCH = 7414/65.5, 
 			//Absolute elevator travel is 66.75 inches
-			ELEVATOR_HEIGHT = 66.25,
+			ELEVATOR_HEIGHT = 66.5,
 			//The height the elevator should be positioned at to drop in the switch.
 			SWITCH_HEIGHT = 25,
 			//How close to the targetHeight that elevator can be to complete
@@ -37,10 +37,12 @@ public class Elevator {
 			MAX_UP_POWER = 1.0,
 			MAX_DOWN_POWER = -0.9,
 			//The minimum power that the elevator can be run at upward
-			MIN_UP_POWER = 0.1,
+			MIN_UP_POWER = 0.12,
 			MIN_DOWN_POWER = -0.02,
 			//The maximum power change
 			MAX_DELTA_POWER = 0.1,
+			//In inches per second, for velocity ramping
+			MIN_VELOCITY = 0.5,
 			//In inches per second, for position PID
 			MAX_POS_VELOCITY = 45,
 			//Maximum velocity while using the joystick
@@ -48,7 +50,7 @@ public class Elevator {
 			//For encoder test function, minimum values to move the robot in different directions
 			ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.12,
 			//For Velocity ramping
-			DANGER_VEL_ZONE = 30;
+			DANGER_VEL_ZONE = 20;
 	
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
@@ -60,6 +62,7 @@ public class Elevator {
 			moveCheck = -1,
 			//The previous counts of the encoder 
 			previousCounts = 0.0;
+	long startTime;
 	
 	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_POS_VELOCITY, MAX_POS_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
@@ -70,7 +73,8 @@ public class Elevator {
 		HOMING,  //Brings elevator slowly to the bottom most position possible, sets the offset. Must be done before any use of elevator.
 		HOLDING, //State of the elevator holding position, both types of elevator usage can be used from this state.
 		MOVING, //State of elevator moving to a target position within the ACCEPTABLE_ERROR.
-		JOYSTICK; //Moves the elevator by a desired power returns to IDLE after setting the power once.
+		JOYSTICK, //Moves the elevator by a desired power returns to IDLE after setting the power once.
+		START; //Executes at the beginning of auto.
 	}
 	States state = States.STOPPED;
 	
@@ -197,14 +201,15 @@ public class Elevator {
 	 * @param targetVelocity -The target speed for the robot to move in inches per second
 	 */
 	public void pidVelMove(double targetVelocity) {
+		double SAFE_HEIGHT = ELEVATOR_HEIGHT - 0.25;
 		if (targetVelocity >= 0.0) {
-			if (getInches() >= ELEVATOR_HEIGHT - DANGER_VEL_ZONE) {
-				double rampMap = Common.map(ELEVATOR_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, 0.1, MAX_J_VELOCITY);
+			if (getInches() >= SAFE_HEIGHT - DANGER_VEL_ZONE) {
+				double rampMap = Common.map(SAFE_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, MIN_VELOCITY, MAX_J_VELOCITY);
 				targetVelocity = Math.min(targetVelocity, rampMap);
 			}
 		} else {
-			if (getInches() >= DANGER_ZONE) {
-				double rampMap = Common.map(getInches(), 0, DANGER_ZONE, 0.1, -MAX_J_VELOCITY);
+			if (getInches() >= DANGER_VEL_ZONE) {
+				double rampMap = Common.map(getInches(), 0, DANGER_VEL_ZONE, -MIN_VELOCITY, -MAX_J_VELOCITY);
 				targetVelocity = Math.max(targetVelocity, rampMap);
 			}
 		}
@@ -279,6 +284,11 @@ public class Elevator {
 		state = States.HOMING;
 	}
 	
+	public void start() {
+		state = States.START;
+		startTime = Common.time();
+	}
+	
 	/**
 	 * Gets the state of the elevator
 	 * 
@@ -351,7 +361,6 @@ public class Elevator {
 	public void moveToHeight(double targetHeight) {
 		if (state != States.STOPPED && state != States.HOMING && state != States.JOYSTICK) {
 			pid.setTargetPosition(targetHeight);
-			Common.debug("New State Moving");
 			state = States.MOVING;
 		}
 	}
@@ -401,10 +410,13 @@ public class Elevator {
 				setPower(0.0);
 				pid.setTargetPosition(0);
 				Common.debug("New state Holding");
-				state = States.HOLDING;
+				state = States.START;
 			} else {
 				setPower(-0.1);
 			}
+			break;
+		case START:
+			moveToHeight(5);
 			break;
 		case HOLDING:
 			pidDisMove();
@@ -421,7 +433,7 @@ public class Elevator {
 			//Common.debug("new State Idle");
 			if (state == States.JOYSTICK){
 				state = States.HOLDING;
-				pid.setTargetPosition(getInches());
+				pid.setTargetPosition(Math.min(ELEVATOR_HEIGHT - 0.25, getInches()));
 			}
 			break;
 		}
