@@ -188,7 +188,7 @@ public class Paths {
 				.addEvent(intakeHomeOnEventTwoComplete)
 				.addEvent(elevatorZeroOnEventTwoComplete)
 				.addDriveStraight(18, 18, 0.65, "DriveBack")
-				.addDriveStraight(12, -18, 0.6, "drive")
+				.addDriveStraight(24, -18, 0.6, "drive")
 				.addEvent(new Event(true) {
 
 					@Override
@@ -315,7 +315,7 @@ public class Paths {
 		public void trigger() {
 			Intake intake = Robot.getIntake();
 			if (stage.eventComplete(2)) {
-				intake.movePosition(-9);
+				intake.movePosition(-7);
 				if (intake.isComplete()) {
 					this.complete = true;
 				}
