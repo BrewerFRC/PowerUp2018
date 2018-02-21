@@ -69,7 +69,7 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Path path = Paths.TWO_CUBE_LEFT_NO_DROP;
+		Path path = Paths.TWO_CUBE_RIGHT_SWITCH;
 		elevator.home();
 		dt.getHeading().reset();
 		intake.reset();

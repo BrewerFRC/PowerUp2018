@@ -232,7 +232,7 @@ public class Intake {
 	public boolean loadCube(double power) {
 		if (isPartiallyLoaded()) {
 			if (Common.time() > intakeTime) {
-				setIntakePower(0);
+				setIntakePower(0.0);
 				intakeTime = 0;
 				return true;
 			} else {
@@ -367,6 +367,10 @@ public class Intake {
 		}
 	}
 	
+	public double getPositionTarget() {
+		return pid.getTargetPosition();
+	}
+	
 	/**
 	 * Whether or not the elevator is within acceptable range of the position target.
 	 * 
@@ -404,7 +408,6 @@ public class Intake {
 				//Common.debug("new State Idle");
 				if (state == States.JOYSTICK){
 					state = States.HOLDING;
-					Common.debug("New target position: " + Math.max(MIN_ANGLE + 1, Math.min(getPosition() + velocity*0.1, getMaxAngle()-1)));
 					pid.setTargetPosition(Math.max(MIN_ANGLE + 1, Math.min(getPosition() + velocity*0.1, getMaxAngle()-1)));
 				}
 				break;

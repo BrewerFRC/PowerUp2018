@@ -53,11 +53,11 @@ public abstract class Event {
 	/**
 	 * The custom event code to run event startup code.
 	 */
-	public abstract void start();
+	public abstract void start(Stage stage);
 	
 	/**
 	 * The custom event code to handle motion and logic of robot parts.
 	 * Should also contain the condition for initiating the event and determining whether it is complete.
 	 */
-	public abstract void trigger();
+	public abstract void trigger(Stage stage);
 }

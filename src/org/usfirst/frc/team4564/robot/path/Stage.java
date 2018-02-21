@@ -31,7 +31,7 @@ public abstract class Stage {
 	 */
 	public void reset() {
 		for (Event event : events) {
-			event.start();
+			event.start(this);
 			event.reset();
 		}
 	}
@@ -41,7 +41,7 @@ public abstract class Stage {
 	 */
 	public void startEvents() {
 		for (Event event : events) {
-			event.start();
+			event.start(this);
 		}
 	}
 	
@@ -50,7 +50,7 @@ public abstract class Stage {
 	 */
 	public void triggerEvents() {
 		for (Event event : events) {
-			event.trigger();
+			event.trigger(this);
 		}
 	 }
 	
