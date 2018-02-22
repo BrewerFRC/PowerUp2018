@@ -46,11 +46,13 @@ public abstract class Stage {
 	}
 	
 	/**
-	 * Runs trigger routine for all events.  Should only activate events which have met a starting condition.
+	 * Runs trigger routine for all uncompleted events.  Should only activate events which have met a starting condition.
 	 */
 	public void triggerEvents() {
 		for (Event event : events) {
-			event.trigger(this);
+			if (!event.complete) {
+				
+			}
 		}
 	 }
 	
