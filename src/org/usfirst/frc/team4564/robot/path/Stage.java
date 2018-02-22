@@ -51,7 +51,7 @@ public abstract class Stage {
 	public void triggerEvents() {
 		for (Event event : events) {
 			if (!event.complete) {
-				
+				event.trigger(this);
 			}
 		}
 	 }
