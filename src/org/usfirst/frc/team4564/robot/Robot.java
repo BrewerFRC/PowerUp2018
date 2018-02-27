@@ -1,4 +1,5 @@
 package org.usfirst.frc.team4564.robot;
+import org.usfirst.frc.team4564.robot.Elevator.States;
 import org.usfirst.frc.team4564.robot.path.Path;
 import org.usfirst.frc.team4564.robot.path.Paths;
 
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The main class for the FIRST Power Up 2018 season robot.
@@ -45,18 +47,34 @@ public class Robot extends SampleRobot {
 	@Override
 	public void disabled() {
 		//dt.getHeading().calibrate();
+		SmartDashboard.putString("Position", auto.position + "");
+		SmartDashboard.putString("Mode", auto.mode.toString());
 		while (isDisabled()) {
 			compressor.setClosedLoopControl(true);
 			gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if(gameData != null) {
 				Common.dashStr("Game Data", gameData);
 				if (gameData.length() == 3) {
-					auto.setGameData(gameData);
-					Common.dashBool("Do You Have Game Data", true);
-					auto.setGameData(gameData);
-				} else {
-					Common.dashBool("Do You Have Game Data" , false);
+					auto.setGameData(gameData.toUpperCase());
 				}
+			}
+			if (driver.when("x")) {
+				auto.setPosition('L');
+			}
+			else if (driver.when("y")) {
+				auto.setPosition('C');
+			}
+			else if (driver.when("b")) {
+				auto.setPosition('R');
+			}
+			else if (driver.when("dPadLeft")) {
+				auto.setMode(Auto.Mode.CROSS_LINE);
+			}
+			else if (driver.when("dPadUp")) {
+				auto.setMode(Auto.Mode.SCALE);
+			}
+			else if (driver.when("dPadDown")) {
+				auto.setMode(Auto.Mode.CLOSE);
 			}
 			elevator.debug();
 			dashBoard();
@@ -69,7 +87,8 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void autonomous() {
-		Path path = Paths.TWO_CUBE_RIGHT_SWITCH;
+		//Path path = Paths.TWO_CUBE_RIGHT_SWITCH;
+		Path path = auto.getPath();
 		elevator.home();
 		dt.getHeading().reset();
 		intake.reset();
@@ -95,13 +114,18 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
     	long time;
-    	elevator.home();
+    	if (elevator.getState() == States.STOPPED) {
+    		elevator.home();
+    	}
     	intake.reset();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
     		double turn = 0;
     		compressor.setClosedLoopControl(true);
+    		auto.getPath();
+			SmartDashboard.putString("Position", "" + auto.position);
+			SmartDashboard.putString("Mode", auto.mode.toString());
     		
     		//Drivetrain
     		//	Shifting
@@ -165,6 +189,16 @@ public class Robot extends SampleRobot {
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
     }
+	
+	public void test() {
+		while (isTest()) {
+			compressor.setClosedLoopControl(true);
+			auto.getPath();
+			SmartDashboard.putString("Position", "" + auto.position);
+			SmartDashboard.putString("Mode", auto.mode.toString());
+			dashBoard();
+		}
+	}
 	
 	public void dashBoard() {
 		Common.dashBool("Intake elevatorSafe", intake.elevatorSafe());

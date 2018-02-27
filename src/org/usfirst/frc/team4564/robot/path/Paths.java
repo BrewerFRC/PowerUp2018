@@ -16,15 +16,18 @@ import org.usfirst.frc.team4564.robot.Robot;
  */
 public class Paths {
 	public static Path
-			TEST_FAR_SCALE, TEST_NEAR_SCALE, FAR_SCALE_SWITCH, NEAR_SCALE_SWITCH, FAR_SWITCH_LEFT,
-			FAR_SWITCH_RIGHT, NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT, FAR_SCALE_SWITCH_LEFT, FAR_SCALE_SWITCH_RIGHT,
-			NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, FAR_SCALE_LEFT, FAR_SCALE_RIGHT, CROSS_LINE,
-			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT, TWO_CUBE_LEFT_SWITCH, TWO_CUBE_RIGHT_SWITCH, TWO_CUBE_LEFT_SCALE,
+			NEAR_SWITCH_LEFT, NEAR_SWITCH_RIGHT,
+			NEAR_SCALE_LEFT, NEAR_SCALE_RIGHT, 
+			FAR_SCALE_LEFT, FAR_SCALE_RIGHT, 
+			CROSS_LINE,
+			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT, 
+			TWO_CUBE_LEFT_SWITCH, TWO_CUBE_RIGHT_SWITCH, 
+			TWO_CUBE_LEFT_SCALE,
 			TWO_CUBE_LEFT_STOP, TWO_CUBE_RIGHT_STOP;
 	
 	public Paths() {
 		//Backup paths
-		CROSS_LINE = new Path().addDriveStraight(50, 0, 0.65, "crossLine");
+		CROSS_LINE = new Path().addDriveStraight(-95, 0, 0.65, "crossLine");
 		
 		CENTER_SWITCH_LEFT = new Path()
 				.addDriveStraight(96, -30, 0.65, "centerDrive")
@@ -59,8 +62,9 @@ public class Paths {
 		FAR_SCALE_LEFT = new Path()
 			.addDriveStraight(-164, 0, -.85, "startDrive")
 			.addPowerTurn(90, .75, true)
-			.addDriveStraight(-136, 90, -.85, "middleDrive")
+			.addDriveStraight(-132, 90, -.85, "middleDrive")
 			.addPowerTurn(0, .75, true)
+			.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
 			.addEvent(elevatorUpAtDistance(0))
 			.addEvent(intakeOverOnElevatorHeight())
 			.addEvent(shootOnEventComplete(1))
@@ -70,8 +74,9 @@ public class Paths {
 		FAR_SCALE_RIGHT = new Path()
 				.addDriveStraight(-164, 0, -.85, "startDrive")
 				.addPowerTurn(-90, .75, true)
-				.addDriveStraight(-136, -90, -.85, "middleDrive")
+				.addDriveStraight(-132, -90, -.85, "middleDrive")
 				.addPowerTurn(0, .75, true)
+				.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
 				.addEvent(elevatorUpAtDistance(0))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1))
@@ -163,8 +168,8 @@ public class Paths {
 	public Path nearScaleLeft() {
 		return new Path()
 				.addDriveStraight(-117, 0, -0.85, "testDrive")
-				.addDriveStraight(-88, 18, -0.85, "testDriveTurn")
-				.addEvent(elevatorUpAtDistance(-10))
+				.addDriveStraight(-88, 17, -0.85, "testDriveTurn")
+				.addEvent(elevatorUpAtDistance(-20))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1))
 				.addEvent(intakeHomeOnEventComplete(2))
@@ -178,8 +183,8 @@ public class Paths {
 	public Path nearScaleRight() {
 		return new Path()
 				.addDriveStraight(-117, 0, -0.85, "testDrive")
-				.addDriveStraight(-88, -18, -0.85, "testDriveTurn")
-				.addEvent(elevatorUpAtDistance(-10))
+				.addDriveStraight(-88, -17, -0.85, "testDriveTurn")
+				.addEvent(elevatorUpAtDistance(-20))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1))
 				.addEvent(intakeHomeOnEventComplete(2))
@@ -194,8 +199,8 @@ public class Paths {
 	public Path nearScaleLeftPickupSecond() {
 		return nearScaleLeft()
 		.addDriveStraight(18, 18, 0.75, "DriveBack")
-		.addDriveStraight(26, -18, 0.6, "drive")
-		.addEvent(loadCube());
+		.addDriveStraight(21, -18, 0.6, "drive")
+		.addEvent(loadCubeLeft());
 	}
 	/**
 	 * Near scale right and picks up a second cube.
@@ -205,8 +210,8 @@ public class Paths {
 	public Path nearScaleRightPickupSecond() {
 		return nearScaleRight()
 		.addDriveStraight(18, -18, 0.75, "DriveBack")
-		.addDriveStraight(26, 18, 0.6, "drive")
-		.addEvent(loadCube());
+		.addDriveStraight(21, 18, 0.6, "drive")
+		.addEvent(loadCubeRight());
 	}
 		
 	///////////////////////////////////////////////
@@ -254,7 +259,7 @@ public class Paths {
 					Robot.getElevator().moveToHeight(Robot.getElevator().ELEVATOR_HEIGHT);
 					Robot.getIntake().movePosition(Robot.getIntake().MAX_ELEVATOR_SAFE);
 				}
-				if (Robot.getElevator().isComplete()) {
+				if (Robot.getElevator().isComplete() && distReached) {
 					this.complete = true;
 				}
 			}
@@ -454,7 +459,7 @@ public class Paths {
 	 * 
 	 * @return - the event
 	 */
-	public Event loadCube() {
+	public Event loadCubeLeft() {
 		return new Event(true) {
 			@Override
 			public void start(Stage stage) {
@@ -462,7 +467,32 @@ public class Paths {
 			}
 			@Override
 			public void trigger(Stage stage) {
-				if (Robot.getIntake().loadCube(1.0)) {
+				Robot.getIntake().setLeftIntakePower(1.0);
+				Robot.getIntake().setRightIntakePower(0.5);
+				if (Robot.getIntake().isPartiallyLoaded()) {
+					Robot.getIntake().setIntakePower(0.0);
+					complete = true;
+				}
+			}
+		};
+	}
+	
+	/**
+	 * Loads cube at the beginning of the stage. Complete when the intake reads a cube.
+	 * 
+	 * @return - the event
+	 */
+	public Event loadCubeRight() {
+		return new Event(true) {
+			@Override
+			public void start(Stage stage) {
+				complete = false;
+			}
+			@Override
+			public void trigger(Stage stage) {
+				Robot.getIntake().setLeftIntakePower(0.5);
+				Robot.getIntake().setRightIntakePower(1.0);
+				if (Robot.getIntake().isPartiallyLoaded()) {
 					Robot.getIntake().setIntakePower(0.0);
 					complete = true;
 				}
