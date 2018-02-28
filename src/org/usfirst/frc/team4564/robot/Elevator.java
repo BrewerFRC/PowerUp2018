@@ -433,7 +433,7 @@ public class Elevator {
 			//Common.debug("new State Idle");
 			if (state == States.JOYSTICK){
 				state = States.HOLDING;
-				pid.setTargetPosition(Math.min(ELEVATOR_HEIGHT - 0.25, getInches()));
+				pid.setTargetPosition(Math.max(0, Math.min(ELEVATOR_HEIGHT - 0.25, getInches() + 0.13*getVelocity())));
 			}
 			break;
 		}

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 @SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
+	public static Robot instance;
 	private static DriveTrain dt = new DriveTrain();
 	private static Intake intake = new Intake();
 	private static Elevator elevator = new Elevator(intake);
@@ -36,6 +37,7 @@ public class Robot extends SampleRobot {
 	
 	@Override
 	public void robotInit() {
+		instance = this;
 		//Initialize all paths.
 		new Paths();
 		//elevator.resetEncoder();
@@ -123,7 +125,6 @@ public class Robot extends SampleRobot {
     		double forward = 0;
     		double turn = 0;
     		compressor.setClosedLoopControl(true);
-    		auto.getPath();
 			SmartDashboard.putString("Position", "" + auto.position);
 			SmartDashboard.putString("Mode", auto.mode.toString());
     		
@@ -226,5 +227,8 @@ public class Robot extends SampleRobot {
 	}
 	public static Intake getIntake() {
 		return intake;
+	}
+	public static Robot instance() {
+		return instance;
 	}
 }

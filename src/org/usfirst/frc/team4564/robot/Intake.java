@@ -25,7 +25,7 @@ public class Intake {
 			//The angle at which the intake is horizontal out the front.
 			FRONT_HORIZONTAL = 0,
 			MIN_POSITION = 210, MAX_POSITION = 3593, 
-			MIN_ANGLE = -12, MAX_ANGLE = 170, 
+			MIN_ANGLE = -12, MAX_ANGLE = 160, 
 			MAX_ABS_ANGLE = 209.0041,
 			//The degrees that the power ramping takes place in at the limits
 			DANGER_ZONE = 25,
@@ -306,7 +306,7 @@ public class Intake {
 		if ((lastVelocityTarget > 0 && velocity < 0) || (lastVelocityTarget < 0 && velocity > 0)) {
 			pid.resetVelocityPID();
 		}
-		if (!Robot.getElevator().intakeSafe() && getPosition() > maxAngle) {
+		if (getPosition() > maxAngle && velocity > 0) {
 			pid.setTargetVelocity(0.0);
 		}
 		else {
@@ -358,8 +358,13 @@ public class Intake {
 	
 	public double getMaxAngle() {
 		if (Robot.getElevator().intakeSafe()) {
-			Common.dashBool("MAX_ANGLE", true);
-			return MAX_ANGLE;
+			if (Robot.instance().isOperatorControl()) {
+				return 110;
+			}
+			else {
+				Common.dashBool("MAX_ANGLE", true);
+				return MAX_ANGLE;
+			}
 		} 
 		else {
 			Common.dashBool("MAX_ANGLE", false);
