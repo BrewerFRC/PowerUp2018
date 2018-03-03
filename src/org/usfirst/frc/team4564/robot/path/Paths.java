@@ -60,14 +60,18 @@ public class Paths {
 		
 		//Scale Paths
 		FAR_SCALE_LEFT = new Path()
-			.addDriveStraight(-164, 0, -.85, "startDrive")
+			//.addDriveStraight(-164, 0, -.85, "startDrive")
+			.addDriveStraight(-168, 0, -.85, "startDrive") //added 4 inches
 			.addPowerTurn(90, .75, true)
-			.addDriveStraight(-132, 90, -.85, "middleDrive")
+			//.addDriveStraight(-132, 90, -.85, "middleDrive")
+			.addDriveStraight(-134, 90, -.85, "middleDrive") //added 2 inches
 			.addPowerTurn(0, .75, true)
-			.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
+			//.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
+			//.addDriveStraight(1, DriveTrain.instance().getHeading().getAngle(), 0.5, "drive") //added some distance(1 inch at 0.5) 
+			.addDriveStraight(-7, DriveTrain.instance().getHeading().getAngle(), -0.5, "drive") //previously drove wrong direction, Was -5 changed to -7
 			.addEvent(elevatorUpAtDistance(0))
 			.addEvent(intakeOverOnElevatorHeight())
-			.addEvent(shootOnEventComplete(1))
+			.addEvent(shootOnEventComplete(1, -0.6))
 			.addEvent(intakeHomeOnEventComplete(2))
 			.addEvent(elevatorZeroOnEventTwoComplete());
 		
@@ -79,7 +83,7 @@ public class Paths {
 				.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
 				.addEvent(elevatorUpAtDistance(0))
 				.addEvent(intakeOverOnElevatorHeight())
-				.addEvent(shootOnEventComplete(1))
+				.addEvent(shootOnEventComplete(1, -0.6))
 				.addEvent(intakeHomeOnEventComplete(2))
 				.addEvent(elevatorZeroOnEventTwoComplete());
 		
@@ -151,7 +155,7 @@ public class Paths {
 				.addDriveStraight(-36, 5, -0.65, "drive")
 				.addEvent(elevatorUpAtDistance(0))
 				.addEvent(intakeOverOnElevatorHeight())
-				.addEvent(shootOnEventComplete(1))
+				.addEvent(shootOnEventComplete(1, -0.5))
 				.addEvent(intakeHomeOnEventComplete(2))
 				.addEvent(elevatorZeroOnEventTwoComplete());
 	}
@@ -167,11 +171,13 @@ public class Paths {
 	 */
 	public Path nearScaleLeft() {
 		return new Path()
-				.addDriveStraight(-117, 0, -0.85, "testDrive")
+				//.addDriveStraight(-117, 0, -0.85, "testDrive")
+				.addDriveStraight(-121, 0, -0.85, "testDrive")
 				.addDriveStraight(-88, 17, -0.85, "testDriveTurn")
+				//.addDriveStraight(-94, 17, -0.85, "testDriveTurn") //ran test but too close to platform
 				.addEvent(elevatorUpAtDistance(-20))
 				.addEvent(intakeOverOnElevatorHeight())
-				.addEvent(shootOnEventComplete(1))
+				.addEvent(shootOnEventComplete(1, -0.6))
 				.addEvent(intakeHomeOnEventComplete(2))
 				.addEvent(elevatorZeroOnEventTwoComplete());
 	}
@@ -186,7 +192,7 @@ public class Paths {
 				.addDriveStraight(-88, -17, -0.85, "testDriveTurn")
 				.addEvent(elevatorUpAtDistance(-20))
 				.addEvent(intakeOverOnElevatorHeight())
-				.addEvent(shootOnEventComplete(1))
+				.addEvent(shootOnEventComplete(1, -0.6))
 				.addEvent(intakeHomeOnEventComplete(2))
 				.addEvent(elevatorZeroOnEventTwoComplete());
 	}
@@ -198,8 +204,10 @@ public class Paths {
 	 */
 	public Path nearScaleLeftPickupSecond() {
 		return nearScaleLeft()
-		.addDriveStraight(18, 18, 0.75, "DriveBack")
-		.addDriveStraight(21, -18, 0.6, "drive")
+//		.addDriveStraight(18, 18, 0.75, "DriveBack")
+//		.addDriveStraight(21, -18, 0.6, "drive")
+		.addDriveStraight(21, 18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
+		.addDriveStraight(24, -18, 0.6, "drive")
 		.addEvent(loadCubeLeft());
 	}
 	/**
@@ -398,7 +406,7 @@ public class Paths {
 	 * @param event - the event index to listen on
 	 * @return - the event
 	 */
-	public Event shootOnEventComplete(int event) {
+	public Event shootOnEventComplete(int event, double power) {
 		return new Event(true) {
 			long startTime = -1;
 			@Override
@@ -419,7 +427,7 @@ public class Paths {
 					this.complete = true;
 				}
 				else if (startTime > 0) {
-					Robot.getIntake().setIntakePower(-0.5);
+					Robot.getIntake().setIntakePower(power);
 				}
 			}
 		};

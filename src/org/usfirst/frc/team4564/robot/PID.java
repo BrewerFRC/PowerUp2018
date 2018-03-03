@@ -53,19 +53,19 @@ public class PID {
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
 		
-		SmartDashboard.putNumber(this.name + "P", this.p);
-		SmartDashboard.putNumber(this.name + "I", this.i);
-		SmartDashboard.putNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "P", this.p);
+		//SmartDashboard.putNumber(this.name + "I", this.i);
+		//SmartDashboard.putNumber(this.name + "D", this.d);
 	}
 	
 	/**
 	 * Update the scaler terms with the latest NetworkTables values.
 	 */
 	public void update() {
-		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
-		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
-		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
-		SmartDashboard.putNumber(this.name + "DShow", this.d);
+		//this.p = SmartDashboard.getNumber(this.name + "P", this.p);
+		//this.i = SmartDashboard.getNumber(this.name + "I", this.i);
+		//this.d = SmartDashboard.getNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "DShow", this.d);
 		SmartDashboard.putNumber(this.name + "Target", getTarget());
 	}
 	
@@ -73,9 +73,9 @@ public class PID {
 	 * Post the current PID coefficients to SmartDashboard.
 	 */
 	public void postCoefficients() {
-		SmartDashboard.putNumber(this.name + "P", this.p);
-		SmartDashboard.putNumber(this.name + "I", this.i);
-		SmartDashboard.putNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "P", this.p);
+		//SmartDashboard.putNumber(this.name + "I", this.i);
+		//SmartDashboard.putNumber(this.name + "D", this.d);
 	}
 	
 	/**

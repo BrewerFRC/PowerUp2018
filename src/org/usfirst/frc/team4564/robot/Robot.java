@@ -80,6 +80,7 @@ public class Robot extends SampleRobot {
 			}
 			elevator.debug();
 			dashBoard();
+    		Timer.delay(0.001);
 		}
 	}
 	
