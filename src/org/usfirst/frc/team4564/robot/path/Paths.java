@@ -13,6 +13,7 @@ import org.usfirst.frc.team4564.robot.Robot;
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
  * @author Jacob Cote
+ * @author Brent Roberts
  */
 public class Paths {
 	public static Path
