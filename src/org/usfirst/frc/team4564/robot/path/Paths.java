@@ -28,7 +28,7 @@ public class Paths {
 	
 	public Paths() {
 		//Backup paths
-		CROSS_LINE = new Path().addDriveStraight(-95, 0, 0.65, "crossLine");
+		CROSS_LINE = new Path().addDriveStraight(-95, 0, -0.65, "crossLine");
 		
 		CENTER_SWITCH_LEFT = new Path()
 				.addDriveStraight(96, -30, 0.65, "centerDrive")
