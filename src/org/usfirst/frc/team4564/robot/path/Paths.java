@@ -22,7 +22,7 @@ public class Paths {
 			CROSS_LINE,
 			CENTER_SWITCH_LEFT, CENTER_SWITCH_RIGHT, 
 			TWO_CUBE_LEFT_SWITCH, TWO_CUBE_RIGHT_SWITCH, 
-			TWO_CUBE_LEFT_SCALE,
+			TWO_CUBE_LEFT_SCALE, TWO_CUBE_RIGHT_SCALE,
 			TWO_CUBE_LEFT_STOP, TWO_CUBE_RIGHT_STOP;
 	
 	public Paths() {
@@ -153,6 +153,15 @@ public class Paths {
 		//Near scale on left side, then second cube in near scale.
 		TWO_CUBE_LEFT_SCALE = nearScaleLeftPickupSecond()
 				.addDriveStraight(-36, 5, -0.65, "drive")
+				.addEvent(elevatorUpAtDistance(0))
+				.addEvent(intakeOverOnElevatorHeight())
+				.addEvent(shootOnEventComplete(1, -0.5))
+				.addEvent(intakeHomeOnEventComplete(2))
+				.addEvent(elevatorZeroOnEventTwoComplete());
+		
+		//Near scale on left side, then second cube in near scale 
+		TWO_CUBE_RIGHT_SCALE =nearScaleRightPickupSecond()
+				.addDriveStraight(-36, -5, -0.65, "drive")
 				.addEvent(elevatorUpAtDistance(0))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1, -0.5))
