@@ -62,23 +62,31 @@ public class Paths {
 		//Scale Paths
 		FAR_SCALE_LEFT = new Path()
 			//.addDriveStraight(-164, 0, -.85, "startDrive")
-			.addDriveStraight(-168, 0, -.85, "startDrive") //added 4 inches
-			.addPowerTurn(90, .75, true)
+			//.addDriveStraight(-168, 0, -.85, "startDrive") //added 4 inches
+			.addDriveStraight(-172, 0, -.85, "startDrive") //added another 4 (WPI day 2) 
+		 	.addPowerTurn(90, .75, true)
 			//.addDriveStraight(-132, 90, -.85, "middleDrive")
-			.addDriveStraight(-134, 90, -.85, "middleDrive") //added 2 inches
+			//.addDriveStraight(-134, 90, -.85, "middleDrive") //added 2 inches
+			.addDriveStraight(-127, 90, -.85, "middleDrive") //subtracted 7 inches
 			.addPowerTurn(0, .75, true)
 			//.addDriveStraight(0, DriveTrain.instance().getHeading().getAngle(), 0.0, "drive")
 			//.addDriveStraight(1, DriveTrain.instance().getHeading().getAngle(), 0.5, "drive") //added some distance(1 inch at 0.5) 
-			.addDriveStraight(-7, DriveTrain.instance().getHeading().getAngle(), -0.5, "drive") //previously drove wrong direction, Was -5 changed to -7
+			//.addDriveStraight(-7, DriveTrain.instance().getHeading().getAngle(), -0.5, "drive") //previously drove wrong direction, Was -5 changed to -7
+			.addDriveStraight(-7, -10, -0.5, "drive") //new angle traget of 10
 			.addEvent(elevatorUpAtDistance(0))
 			.addEvent(intakeOverOnElevatorHeight())
 			.addEvent(shootOnEventComplete(1, -0.6))
 			.addEvent(intakeHomeOnEventComplete(2))
-			.addEvent(elevatorZeroOnEventTwoComplete());
+			.addEvent(elevatorZeroOnEventTwoComplete())
+			//second cube pickup
+			.addDriveStraight(21, -10, 0.75, "DriveBack")
+			.addDriveStraight(24, 18, 0.6, "drive")
+			.addEvent(loadCubeRight());
 		
 		FAR_SCALE_RIGHT = new Path()
 				//.addDriveStraight(-164, 0, -.85, "startDrive")
-				.addDriveStraight(-168, 0, -.85, "startDrive") //added 4 inches
+				//.addDriveStraight(-168, 0, -.85, "startDrive") //added 4 inches
+				.addDriveStraight(-172, 0, -.85, "startDrive") //added another 4 inches (WPI day 2)
 				.addPowerTurn(-90, .75, true)
 				//.addDriveStraight(-132, -90, -.85, "middleDrive")
 				.addDriveStraight(-134, -90, -.85, "middleDrive")
@@ -233,8 +241,8 @@ public class Paths {
 		return nearScaleRight()
 		//.addDriveStraight(18, -18, 0.75, "DriveBack")
 		//.addDriveStraight(21, 18, 0.6, "drive")
-		.addDriveStraight(21, 18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
-		.addDriveStraight(24, -18, 0.6, "drive")		
+		.addDriveStraight(21, -18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
+		.addDriveStraight(24, 18, 0.6, "drive")		
 		.addEvent(loadCubeRight());
 	}
 		
@@ -433,7 +441,7 @@ public class Paths {
 			}
 			@Override
 			public void trigger(Stage stage) {
-				Common.debug("Event One Complete: " + stage.eventComplete(1));
+				//Common.debug("Event One Complete: " + stage.eventComplete(1));
 				if (stage.eventComplete(event) && startTime == -1) {
 					Common.debug("Complete passed on");
 					startTime = Common.time();

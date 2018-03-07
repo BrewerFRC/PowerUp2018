@@ -237,6 +237,14 @@ public class PID {
 		else {
 			this.output = output;
 		}
+		// *** NaN check
+		if (Double.isNaN(output)) {
+			Common.debug("PID Calc is NaN " + this.name);
+			Common.debug("The input was " + input);
+			output = 0.0;
+			sumError = 0;
+		}
+		// *****
 		lastCalc = this.output;
 		
 		/*if (inverted) {

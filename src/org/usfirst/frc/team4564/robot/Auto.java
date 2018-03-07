@@ -95,8 +95,8 @@ public class Auto {
 							Common.debug("Auto#getPath() - Near Scale Left w/Scale 2-Cube");
 							return Paths.TWO_CUBE_LEFT_SCALE;
 						}
-						Common.debug("Auto#getPath() - Near Scale Right w/2nd Pickup and Stop");
-						return Paths.TWO_CUBE_RIGHT_STOP;
+						Common.debug("Auto#getPath() - Near Scale Right w/Scale 2-Cube");
+						return Paths.TWO_CUBE_RIGHT_SCALE;
 					}
 				}
 				//Otherwise, do far scale

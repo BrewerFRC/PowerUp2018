@@ -272,6 +272,10 @@ public class Intake {
 	 * @return -the velocity in degrees per second
 	 */
 	public double getVelocity() {
+		if (Double.isNaN(velocity)) {
+			Common.debug("Velocity NaN"+ velocity);
+			velocity = 0;
+		}
 		return velocity;
 	}
 	
