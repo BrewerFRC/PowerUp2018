@@ -60,6 +60,14 @@ public class Robot extends SampleRobot {
 					auto.setGameData(gameData.toUpperCase());
 				}
 			}
+			
+			//Gyro Buttons
+			if (driver.when("start")) {
+				dt.getHeading().calibrate();
+				Common.debug("Gyro Calculated"+dt.getHeading().getAngle());
+			}
+			
+			//Auto Settings
 			if (driver.when("x")) {
 				auto.setPosition('L');
 			}
