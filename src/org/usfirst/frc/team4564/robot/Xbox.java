@@ -107,6 +107,32 @@ public class Xbox extends XboxController {
 		return false;
 	}
 	
+	public boolean falling(String button) {
+		if (!whenMap.containsKey(button)) {
+			return false;
+		}
+		
+		if (whenMap.get(button)) {
+			if (!getPressed(button)) {
+				whenMap.put(button, false);
+				return true;
+				}
+			else {
+				whenMap.put(button, true);
+				return false;
+				}
+			}
+		else {
+			if (getPressed(button)) {
+				whenMap.put(button, true);
+				return false;
+			} else {
+				whenMap.put(button, false);
+				return false;
+			}
+		}
+	}
+	
 	/**
 	 * Maps superclass button functions to strings and sets up built-in deadzones.
 	 */

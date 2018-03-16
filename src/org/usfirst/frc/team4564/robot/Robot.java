@@ -179,9 +179,25 @@ public class Robot extends SampleRobot {
     		}*/
     		intake.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
     		intake.update();
-
+    		
     		//Intake
-    		if (driver.getPressed("a")) {
+    		//intake arm pressure
+    		if (intake.isFullyLoaded()) {
+    			intake.hardShut();
+    		}
+    		else if (intake.isPartiallyLoaded()) {
+    			intake.softShut();
+    		}
+    		else if (!intake.isPartiallyLoaded()) {
+    			if (!driver.when("leftTrigger")) {
+    				intake.softShut();
+    			} else {
+    				intake.openShut();
+    			}
+    		}
+    			
+    		
+    		/*if (driver.getPressed("a")) {
     			intake.setIntakePower(1.0);
     		}
     		else if (operator.getPressed("leftTrigger")) {
@@ -192,7 +208,7 @@ public class Robot extends SampleRobot {
     		}
     		else {
     			intake.setIntakePower(0.0);
-    		}
+    		}*/
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
@@ -229,6 +245,9 @@ public class Robot extends SampleRobot {
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 		Common.dashNum("Bat", bat.getDistance());
 		Common.dashStr("Intake arm State", intake.state.toString());
+		//Test
+		Common.dashBool("Falling A", driver.falling("a"));
+		//
 	}
 	
 	public static Elevator getElevator() {

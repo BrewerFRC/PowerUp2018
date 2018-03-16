@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -19,6 +20,8 @@ public class Intake {
 			rightIntake = new Spark(Constants.RIGHT_INTAKE);
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
+	private Solenoid hardSole = new Solenoid(Constants.HARD_SOLE);
+	private Solenoid openSole = new Solenoid(Constants.OPEN_SOLE);
 	private PositionByVelocityPID pid;
 	
 	public final double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
@@ -48,6 +51,7 @@ public class Intake {
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
+	public int loading = 0;
 	public double velocity = 0.0, lastVelocityTarget = 0;
 	public double targetVelocity = 0.0;
 	public double position = 64;
@@ -245,6 +249,21 @@ public class Intake {
 			setIntakePower(power);
 			return false;
 		}
+	}
+	
+	public void hardShut() {
+		hardSole.set(true);
+		openSole.set(false);
+	}
+	
+	public void softShut() {
+		hardSole.set(false);
+		openSole.set(false);
+	}
+	
+	public void openShut() {
+		hardSole.set(false);
+		openSole.set(true);
 	}
 	
 	/**
