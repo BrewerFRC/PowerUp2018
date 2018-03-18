@@ -225,6 +225,8 @@ public class Robot extends SampleRobot {
     			intake.setIntakePower(-0.5);
     		}
     		else {
+    			driver.setRumble(RumbleType.kLeftRumble, 0.0);
+				driver.setRumble(RumbleType.kRightRumble, 0.0);
     			intake.setIntakePower(0.0);
     		}
     		dashBoard();
@@ -263,6 +265,7 @@ public class Robot extends SampleRobot {
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 		Common.dashNum("Bat", bat.getDistance());
 		Common.dashStr("Intake arm State", intake.state.toString());
+		Common.dashBool("Loading", intake.loading);
 	}
 	
 	public static Elevator getElevator() {

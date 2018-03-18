@@ -20,8 +20,8 @@ public class Intake {
 			rightIntake = new Spark(Constants.RIGHT_INTAKE);
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
-	private Solenoid hardSole = new Solenoid(Constants.HARD_SOLE);
-	private Solenoid openSole = new Solenoid(Constants.OPEN_SOLE);
+	private Solenoid hardSole = new Solenoid(Constants.PCM_CAN_ID, Constants.HARD_SOLE);
+	private Solenoid openSole = new Solenoid(Constants.PCM_CAN_ID, Constants.OPEN_SOLE);
 	private PositionByVelocityPID pid;
 	
 	public final double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
@@ -252,16 +252,19 @@ public class Intake {
 	}
 	
 	public void hardArm() {
+		//Common.debug("Hard");
 		hardSole.set(true);
 		openSole.set(false);
 	}
 	
 	public void softArm() {
+		//Common.debug("soft");
 		hardSole.set(false);
 		openSole.set(false);
 	}
 	
 	public void openArm() {
+		//Common.debug("open");
 		hardSole.set(false);
 		openSole.set(true);
 	}
