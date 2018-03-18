@@ -51,7 +51,7 @@ public class Intake {
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
-	public int loading = 0;
+	public boolean loading = false;
 	public double velocity = 0.0, lastVelocityTarget = 0;
 	public double targetVelocity = 0.0;
 	public double position = 64;
@@ -251,17 +251,17 @@ public class Intake {
 		}
 	}
 	
-	public void hardShut() {
+	public void hardArm() {
 		hardSole.set(true);
 		openSole.set(false);
 	}
 	
-	public void softShut() {
+	public void softArm() {
 		hardSole.set(false);
 		openSole.set(false);
 	}
 	
-	public void openShut() {
+	public void openArm() {
 		hardSole.set(false);
 		openSole.set(true);
 	}

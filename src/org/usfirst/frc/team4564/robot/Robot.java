@@ -6,6 +6,7 @@ import org.usfirst.frc.team4564.robot.path.Paths;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -182,33 +183,50 @@ public class Robot extends SampleRobot {
     		
     		//Intake
     		//intake arm pressure
-    		if (intake.isFullyLoaded()) {
-    			intake.hardShut();
-    		}
-    		else if (intake.isPartiallyLoaded()) {
-    			intake.softShut();
-    		}
-    		else if (!intake.isPartiallyLoaded()) {
-    			if (!driver.when("leftTrigger")) {
-    				intake.softShut();
+    		if (driver.when("leftTrigger") || operator.when("leftTrigger")) {
+    			if (!intake.isPartiallyLoaded()) {
+    				intake.loading = true;
     			} else {
-    				intake.openShut();
+    				intake.loading = false;
     			}
     		}
-    			
+    		if (driver.falling("leftTrigger") || operator.falling("leftTrigger")) {
+    			intake.loading = true;
+    			}
     		
-    		/*if (driver.getPressed("a")) {
+    		if (intake.loading) {
+				if (intake.isFullyLoaded()) {
+					intake.hardArm();
+				}
+				else if (intake.isPartiallyLoaded()) {
+					intake.softArm();
+				}
+				else if (driver.getPressed("leftTrigger") || operator.getPressed("leftTrigger")) {
+					intake.openArm();
+				} else {
+					intake.softArm();
+				}
+    		} else {	//Unload
+    			intake.openArm();
+    		}
+    			
+    		//intake wheel control
+    		if (driver.getPressed("a")) {
+    			if (intake.isFullyLoaded()) {
+    				driver.setRumble(RumbleType.kLeftRumble, 0.3);
+    				driver.setRumble(RumbleType.kRightRumble, 0.3);
+    			} else {
+    				driver.setRumble(RumbleType.kLeftRumble, 0.0);
+    				driver.setRumble(RumbleType.kRightRumble, 0.0);
+    			}
     			intake.setIntakePower(1.0);
     		}
-    		else if (operator.getPressed("leftTrigger")) {
-    			intake.setIntakePower(-0.5);
-    		}
     		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
-    			intake.setIntakePower(-1.0);
+    			intake.setIntakePower(-0.5);
     		}
     		else {
     			intake.setIntakePower(0.0);
-    		}*/
+    		}
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
