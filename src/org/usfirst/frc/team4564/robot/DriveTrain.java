@@ -1,9 +1,9 @@
 package org.usfirst.frc.team4564.robot;
 
-import org.usfirst.frc.team4564.robot.path.Pathfinding;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -20,8 +20,17 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class DriveTrain extends DifferentialDrive {
 	private static DriveTrain instance;
 	
-	public static final double DRIVEACCEL = .06, TURNACCEL = .06, TANKACCEL = 0.01, TANKMIN = 0.40, TURNMAX = .8;
+	public static double DRIVEACCEL = 0, ACCEL_HG_LE = .045, ACCEL_HG_HE = 0.01, ACCEL_LG_LE = 0.04, ACCEL_LG_HE = 0.01, DRIVEMIN = 0.4;
+
+	public static final double TURNACCEL = .06;
+
+	public static final double TANKACCEL = 0.01;
+
+	public static final double TANKMIN = 0.40;
+
+	public static final double TURNMAX = .8;
 	
+	private static final double DISTANCE_PER_PULSE_L = 0.0098195208, DISTANCE_PER_PULSE_R = 0.0098293515;
 	private static final Spark 
 			frontL = new Spark(Constants.DRIVE_FL),
 			frontR = new Spark(Constants.DRIVE_FR),
@@ -33,11 +42,9 @@ public class DriveTrain extends DifferentialDrive {
 	private Encoder encoderL, encoderR;
 	private PID pidL, pidR;
 	private Heading heading;
-	private Pathfinding path = new Pathfinding();
+	private Solenoid shifter;
 	private double driveSpeed = 0, turnSpeed = 0;
 	private double tankLeft = 0, tankRight = 0;
-	private double targetHeading;
-	private boolean headingHold;
 	
 	/**
 	 * Creates an instance of DriveTrain.
@@ -46,18 +53,42 @@ public class DriveTrain extends DifferentialDrive {
 	public DriveTrain() {
 		super(left, right);
 		
-		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, true, EncodingType.k4X);
-		encoderL.setDistancePerPulse(0.0098209719);
+		encoderL = new Encoder(Constants.DRIVE_ENCODER_LA, Constants.DRIVE_ENCODER_LB, false, EncodingType.k4X);
+		encoderL.setDistancePerPulse(DISTANCE_PER_PULSE_L);
 		encoderL.setSamplesToAverage(10);
 		encoderR = new Encoder(Constants.DRIVE_ENCODER_RA, Constants.DRIVE_ENCODER_RB, true, EncodingType.k4X);
-		encoderR.setDistancePerPulse(0.0098209719);
+		encoderR.setDistancePerPulse(DISTANCE_PER_PULSE_R);
 		encoderR.setSamplesToAverage(10);
 		heading = new Heading();
+		shifter = new Solenoid(Constants.PCM_CAN_ID, Constants.SHIFTER);
 		
 		pidL = new PID(0.005, 0, 0, false, true, "velL");
 		pidR = new PID(0.005, 0, 0, false, true, "velR");
 		
 		instance = this;
+	}
+	
+	/**
+	 * Shifts the drivetrain gearbox to high gear.
+	 */
+	public void shiftHigh() {
+		shifter.set(false);
+	}
+	
+	/**
+	 * Shifts the drivetrain gearbox to low gear.
+	 */
+	public void shiftLow() {
+		shifter.set(true);
+	}
+	
+	/**
+	 * Whether or not the drivetrain is in low gear.
+	 * 
+	 * @return - is low
+	 */
+	public boolean isShiftedLow() {
+		return shifter.get();
 	}
 	
 	/**
@@ -76,17 +107,6 @@ public class DriveTrain extends DifferentialDrive {
 	public void updatePIDs() {
 		pidL.update();
 		pidR.update();
-	}
-	
-	/**
-	 * Drive the robot on controlled left and right velocity targets.
-	 */
-	public void pidVelDrive() {
-		//pidL.setTarget(18);
-		//pidR.setTarget(54);
-		path.update();
-		this.tankDrive(path.left(), path.right());
-		//this.tankDrive(-pidL.calc(getLeftVelocity()), -pidR.calc(getRightVelocity()));
 	}
 	
 	/**
@@ -190,22 +210,59 @@ public class DriveTrain extends DifferentialDrive {
 	}
 	
 	/**
+	 * Gets the drive acceleration value based on the elevator height and gear.
+	 * 
+	 * @return - the drive acceleration value
+	 */
+	public double getDriveAccel() {
+		Elevator e = Robot.getElevator();
+		double percentHeight = e.getInches() / e.ELEVATOR_HEIGHT;
+		
+		if (isShiftedLow()) {
+			Common.dashStr("Gear", "Low");
+			Common.dashNum("Calculated Acceleration", (1.0 - percentHeight) * (ACCEL_LG_LE - ACCEL_LG_HE) + ACCEL_LG_HE);
+			return (1.0 - percentHeight) * (ACCEL_LG_LE - ACCEL_LG_HE) + ACCEL_LG_HE;
+		}
+		else {
+			Common.dashStr("Gear", "High");
+			Common.dashNum("Calculated Acceleration", (1.0 - percentHeight) * (ACCEL_HG_LE - ACCEL_HG_HE) + ACCEL_HG_HE);
+			return (1.0 - percentHeight) * (ACCEL_HG_LE - ACCEL_HG_HE) + ACCEL_HG_HE;
+		}
+	}
+	
+	/**
 	 * Gradually accelerate to a specified drive value.
 	 * 
 	 * @param target - the target drive value from -1 to 1
 	 * @return double - the allowed drive value for this cycle.
 	 */
-	 public double driveAccelCurve(double target) {
-		 if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
+	public double driveAccelCurve(double target) {
+		double DRIVEACCEL = getDriveAccel();
+		//If the magnitude of current is less than the minimum
+		if (Math.abs(driveSpeed) < DRIVEMIN) {
+			//Move to the lesser value of the minimum or the target, including desired direction.
+			if (target > 0) {
+				driveSpeed = Math.min(DRIVEMIN, target);
+			}
+			else {
+				driveSpeed = Math.max(-DRIVEMIN, target);
+			}
+		}
+		//If the magnitude of current is greater than the minimum
+		//If the difference is greater than the allowed acceleration
+		if (Math.abs(driveSpeed - target) > DRIVEACCEL) {
+			//Accelerate in the correct direction
             if (driveSpeed > target) {
                 driveSpeed = driveSpeed - DRIVEACCEL;
             } else {
                 driveSpeed = driveSpeed + DRIVEACCEL;
             }
-        } else {
+        }
+		//If the difference is less than the allowed acceleration, reach target
+		else {
             driveSpeed = target;
         }
-        return driveSpeed;
+		return driveSpeed;
 	 }
 	 
 	 /**
@@ -265,7 +322,7 @@ public class DriveTrain extends DifferentialDrive {
 		tankLeft = accelSide(tankLeft, left);
 		tankRight = accelSide(tankRight, right);
 		
-		System.out.println(tankLeft + ":" + tankRight);
+		//System.out.println(tankLeft + ":" + tankRight);
 	}
 	
 	/**
@@ -290,6 +347,7 @@ public class DriveTrain extends DifferentialDrive {
 	 * @return the new motor power.
 	 */
 	private double accelSide(double current, double target) {
+		double TANKACCEL = getDriveAccel();
 		//If the magnitude of current is less than the minimum
 		if (Math.abs(current) < TANKMIN) {
 			//Move to the lesser value of the minimum or the target, including desired direction.

@@ -53,18 +53,19 @@ public class PID {
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
 		
-		SmartDashboard.putNumber(this.name + "P", this.p);
-		SmartDashboard.putNumber(this.name + "I", this.i);
-		SmartDashboard.putNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "P", this.p);
+		//SmartDashboard.putNumber(this.name + "I", this.i);
+		//SmartDashboard.putNumber(this.name + "D", this.d);
 	}
 	
 	/**
 	 * Update the scaler terms with the latest NetworkTables values.
 	 */
 	public void update() {
-		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
-		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
-		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
+		//this.p = SmartDashboard.getNumber(this.name + "P", this.p);
+		//this.i = SmartDashboard.getNumber(this.name + "I", this.i);
+		//this.d = SmartDashboard.getNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "DShow", this.d);
 		SmartDashboard.putNumber(this.name + "Target", getTarget());
 	}
 	
@@ -72,9 +73,9 @@ public class PID {
 	 * Post the current PID coefficients to SmartDashboard.
 	 */
 	public void postCoefficients() {
-		SmartDashboard.putNumber(this.name + "P", this.p);
-		SmartDashboard.putNumber(this.name + "I", this.i);
-		SmartDashboard.putNumber(this.name + "D", this.d);
+		//SmartDashboard.putNumber(this.name + "P", this.p);
+		//SmartDashboard.putNumber(this.name + "I", this.i);
+		//SmartDashboard.putNumber(this.name + "D", this.d);
 	}
 	
 	/**
@@ -229,6 +230,15 @@ public class PID {
 		output = Math.abs(output)+ min;
 		output *= sign;
 		
+		// *** NaN check
+		if (Double.isNaN(output)) {
+			Common.debug("PID Calc is NaN " + this.name);
+			Common.debug("The input was " + input);
+			output = 0.0;
+			sumError = 0;
+		}
+		// *****
+		
 		//Apply necessary forward PID cummulation.
 		if (forward) {
 			this.output += output;
@@ -236,9 +246,9 @@ public class PID {
 		else {
 			this.output = output;
 		}
+		
 		lastCalc = this.output;
 		
-		SmartDashboard.putNumber(this.name + "Calc", this.output);
 		/*if (inverted) {
 			this.output = Math.min(Math.max(this.output, -Outmax), -Outmin);
 		}
@@ -257,6 +267,9 @@ public class PID {
 		else {
 			this.output = Math.min(Math.max(this.output, Outmin), Outmax);
 		}
-		return (inverted) ? -this.output : this.output;
+		double r = (inverted) ? -this.output : this.output;
+		SmartDashboard.putNumber(this.name + "Calc", r);
+
+		return r;
 	}
 }

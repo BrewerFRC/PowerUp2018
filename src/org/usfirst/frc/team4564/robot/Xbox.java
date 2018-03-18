@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * @author Evan McCoy
  * @author Jacob Cote
  */
-public class Xbox extends XboxController{
+public class Xbox extends XboxController {
 	private Map<String, Supplier<Boolean>> functionMap = new HashMap<String, Supplier<Boolean>>();
 	private Map<String, Boolean> whenMap = new HashMap<String, Boolean>();
 	
@@ -28,17 +28,28 @@ public class Xbox extends XboxController{
 	}
 	
 	/**
+	 * The controllable deadzone for the controller.
+	 * 
+	 * @param input the value of the interface in use.
+	 * @param deadzone the absolute value of the deadzone.
+	 * @return double the input value with deadzone applied.
+	 */
+	public double deadzone(double input, double deadzone) {
+		if (Math.abs(input) < deadzone) {
+			return(0);
+		} else {
+			return(input);
+		}
+	}
+	
+	/**
 	 * The universal deadzone for the controller.
 	 * 
 	 * @param input the value of the interface in use.
 	 * @return double the input value with deadzone applied.
 	 */
 	public double deadzone(double input) {
-		if (Math.abs(input) < .2) {
-			return(0);
-		} else {
-			return(input);
-		}
+		return deadzone(input, 0.2);
 	}
 	
 	/**
@@ -162,7 +173,5 @@ public class Xbox extends XboxController{
 			return this.getRawButton(10);
 		});
 		whenMap.put("rightThumb", false);
-		
-		
 	}
 }

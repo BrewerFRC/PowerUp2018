@@ -23,6 +23,7 @@ public class Path {
 		dt.getHeading().reset();
 		dt.resetEncoders();
 		stages.get(0).start();
+		stages.get(0).startEvents();
 	}
 	
 	/**
@@ -30,6 +31,9 @@ public class Path {
 	 */
 	public void reset() {
 		state = 0;
+		for (Stage stage : stages) {
+			stage.reset();
+		}
 		//start();
 	}
 	
@@ -39,6 +43,11 @@ public class Path {
 	 * @return The left/right motor powers, or [0, 0] if the path is complete.
 	 */
 	public double[] getDrive() {
+		for (int i = state;i >= 0;i--) {
+			if (i < stages.size()) {
+				stages.get(i).triggerEvents();
+			}
+		}
 		if (state >= stages.size()) {
 			if (stages.get(stages.size() - 1).isPersist()) {
 				return stages.get(stages.size() - 1).getDrive();
@@ -54,6 +63,7 @@ public class Path {
 			if (state < stages.size()) {
 				edge[1] = stages.get(state);
 				stages.get(state).start();
+				stages.get(state).startEvents();
 				if (stages.get(state - 1).isHeld()) {
 					return stages.get(state - 1).getDrive();
 				}
@@ -61,6 +71,9 @@ public class Path {
 			else {
 				return new double[] {0, 0};
 			}
+		}
+		for (int i = state;i >= 0;i--) {
+			stages.get(i).triggerEvents();
 		}
 		return stages.get(state).getDrive();
 	}
@@ -145,6 +158,11 @@ public class Path {
 		return this;
 	}
 	
+	public Path addDrivePower(double power) {
+		stages.add(new DrivePower(power));
+		return this;
+	}
+	
 	/**
 	 * Adds another power turn stage with the given parameters.
 	 * 
@@ -152,8 +170,8 @@ public class Path {
 	 * @param power - the power to apply to the turning wheel
 	 * @return the current Path instance
 	 */
-	public Path addPowerTurn(double targetAngle, double power) {
-		stages.add(new PowerTurn(targetAngle, power));
+	public Path addPowerTurn(double targetAngle, double power, boolean backward) {
+		stages.add(new PowerTurn(targetAngle, power, backward));
 		return this;
 	}
 	
@@ -165,8 +183,23 @@ public class Path {
 	 * @param power - the power to apply to the turning wheel
 	 * @return the current Path instance
 	 */
-	public Path addPowerTurnOverlay(double targetAngle, double power) {
-		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, stages.get(stages.size() - 1)));
+	public Path addPowerTurnOverlay(double targetAngle, double power, boolean backward) {
+		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, backward, stages.get(stages.size() - 1)));
+		return this;
+	}
+	
+	/**
+	 * Adds an event to the last Stage in the path.
+	 * 
+	 * @param event - the event
+	 * @return {@link Path Path} - the current Path instance
+	 */
+	public Path addEvent(Event event) {
+		if (stages.size() > 0) {
+			Stage stage = stages.get(stages.size() - 1);
+			event.setStage(stage);
+			stage.addEvent(event);
+		}
 		return this;
 	}
 }

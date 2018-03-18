@@ -16,11 +16,15 @@ public class Constants {
 	REFRESH_RATE = 50,
 	
 	//Drive motors
-	DRIVE_FL = 7, DRIVE_FR = 8, DRIVE_BL = 6, DRIVE_BR = 9,
+	DRIVE_FL = 0, DRIVE_FR = 2, DRIVE_BL = 1, DRIVE_BR = 3,
+	
+	//Intake Motors
+	LEFT_INTAKE = 4, RIGHT_INTAKE = 6, INTAKE_ARM = 5,
 	
 	//Encoders
 	DRIVE_ENCODER_LA = 2, DRIVE_ENCODER_LB = 3,
 	DRIVE_ENCODER_RA = 0, DRIVE_ENCODER_RB = 1,
+	ELEVATOR_ENCODER_A = 5, ELEVATOR_ENCODER_B = 6,
 	
 	//Sonic
 	SONIC_PIN = 0,
@@ -35,10 +39,9 @@ public class Constants {
 	IR_SENSOR = 3,
 			
 	//potentiometer intake
-	INTAKE_POT = 2
+	INTAKE_POT = 2,
 
-	
-
-	
+	//Pneumatics
+	PCM_CAN_ID = 1, SHIFTER = 0
 	;
 }

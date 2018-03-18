@@ -40,7 +40,8 @@ public class Common {
 	public static long time() {
 		return Calendar.getInstance().getTimeInMillis();
 	}
-	/**Takes a value and a range it falls within and converts it to a different range
+	/**Takes a value and a range it falls within and converts it to a different range.
+	 * Defaults to minimum input if it exceeds the min or max input.
 	 * 
 	 * @param input -Value to be converted to a different range
 	 * @param minInput -Minimum value for the range of the input
@@ -50,6 +51,7 @@ public class Common {
 	 * @return double - A value in the output range that is proportional to the input
 	 */
 	public static double map(double input, double minInput, double maxInput, double minOutput, double maxOutput) {
+		input = Math.min(Math.max(input, minInput), maxInput);
 		double inputRange = maxInput - minInput;
 		double inputPercentage = (input-minInput)/inputRange;
 		double outputRange = maxOutput - minOutput;

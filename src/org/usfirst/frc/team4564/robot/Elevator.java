@@ -1,89 +1,109 @@
 package org.usfirst.frc.team4564.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
-/**A class to control the elevator
+
+/**
+ * A class to control the elevator
  * 
  * @author Brewer FIRST Robotics Team 4564
  * @author Brent Roberts
+ * @author Evan McCoy
  */
 public class Elevator {
 	Intake intake;
 	TalonSRX elevatorLeft = new TalonSRX(Constants.ELEVATOR_LEFT);
 	TalonSRX elevatorRight = new TalonSRX(Constants.ELEVATOR_RIGHT);
+	private Encoder encoder; 
 	//true = pressed
 	private DigitalInput lowerLimit = new DigitalInput(Constants.LOWER_LIMIT);
 	//false = pressed
 	private DigitalInput upperLimit = new DigitalInput(Constants.UPPER_LIMIT);
-	//in counts
-	double offset = 0;
-	//random value for now
-	final double COUNTS_PER_INCH = 453.42029;
-	//Elevator height in inches(random value for now)
-	final double ELEVATOR_HEIGHT = 65.75;
+	//Elevator height in inches(random value
+	public final double COUNTS_PER_INCH = 7414/65.5, 
+			//Absolute elevator travel is 66.75 inches
+			ELEVATOR_HEIGHT = 66.5,
+			//The height the elevator should be positioned at to drop in the switch.
+			SWITCH_HEIGHT = 25,
+			//How close to the targetHeight that elevator can be to complete
+			ACCEPTABLE_ERROR = 1.0,
+			//The location of the upper limit switch in inches
+			UPPER_LIMIT_POINT = 57.5,
+			//The maximum power that the elevator can be run at upward
+			MAX_UP_POWER = 1.0,
+			MAX_DOWN_POWER = -0.9,
+			//The minimum power that the elevator can be run at upward
+			MIN_UP_POWER = 0.12,
+			MIN_DOWN_POWER = -0.02,
+			//The maximum power change
+			MAX_DELTA_POWER = 0.1,
+			//In inches per second, for velocity ramping
+			MIN_VELOCITY = 0.5,
+			//In inches per second, for position PID
+			MAX_POS_VELOCITY = 45,
+			//Maximum velocity while using the joystick
+			MAX_J_VELOCITY = 45,
+			//For encoder test function, minimum values to move the robot in different directions
+			ENCODER_MIN_UP = 0.15, ENCODER_MIN_DOWN = -0.12,
+			//For Velocity ramping
+			DANGER_VEL_ZONE = 20;
+	
 	//Reduced speed zone at upper and lower limits in inches.
 	final int DANGER_ZONE = 18;
-	double velocity = 0.0;
-	double targetHeight = 0.0;
-	double error = 0;
-	//How close to the targetHeight that elevator can be to complete
-	final double ACCEPTABLE_ERROR = 1.5;
-	//The location of the upper limit switch in inches
-	final double UPPER_LIMIT_POINT = 57.7;
-	//The maximum power that the elevator can be run at upward
-	final double MAX_UP_POWER = 1.0;
-	final double MAX_DOWN_POWER = -0.7;
-	//The minimum power that the elevator can be run at upward
-	final double MIN_UP_POWER = 0.05;
-	final double MIN_DOWN_POWER = 0.07;
-	//The last power that was set
-	double lastPower = 0;
-	//The maximum power change
-	final double MAX_DELTA_POWER = 0.1;
-	//In inches per second
-	final double MAX_VELOCITY = 12;
-	//Maximum velocity while using the joystick
-	final double MAX_J_VELOCITY = 10;
-	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_VELOCITY, MAX_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
+	
+	double velocity = 0.0,
+			//The last power that was set
+			lastPower = 0,
+			//-1 is not moving, 0 or greater is moving
+			moveCheck = -1,
+			//The previous counts of the encoder 
+			previousCounts = 0.0;
+	long startTime;
+	
+	PositionByVelocityPID pid = new PositionByVelocityPID(0, ELEVATOR_HEIGHT, -MAX_POS_VELOCITY, MAX_POS_VELOCITY, MAX_DOWN_POWER, MAX_UP_POWER, 0, "Elevator PID");
 	double velP = 0.002, velI = 0.0, velD = 0.0;
-	double posP = 0.1, posI = 0.0, posD = 0.0;
+	double posP = 5, posI = 0.0, posD = 0.0;
 	
 	public enum States {
 		STOPPED, //The state that elevator starts, does nothing unless the home function is run.
 		HOMING,  //Brings elevator slowly to the bottom most position possible, sets the offset. Must be done before any use of elevator.
-		IDLE, //State of the elevator doing nothing, both types of elevator usage can be used from this state.
+		HOLDING, //State of the elevator holding position, both types of elevator usage can be used from this state.
 		MOVING, //State of elevator moving to a target position within the ACCEPTABLE_ERROR.
-		JOYSTICK; //Moves the elevator by a desired power returns to IDLE after setting the power once.
+		JOYSTICK, //Moves the elevator by a desired power returns to IDLE after setting the power once.
+		START; //Executes at the beginning of auto.
 	}
 	States state = States.STOPPED;
 	
 	public Elevator(Intake intake) {
 		this.intake = intake;
-		elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		/*elevatorRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
 		elevatorRight.configVelocityMeasurementWindow(8, 0);//defaults to 64, rolling average sample size
 		//defaults to 100 Ms, the time of the sample that the current sample is compare to, changes the units
-		elevatorRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_100Ms, 0);
+		elevatorRight.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_100Ms, 0);*/
+		encoder = new Encoder(Constants.ELEVATOR_ENCODER_A, Constants.ELEVATOR_ENCODER_B, true, EncodingType.k1X);
 		elevatorLeft.setInverted(true);
 		pid.setVelocityScalars(velP, velI, velD);
 		pid.setVelocityInverted(true);
 		pid.setPositionScalars(posP, posI, posD);
+		pid.setPositionInverted(true);
 		Thread t = new Thread(new UpperLimitTask());
 		t.start();
 	}
 	
-	/**A safe function to set the power of the elevator, cannot exceed MAX_POWER
+	/**
+	 * A safe function to set the power of the elevator, cannot exceed MAX_POWER
 	 * 
-	 * @param power -power to run the elevator at, + = up and - = down
+	 * @param power - power to run the elevator at, + = up and - = down
 	 */
 	public void setPower(double power) {
 		// Check safeties and stop power if necessary
-		if (!intake.elevatorSafe()) {	
-			power = 0.0;
+		if (!intake.elevatorSafe() && power < MIN_UP_POWER) {//Don't let elevator drop if intake arm is in a unsafe position
+			power = MIN_UP_POWER;
+			pid.reset();
 		}
 		if (power > 0.0) {  //Move up
 			if(getInches() >= ELEVATOR_HEIGHT) { //hard limit on expected height
@@ -102,12 +122,17 @@ public class Elevator {
 		} else {  //Moving Down
 			if (lowerLimit.get()) { //lower limit true when pressed
 				power = 0.0;
-			} else if (getInches() <= DANGER_ZONE) {
-				power = Math.max(power, Common.map(getInches(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
 			} else {
-				power = Math.max(power, MAX_DOWN_POWER);
+				if(state != States.HOMING) {
+					if (getInches() <= DANGER_ZONE) {
+						power = Math.max(power, Common.map(getInches(), 0.0, DANGER_ZONE, MIN_DOWN_POWER, MAX_DOWN_POWER));
+					} else {
+						power = Math.max(power, MAX_DOWN_POWER);
+					}
+				}
 			}
 		}
+		power = encoderTest(power);
 		lastPower = power;
 		elevatorRight.set(ControlMode.PercentOutput, power);
 		elevatorLeft.set(ControlMode.PercentOutput, power);
@@ -131,39 +156,95 @@ public class Elevator {
 		}
 		setPower(power);
 	}
-	/**Uses a pid to move the robot at a target velocity
+	
+	
+	/** 
+	 * Test that encoder is registering movement.  Set Power to zero and re-home if not.
+	 *
+	 * @param power - Current power to be tested.
+	 */
+	public double encoderTest(double power) {
+		if (moveCheck == -1) {  //If not currently testing
+			if (power > ENCODER_MIN_UP || power < ENCODER_MIN_DOWN) {  //Is power great enough to move elevator?
+				moveCheck = 1;  //Start check counter 
+			}
+		} else {
+			if (power < ENCODER_MIN_UP && power > ENCODER_MIN_DOWN) {  //Is power not great enough to move elevator?
+				moveCheck = -1; //Stop checking
+			}
+			if (moveCheck >= 5) {  //Test encoder movement after 5 cylces
+				if (state != States.HOMING) {
+					if (getVelocity() == 0) {
+						Common.debug("ENCODER FAULT: Velocity is still zero, State = HOMING"+"power:"+power);
+						state = States.HOMING;
+						power = 0.0;
+					} 
+					if (getEncoder() == previousCounts) {
+						Common.debug("ENCODER FAULT: Count is the same as previous, state = HOMING"+getEncoder()+"power"+power);
+						state = States.HOMING;
+						power = 0.0;
+					}
+				}
+				moveCheck = 1;  //Restart counter
+			} else {
+				moveCheck += 1;
+			}
+		}
+		previousCounts = getEncoder();
+		return power;
+	}
+	
+	
+	/**
+	 * Uses a pid to move the robot at a target velocity
 	 * 
 	 * @param targetVelocity -The target speed for the robot to move in inches per second
 	 */
 	public void pidVelMove(double targetVelocity) {
-		/*if (targetVelocity >= 0.0) {
-			if (getInches() >= ELEVATOR_HEIGHT - DANGER_ZONE) {
-				targetVelocity = Math.min(targetVelocity, Common.map(getInches(), ELEVATOR_HEIGHT-DANGER_ZONE, ELEVATOR_HEIGHT, 0, MAX_J_VELOCITY));
+		double SAFE_HEIGHT = ELEVATOR_HEIGHT - 0.25;
+		if (targetVelocity >= 0.0) {
+			if (getInches() >= SAFE_HEIGHT - DANGER_VEL_ZONE) {
+				double rampMap = Common.map(SAFE_HEIGHT-getInches(), 0, DANGER_VEL_ZONE, MIN_VELOCITY, MAX_J_VELOCITY);
+				targetVelocity = Math.min(targetVelocity, rampMap);
 			}
 		} else {
-			if (getInches() >= DANGER_ZONE) {
-				targetVelocity = Math.max(targetVelocity, Common.map(getInches(), 0, DANGER_ZONE, 0, -MAX_J_VELOCITY));
+			if (getInches() >= DANGER_VEL_ZONE) {
+				double rampMap = Common.map(getInches(), 0, DANGER_VEL_ZONE, -MIN_VELOCITY, -MAX_J_VELOCITY);
+				targetVelocity = Math.max(targetVelocity, rampMap);
 			}
-		}*/
+		}
 		pid.setTargetVelocity(targetVelocity);
 		double pidVelCalc = pid.calcVelocity(getVelocity());
 		Common.dashNum("pidVelCalc", pidVelCalc);
 		accelPower(pidVelCalc);
 	}
-	/**Uses a pid to move the robot at a target Velocity
-	 * 
-	 * @param targetHeight -The target height for the elevator to move to in inches
+	
+	/**
+	 * Uses a PID to move the robot at the PID target positon.
 	 */
-	public void pidDisMove(double targetHeight) {
-		pid.setTargetPosition(targetHeight);
+	public void pidDisMove() {
 		double pidDisCalc = pid.calc(getInches(), getVelocity());
 		Common.dashNum("pidDisCalc", pidDisCalc);
 		accelPower(pidDisCalc);
 	}
 	
-	/**Gets if the elevator is at the top
+	/**
+	 * Whether or not the intake is safe to move at the current elevator height.
 	 * 
-	 * @return -true = at top
+	 * @return - True when it is safe to move the intake over the back
+	 */
+	public boolean intakeSafe() {
+		if (getInches() >= ELEVATOR_HEIGHT-1.4) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Gets if the elevator is at the top
+	 * 
+	 * @return - true = at top
 	 */
 	public boolean upperLimitSafe() {
 		//greater or equal to total height
@@ -173,9 +254,11 @@ public class Elevator {
 			return false;
 		}
 	}
-	/**Gets if the elevator is at the top
+	
+	/**
+	 * Gets if the elevator is at the top
 	 * 
-	 * @return -true = at bottom
+	 * @return - true = at bottom
 	 */
 	public boolean atBottom() {
 		if (lowerLimit.get()) {
@@ -184,76 +267,118 @@ public class Elevator {
 			return false;
 		}
 	}
-	/**Starts homing the elevator
+	
+	/** Gets the elevator height as a percentage
 	 * 
+	 * @return -Elevator height as a percentage
+	 */
+	public double getElevatorPercent() {
+		return Common.map(getInches(), 0, ELEVATOR_HEIGHT, 0, 1);
+	}
+	
+	/**
+	 * Starts homing the elevator
 	 */
 	public void home() {
 		Common.debug("New state Homing");
 		state = States.HOMING;
 	}
-	/**Gets the state of the elevator
+	
+	public void start() {
+		state = States.START;
+		startTime = Common.time();
+	}
+	
+	/**
+	 * Gets the state of the elevator
 	 * 
 	 * @return -The current state of the elevator
 	 */
 	public States getState() {
 		return state;
 	}
-	/**Resets the offset of the encoder
-	 * 
+	
+	/**
+	 * Resets the offset of the encoder
 	 */
 	public void resetEncoder() {
-		offset = elevatorRight.getSensorCollection().getPulseWidthPosition();
+		//offset = elevatorRight.getSensorCollection().getPulseWidthPosition();
+		encoder.reset();
 	}
-	/**Gets the raw encoder counts + the offset in counts 
+	
+	/**
+	 * Gets the raw encoder counts + the offset in counts 
 	 * 
 	 * @return -The current height of the elevator in counts
 	 */
 	public double getEncoder() {
-		return elevatorRight.getSensorCollection().getPulseWidthPosition() - offset;
+		return encoder.get();
 	}
-	/**Gets the current height of the elevator in inches
+	
+	/**
+	 * Gets the current height of the elevator in inches
 	 * 
 	 * @return -The current height of the elevator in counts 
 	 */
 	public double getInches() {
 		return getEncoder()/COUNTS_PER_INCH;
 	}
-	/**Completely untested
+	
+	/**
+	 * The velocity of the elevator.
 	 * 
-	 * @return
+	 * @return - the velocity in inches per second.
 	 */
 	public double getVelocity() {
-		//should return inches per second
-		return (elevatorRight.getSensorCollection().getPulseWidthVelocity()/COUNTS_PER_INCH)*10;
+		return encoder.getRate()/COUNTS_PER_INCH;
 	}
-	/**Function designed for joystick control of elevator
-	 * Only works for one cycle
+	
+	/**
+	 * Function designed for joystick control of elevator.
+	 * Only works for one cycle.
+	 * 
 	 * @param jInput -The velocity mapped for 1.0(max down) to -1.0(max up) to move the elevator at
 	 */
 	public void joystickControl(double jInput) {
 		//overrules moveToHeight()
+		Common.dashNum("Elevator Joystick", jInput);
 		if (state != States.STOPPED && state != States.HOMING){
-			double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);
-			Common.dashNum("jMap", jMap);
-			velocity = jMap;
-			//Common.debug("New state Joystick");
-			state = States.JOYSTICK;
+			if (jInput != 0) {
+				double jMap = Common.map(-jInput, -1, 1, -MAX_J_VELOCITY, MAX_J_VELOCITY);
+				Common.dashNum("jMap", jMap);
+				velocity = jMap;
+				//Common.debug("New state Joystick");
+				state = States.JOYSTICK;
+			}
 		}
 	}
-	/**Starts moving the elevator to a target height
+	
+	/**
+	 * Starts moving the elevator to a target height
 	 * 
-	 * @param targetHeight -Height in inches that the elevator to move to
+	 * @param targetHeight - Height in inches that the elevator to move to
 	 */
 	public void moveToHeight(double targetHeight) {
 		if (state != States.STOPPED && state != States.HOMING && state != States.JOYSTICK) {
-			this.targetHeight = targetHeight;
-			Common.debug("New State Moving");
+			pid.setTargetPosition(targetHeight);
 			state = States.MOVING;
 		}
 	}
+	
+	/**
+	 * Whether or not the elevator is within acceptable range of the position target.
+	 * 
+	 * @return - complete
+	 */
+	public boolean isComplete() {
+		return Math.abs(pid.getTargetPosition() - getInches()) < ACCEPTABLE_ERROR;
+	}
+	
+	/**
+	 * Prints standard debug information about elevator components.
+	 */
 	public void debug() {
 		Common.dashNum("Elevator encoder", getEncoder());
-		Common.dashNum("offset", offset);
 		Common.dashNum("Elevator encoder in inches", getInches());
 		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("upper Limit Triggered", upperLimit.get());
@@ -261,20 +386,20 @@ public class Elevator {
 		Common.dashStr("Elevator State", state.toString());
 		Common.dashNum("Elevator Velocity", getVelocity());
 	}
-	/**Update function that should be the last run of all elevator functions.
+	
+	/**
+	 * Update function that should be the last run of all elevator functions.
 	 * Exports certain values to smart dashboard and runs the state process of the elevator
-	 * 
 	 */
 	public void update() {
-		Common.dashNum("Elevator encoder", getEncoder());
-		Common.dashNum("offset", offset);
+		pid.update();
+		//Common.dashNum("Elevator encoder", getEncoder());
 		Common.dashNum("Elevator encoder in inches", getInches());
 		Common.dashBool("upper limits safe", upperLimitSafe());
 		Common.dashBool("upper Limit Triggered", upperLimit.get());
 		Common.dashBool("at bottom", atBottom());
 		Common.dashStr("Elevator State", state.toString());
 		Common.dashNum("Elevator Velocity", getVelocity());
-		pid.update();
 		switch(state) {
 		case STOPPED:
 			setPower(0.0);
@@ -283,37 +408,33 @@ public class Elevator {
 			if (lowerLimit.get()) {
 				resetEncoder();
 				setPower(0.0);
-				Common.debug("New state Idle");
-				state = States.IDLE;
+				pid.setTargetPosition(0);
+				Common.debug("New state Holding");
+				state = States.START;
 			} else {
 				setPower(-0.1);
 			}
 			break;
-		case IDLE:
-			setPower(0.0);
+		case START:
+			moveToHeight(5);
+			break;
+		case HOLDING:
+			pidDisMove();
 			break;
 		case MOVING:
-			pidDisMove(targetHeight);
-			state = States.IDLE;
-			/*error = targetHeight - getInches();
-			if (Math.abs(error) < ACCEPTABLE_ERROR) {
-				setPower(0.0);
-				Common.debug("New state Idle");
-				state = States.IDLE;
-			} else {
-				double power = Common.map(Math.abs(error), 0, ELEVATOR_HEIGHT, MIN_POWER, MAX_POWER);
-				if (error > 0) {
-					setPower(power);
-				} else {
-					setPower(-power);
-				}
-			}*/
+			if (isComplete()) {
+				state = States.HOLDING;
+			}
+			pidDisMove();
 			break;
 		case JOYSTICK:
 			pidVelMove(velocity);
 			//accleMove(speed);
 			//Common.debug("new State Idle");
-			state = States.IDLE;
+			if (state == States.JOYSTICK){
+				state = States.HOLDING;
+				pid.setTargetPosition(Math.max(0, Math.min(ELEVATOR_HEIGHT - 0.25, getInches() + 0.13*getVelocity())));
+			}
 			break;
 		}
 	}

@@ -8,21 +8,39 @@ package org.usfirst.frc.team4564.robot.path;
  * @author Evan McCoy
  */
 public class DriveStraight extends Drive {
-	private double target;
 	private double power;
 	
 	public DriveStraight(double distance, double angle, double power) {
-		super(false);
-		this.target = distance;
-		this.angle = angle;
+		super(false, distance);
+		
+		super.angle = angle;
 		this.power = power;
 	}
 	
 	public boolean isComplete() {
-		return super.isComplete(target);
+		return super.isComplete(target) && super.eventsFinished();
 	}
 	
 	public double[] getDrive() {
-		return super.getDrive(new double[] {power, power}, target);
+		return super.getDrive(new double[] {power, power});
+
+	/*public void start() {
+		DriveTrain.instance().resetEncoders();
+		Heading heading = DriveTrain.instance().getHeading();
+		heading.setAngle(angle);
+		heading.setHeadingHold(true);
+	}*/
+	/*
+	public boolean isDistanceComplete() {
+		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
+			//System.out.println("DriveStraight: " + this.name + " - Complete");
+			return true;
+		}
+		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
+			//System.out.println("DriveStraight: " + this.name + " - Complete");
+			return true;
+		}
+		return false;
+	}*/
 	}
 }

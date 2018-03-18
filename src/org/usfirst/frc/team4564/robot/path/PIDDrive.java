@@ -26,7 +26,14 @@ public class PIDDrive extends Drive {
 	}
 	
 	public boolean isComplete() {
+<<<<<<< HEAD
 		return super.isComplete(pid.getTarget());
+=======
+		if (!super.eventsFinished()) {
+			return false;
+		}
+		return DriveTrain.instance().getAverageDist() >= pid.getTarget();
+>>>>>>> b68b0035d79db5bc68fafb16f800b47c00537b50
 	}
 	
 	public double[] getDrive() {
