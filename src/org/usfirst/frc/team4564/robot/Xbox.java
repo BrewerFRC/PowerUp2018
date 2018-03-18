@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
 public class Xbox extends XboxController {
 	private Map<String, Supplier<Boolean>> functionMap = new HashMap<String, Supplier<Boolean>>();
 	private Map<String, Boolean> whenMap = new HashMap<String, Boolean>();
+	private Map<String, Boolean> fallingMap = new HashMap<String, Boolean>();
 	
 	/**
 	 * Instantiates the controller on the specified port.
@@ -108,26 +109,26 @@ public class Xbox extends XboxController {
 	}
 	
 	public boolean falling(String button) {
-		if (!whenMap.containsKey(button)) {
+		if (!fallingMap.containsKey(button)) {
+			Common.debug("falling map does not contain"+button);
 			return false;
 		}
-		
-		if (whenMap.get(button)) {
+		if (fallingMap.get(button)) {
 			if (!getPressed(button)) {
-				whenMap.put(button, false);
+				fallingMap.put(button, false);
 				return true;
 				}
 			else {
-				whenMap.put(button, true);
+				fallingMap.put(button, true);
 				return false;
 				}
 			}
 		else {
 			if (getPressed(button)) {
-				whenMap.put(button, true);
+				fallingMap.put(button, true);
 				return false;
 			} else {
-				whenMap.put(button, false);
+				fallingMap.put(button, false);
 				return false;
 			}
 		}
@@ -139,65 +140,80 @@ public class Xbox extends XboxController {
 	public void setupFunctions() {
 		functionMap.put("a", this::getAButton);
 		whenMap.put("a", false);
+		fallingMap.put("a", false);
 		
 		functionMap.put("b", this::getBButton);
 		whenMap.put("b", false);
+		fallingMap.put("b", false);
 		
 		functionMap.put("x", this::getXButton);
 		whenMap.put("x", false);
+		fallingMap.put("x", false);
 		
 		functionMap.put("y", this::getYButton);
 		whenMap.put("y", false);
+		fallingMap.put("y", false);
 		
 		functionMap.put("start", this::getStartButton);
 		whenMap.put("start", false);
+		fallingMap.put("start", false);
 		
 		functionMap.put("back", this::getBackButton);
 		whenMap.put("back", false);
+		fallingMap.put("back", false);
 		
 		functionMap.put("dPadUp", () -> {
 			return (this.getPOV() == -1) ? false : Math.abs(0 - this.getPOV()) < 45 || Math.abs(360 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadUp", false);
+		fallingMap.put("dPadUp", false);
 		
 		functionMap.put("dPadRight", () -> {
 			return (this.getPOV() == -1) ? false : Math.abs(90 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadRight", false);
+		fallingMap.put("dPadRight", false);
 		
 		functionMap.put("dPadDown", () -> {
 			return (this.getPOV() == -1) ? false : Math.abs(180 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadDown", false);
+		fallingMap.put("dPadDown", false);
 		
 		functionMap.put("dPadLeft", () -> {
 			return (this.getPOV() == -1) ? false : Math.abs(270 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadLeft", false);
+		fallingMap.put("dPadDown", false);
 		
 		functionMap.put("leftBumper", () -> {
 			return this.getBumper(GenericHID.Hand.kLeft);
 		});
 		whenMap.put("leftBumper", false);
+		fallingMap.put("leftBumper", false);
 		
 		functionMap.put("rightBumper", () -> {
 			return this.getBumper(GenericHID.Hand.kRight);
 		});
 		whenMap.put("rightBumper", false);
+		fallingMap.put("rightBumper", false);
 		
 		functionMap.put("leftTrigger", () -> {
 			return deadzone(this.getLeftTrigger()) > 0;
 		});
 		whenMap.put("leftTrigger", false);
+		fallingMap.put("leftTrigger", false);
 		
 		functionMap.put("rightTrigger", () -> {
 			return deadzone(this.getRightTrigger()) > 0;
 		});
 		whenMap.put("rightTrigger", false);
+		fallingMap.put("rightTrigger", false);
 		
 		functionMap.put("rightThumb", () -> {
 			return this.getRawButton(10);
 		});
 		whenMap.put("rightThumb", false);
+		fallingMap.put("rightThumb", false);
 	}
 }

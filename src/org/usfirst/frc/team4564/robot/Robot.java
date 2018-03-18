@@ -263,9 +263,6 @@ public class Robot extends SampleRobot {
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 		Common.dashNum("Bat", bat.getDistance());
 		Common.dashStr("Intake arm State", intake.state.toString());
-		//Test
-		Common.dashBool("Falling A", driver.falling("a"));
-		//
 	}
 	
 	public static Elevator getElevator() {
