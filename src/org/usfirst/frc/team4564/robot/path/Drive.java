@@ -36,11 +36,11 @@ public abstract class Drive extends Stage {
 			System.out.println("Drive - Complete");
 		}
 		return dist >= target;**/
-		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
+		if ((DriveTrain.instance().getAverageDist() >= target && direction == 1) && super.eventsFinished()) {
 			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
-		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
+		else if ((DriveTrain.instance().getAverageDist() <= target && direction == -1) &&  super.eventsFinished()) {
 			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
