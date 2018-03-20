@@ -4,20 +4,28 @@ import org.usfirst.frc.team4564.robot.Bat;
 import org.usfirst.frc.team4564.robot.DriveTrain;
 import org.usfirst.frc.team4564.robot.Heading;
 
-public abstract class Drive extends Stage {
+public class Drive extends Stage {
 	protected double angle;
-	protected String name;
-	private int direction = 1;
-	private double target;
+	protected double power;
+	protected int direction = 1;
+	protected double target;
 	
-	public Drive(boolean hold, double distance) {
-		super(hold);
-		this.target = distance;
+	public Drive(double distance, double angle, double power) {
+		this(false, distance, angle, power);
 	}
 	
-	public Drive(boolean hold, boolean persist, double distance) {
+	public Drive(boolean hold, double distance, double angle, double power) {
+		super(hold);
+		this.target = distance;
+		this.angle = angle;
+		this.power = power;
+	}
+	
+	public Drive(boolean hold, boolean persist, double distance, double angle, double power) {
 		super(hold, persist);
 		this.target = distance;
+		this.angle = angle;
+		this.power = power;
 	}
 	
 	public void start() {
@@ -30,33 +38,35 @@ public abstract class Drive extends Stage {
 		}
 	}
 	
-	public boolean isComplete(double target) {
-		/*double dist = DriveTrain.instance().getAverageDist();
-		if (dist >= target) {
-			System.out.println("Drive - Complete");
-		}
-		return dist >= target;**/
-		if ((DriveTrain.instance().getAverageDist() >= target && direction == 1) && super.eventsFinished()) {
+	public boolean isComplete() {
+		return isDistanceComplete() && super.eventsFinished();
+	}
+	
+	public boolean isDistanceComplete() {
+		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
 			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
-		else if ((DriveTrain.instance().getAverageDist() <= target && direction == -1) &&  super.eventsFinished()) {
+		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
 			//System.out.println("DriveStraight: " + this.name + " - Complete");
 			return true;
 		}
 		return false;
 	}
 	
-	public double[] getDrive(double[] power) {
+	public double[] getDrive() {
+		//If the drive is complete, finish drive.
+		if (isDistanceComplete()) {
+			return new double[] {0, 0};
+		}
 		double sonicDist = Bat.getInstance().getDistance();
 		double robotDist = DriveTrain.instance().getAverageDist();
 		double velocity = DriveTrain.instance().getAverageVelocity();
-		if (sonicDist >= target - robotDist) {
-			return power;
+		if (!(sonicDist >= target - robotDist)) {
+			if (sonicDist <= velocity) {
+				return new double[] {0, 0};
+			}
 		}
-		if (sonicDist <= velocity) {
-			return new double[] {0, 0};
-		}
-		return power;
+		return new double[] {power, power};
 	}
 }

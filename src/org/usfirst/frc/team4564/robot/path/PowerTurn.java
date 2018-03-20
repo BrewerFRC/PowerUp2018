@@ -56,37 +56,4 @@ public class PowerTurn extends Stage {
 			return new double[] {power, 0};
 		}
 	}
-	
-	/**
-	 * A class representing a stage of a Path where the robot derives  non-zero power from PowerTurn and one power from the previous stage.
-	 * This hybrid is meant to be used with a previous stage of PIDDrive, as to keep the pivoting wheel locked at the appropriate distance 
-	 * from the last stage.
-	 * 
-	 * @author Brewer FIRST Robotics Team 4564
-	 * @author Evan McCoy
-	 */
-	public static class PowerTurnOverlay extends PowerTurn {
-		private Stage previousStage;
-		
-		public PowerTurnOverlay(double target, double power, boolean backward, Stage previousStage) {
-			super(target, power, backward);
-			this.previousStage = previousStage;
-		}
-		
-		@Override
-		public double[] getDrive() {
-			double[] power = super.getDrive();
-			if (power[0] == 0) {
-				double[] previousPower = (previousStage instanceof PIDDrive) ? 
-						((PIDDrive)previousStage).getDrive(DriveTrain.instance().getLeftDist()) : previousStage.getDrive();
-				power[0] = previousPower[0];
-			}
-			if (power[1] == 0) {
-				double[] previousPower = (previousStage instanceof PIDDrive) ? 
-						((PIDDrive)previousStage).getDrive(DriveTrain.instance().getRightDist()) : previousStage.getDrive();
-				power[1] = previousPower[1];
-			}
-			return power;
-		}
-	}
 }

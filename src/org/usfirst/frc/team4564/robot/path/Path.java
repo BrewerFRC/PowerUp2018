@@ -137,7 +137,7 @@ public class Path {
 	 * @return the current Path instance
 	 */
 	public Path addDriveStraight(double distance, double heading, double power, String name) {
-		stages.add(new DriveStraight(distance, heading, power));
+		stages.add(new Drive(distance, heading, power));
 		return this;
 	}
 	
@@ -172,19 +172,6 @@ public class Path {
 	 */
 	public Path addPowerTurn(double targetAngle, double power, boolean backward) {
 		stages.add(new PowerTurn(targetAngle, power, backward));
-		return this;
-	}
-	
-	/**
-	 * Adds another power turn stage with the given parameters.  Only the non-zero turn side is derived from this stage.
-	 * The normally zero power is derived from the previous stage.
-	 * 
-	 * @param targetAngle - the angle to stop turning once reached
-	 * @param power - the power to apply to the turning wheel
-	 * @return the current Path instance
-	 */
-	public Path addPowerTurnOverlay(double targetAngle, double power, boolean backward) {
-		stages.add(new PowerTurn.PowerTurnOverlay(targetAngle, power, backward, stages.get(stages.size() - 1)));
 		return this;
 	}
 	

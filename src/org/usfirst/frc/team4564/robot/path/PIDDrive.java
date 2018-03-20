@@ -1,7 +1,6 @@
 package org.usfirst.frc.team4564.robot.path;
 
 import org.usfirst.frc.team4564.robot.DriveTrain;
-import org.usfirst.frc.team4564.robot.Heading;
 import org.usfirst.frc.team4564.robot.PID;
 
 /**
@@ -14,10 +13,9 @@ public class PIDDrive extends Drive {
 	private static final double P = 0.017, I = 0, D = 1.5;
 	
 	private PID pid;
-	private double angle;
 	
 	public PIDDrive(double distance, double angle, double minPower, double maxPower, boolean inverted, String name) {
-		super(false, true);
+		super(false, true, distance, angle, minPower);
 		this.pid = new PID(P, I, D, inverted, false, name);
 		pid.setTarget(distance);
 		pid.setOutputLimits(-maxPower, maxPower);
@@ -25,23 +23,13 @@ public class PIDDrive extends Drive {
 		this.angle = angle;
 	}
 	
-	public boolean isComplete() {
-<<<<<<< HEAD
-		return super.isComplete(pid.getTarget());
-=======
-		if (!super.eventsFinished()) {
-			return false;
-		}
-		return DriveTrain.instance().getAverageDist() >= pid.getTarget();
->>>>>>> b68b0035d79db5bc68fafb16f800b47c00537b50
-	}
-	
+	@Override
 	public double[] getDrive() {
-		return getDrive(DriveTrain.instance().getAverageDist());
-	}
-	
-	public double[] getDrive(double curDistance) {
+		double curDistance = DriveTrain.instance().getAverageDist();
 		double power = pid.calc(curDistance);
-		return super.getDrive(new double[] {power, power}, pid.getTarget());
+		if (Math.abs(super.getDrive()[0]) > 0) {
+			return new double[] {power, power};
+		}
+		return super.getDrive();
 	}
 }
