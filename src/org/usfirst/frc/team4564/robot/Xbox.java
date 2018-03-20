@@ -184,7 +184,7 @@ public class Xbox extends XboxController {
 			return (this.getPOV() == -1) ? false : Math.abs(270 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadLeft", false);
-		fallingMap.put("dPadDown", false);
+		fallingMap.put("dPadLeft", false);
 		
 		functionMap.put("leftBumper", () -> {
 			return this.getBumper(GenericHID.Hand.kLeft);
