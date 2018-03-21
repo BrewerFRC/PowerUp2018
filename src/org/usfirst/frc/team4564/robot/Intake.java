@@ -101,6 +101,8 @@ public class Intake {
 		power = rampPower(power);
 		intakeArm.set(power);
 		Common.dashNum("Intake arm Power", power);
+		Common.dashNum("Intake Last Power", lastPower);
+		lastPower = power;
 	}
 	
 	private void setAccelArmPower(double targetPower) {
@@ -114,10 +116,7 @@ public class Intake {
 		} else {
 			power = targetPower;
 		}
-		Common.dashNum("Intake arm Power", power);
-		Common.dashNum("Intake Last Power", lastPower);
 		setArmPower(power);
-		lastPower = power;
 	}
 	
 	public double rampPower(double power) {
@@ -125,7 +124,7 @@ public class Intake {
 		final double MIDDLE_POWER = 0.7;
 		final double MAX_POWER = 1.0;
 		final double MIN_POWER = 0.0;
-		final double LOW_POWER = 0.05;
+		final double LOW_POWER = 0.08;
 		double maxPower = 0.0;
 		double minPower = 0.0;
 		if (Robot.getElevator().intakeSafe())

@@ -106,6 +106,7 @@ public class Robot extends SampleRobot {
 		intake.reset();
 		path.reset();
 		path.start();
+		intake.hardArm();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
@@ -130,6 +131,7 @@ public class Robot extends SampleRobot {
     		elevator.home();
     	}
     	intake.reset();
+    	//intake.hardArm();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -195,11 +197,13 @@ public class Robot extends SampleRobot {
     			}
     		
     		if (intake.loading) {
-				if (intake.isFullyLoaded()) {
+				/*if (intake.isFullyLoaded()) {
 					intake.hardArm();
-				}
-				else if (intake.isPartiallyLoaded()) {
-					intake.softArm();
+				}*/
+				//else 
+				if (intake.isPartiallyLoaded()) {
+					//intake.softArm();
+					intake.hardArm();
 				}
 				else if (driver.getPressed("leftTrigger") || operator.getPressed("leftTrigger")) {
 					intake.openArm();

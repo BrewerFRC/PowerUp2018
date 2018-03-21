@@ -34,7 +34,11 @@ public class Paths {
 				.addDriveStraight(96, -30, 0.65, "centerDrive")
 				.addEvent(armUp())
 				.addDriveStraight(36, 0, 0.5, "straightDrive")
-				.addEvent(shootWhenStopped());
+				.addEvent(shootWhenStopped())
+				//Two Cube
+				.addDriveStraight(-24, -45, -0.85, "backDrive")
+				
+				;
 		
 		CENTER_SWITCH_RIGHT = new Path()
 				.addDriveStraight(96, 30, 0.65, "centerDrive")
@@ -81,6 +85,7 @@ public class Paths {
 			//second cube pickup
 			.addDriveStraight(21, -10, 0.75, "DriveBack")
 			.addDriveStraight(24, 18, 0.6, "drive")
+			.addEvent(closeOnDriveComplete())
 			.addEvent(loadCubeRight());
 		
 		FAR_SCALE_RIGHT = new Path()
@@ -230,6 +235,7 @@ public class Paths {
 //		.addDriveStraight(21, -18, 0.6, "drive")
 		.addDriveStraight(21, 18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
 		.addDriveStraight(24, -18, 0.6, "drive")
+		.addEvent(closeOnDriveComplete())
 		.addEvent(loadCubeLeft());
 	}
 	/**
@@ -243,6 +249,7 @@ public class Paths {
 		//.addDriveStraight(21, 18, 0.6, "drive")
 		.addDriveStraight(21, -18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
 		.addDriveStraight(24, 18, 0.6, "drive")		
+		.addEvent(closeOnDriveComplete())
 		.addEvent(loadCubeRight());
 	}
 		
@@ -343,6 +350,7 @@ public class Paths {
 					elevator.moveToHeight(0);
 					if (elevator.getInches() <= 20) {
 						this.complete = true;
+						Common.debug("Elevator Zero Complete");
 					}
 				}
 			}
@@ -390,8 +398,9 @@ public class Paths {
 				Intake intake = Robot.getIntake();
 				if (stage.eventComplete(event)) {
 					intake.movePosition(-7);
-					if (intake.isComplete()) {
+					if (intake.getPosition() < -5) {
 						this.complete = true;
+						Common.debug("Intake Home Complete");
 					}
 				}
 			}
@@ -463,7 +472,7 @@ public class Paths {
 	 * @return - the event
 	 */
 	public Event shootWhenStopped() {
-		return new Event(false) {
+		return new Event(true) { //Changed to true inorder to prevent early driving
 			long startTime = -1;
 			@Override
 			public void start(Stage stage) {
@@ -495,16 +504,24 @@ public class Paths {
 		return new Event(true) {
 			@Override
 			public void start(Stage stage) {
+				Robot.getIntake().openArm();
 				complete = false;
 			}
 			@Override
 			public void trigger(Stage stage) {
 				Robot.getIntake().setLeftIntakePower(1.0);
 				Robot.getIntake().setRightIntakePower(0.5);
-				if (Robot.getIntake().isPartiallyLoaded()) {
+				if (Robot.getIntake().isFullyLoaded()) {
 					Robot.getIntake().setIntakePower(0.0);
+					Robot.getIntake().hardArm();
 					complete = true;
 				}
+				else if (Robot.getIntake().isPartiallyLoaded()) {
+					Robot.getIntake().setIntakePower(0.0);
+					Robot.getIntake().softArm();
+					complete = true;
+				}
+				
 			}
 		};
 	}
@@ -524,8 +541,16 @@ public class Paths {
 			public void trigger(Stage stage) {
 				Robot.getIntake().setLeftIntakePower(0.5);
 				Robot.getIntake().setRightIntakePower(1.0);
-				if (Robot.getIntake().isPartiallyLoaded()) {
+				if (Robot.getIntake().isFullyLoaded()) {
+					Common.debug("Hard Cube arm");
 					Robot.getIntake().setIntakePower(0.0);
+					Robot.getIntake().hardArm();
+					complete = true;
+				}
+				else if (Robot.getIntake().isPartiallyLoaded()) {
+					Common.debug("Soft cube arm");
+					Robot.getIntake().setIntakePower(0.0);
+					Robot.getIntake().softArm();
 					complete = true;
 				}
 			}
@@ -553,6 +578,24 @@ public class Paths {
 					complete = true;
 				}
 				Robot.getIntake().loadCube(1.0);
+			}
+		};
+	}
+	
+	public Event closeOnDriveComplete() {
+		return new Event(false) {
+			@Override
+			public void start(Stage stage) {
+				complete = false;
+			}
+			@Override
+			public void trigger(Stage stage) {
+				//isComplete checks events
+				if (DriveTrain.instance().getAverageVelocity() < 2) {
+					Common.debug("Closed on drive Complete");
+					Robot.getIntake().hardArm();
+					complete = true;
+				}
 			}
 		};
 	}
