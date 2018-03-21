@@ -37,7 +37,6 @@ public class Paths {
 				.addEvent(shootWhenStopped())
 				//Two Cube
 				.addDriveStraight(-24, -45, -0.85, "backDrive")
-				
 				;
 		
 		CENTER_SWITCH_RIGHT = new Path()
