@@ -189,6 +189,21 @@ public class Path {
 	}
 	
 	/**
+	 * Adds a drive to wall with the given parameters.
+	 * MUST HAVE VELOCITY BEFORE IT IS RUN
+	 * 
+	 * @param distance -Distance to run
+	 * @param heading -Heading to move at
+	 * @param power -Power to move at
+	 * @param name -Not used
+	 * @return
+	 */
+	public Path addDriveToWall(double distance, double heading, double power, String name) {
+		stages.add(new DriveToWall(distance, heading, power));
+		return this;
+	}
+	
+	/**
 	 * Adds an event to the last Stage in the path.
 	 * 
 	 * @param event - the event
