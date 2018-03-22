@@ -42,6 +42,6 @@ public class Constants {
 	INTAKE_POT = 2,
 
 	//Pneumatics
-	PCM_CAN_ID = 1, SHIFTER = 0
+	PCM_CAN_ID = 1, SHIFTER = 0, HARD_SOLE = 2, OPEN_SOLE = 3
 	;
 }

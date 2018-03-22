@@ -230,13 +230,6 @@ public class PID {
 		output = Math.abs(output)+ min;
 		output *= sign;
 		
-		//Apply necessary forward PID cummulation.
-		if (forward) {
-			this.output += output;
-		}
-		else {
-			this.output = output;
-		}
 		// *** NaN check
 		if (Double.isNaN(output)) {
 			Common.debug("PID Calc is NaN " + this.name);
@@ -245,6 +238,15 @@ public class PID {
 			sumError = 0;
 		}
 		// *****
+		
+		//Apply necessary forward PID cummulation.
+		if (forward) {
+			this.output += output;
+		}
+		else {
+			this.output = output;
+		}
+		
 		lastCalc = this.output;
 		
 		/*if (inverted) {

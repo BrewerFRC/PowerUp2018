@@ -6,6 +6,7 @@ import org.usfirst.frc.team4564.robot.path.Paths;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -105,6 +106,7 @@ public class Robot extends SampleRobot {
 		intake.reset();
 		path.reset();
 		path.start();
+		intake.hardArm();
 		while (isEnabled() && isAutonomous()) {
 			long time = Common.time();
 			
@@ -129,6 +131,7 @@ public class Robot extends SampleRobot {
     		elevator.home();
     	}
     	intake.reset();
+    	//intake.hardArm();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -179,18 +182,55 @@ public class Robot extends SampleRobot {
     		}*/
     		intake.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
     		intake.update();
-
+    		
     		//Intake
+    		//intake arm pressure
+    		if (driver.when("leftTrigger") || operator.when("leftTrigger")) {
+    			if (!intake.isPartiallyLoaded()) {
+    				intake.loading = true;
+    			} else {
+    				intake.loading = false;
+    			}
+    		}
+    		if (driver.falling("leftTrigger") || operator.falling("leftTrigger")) {
+    			intake.loading = true;
+    			}
+    		
+    		if (intake.loading) {
+				/*if (intake.isFullyLoaded()) {
+					intake.hardArm();
+				}*/
+				//else 
+				if (intake.isPartiallyLoaded()) {
+					//intake.softArm();
+					intake.hardArm();
+				}
+				else if (driver.getPressed("leftTrigger") || operator.getPressed("leftTrigger")) {
+					intake.openArm();
+				} else {
+					intake.softArm();
+				}
+    		} else {	//Unload
+    			intake.openArm();
+    		}
+    			
+    		//intake wheel control
     		if (driver.getPressed("a")) {
+    			if (intake.isFullyLoaded()) {
+    				driver.setRumble(RumbleType.kLeftRumble, 0.3);
+    				driver.setRumble(RumbleType.kRightRumble, 0.3);
+    			} else {
+    				driver.setRumble(RumbleType.kLeftRumble, 0.0);
+    				driver.setRumble(RumbleType.kRightRumble, 0.0);
+    			}
     			intake.setIntakePower(1.0);
     		}
-    		else if (operator.getPressed("leftTrigger")) {
+    		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
     			intake.setIntakePower(-0.5);
     		}
-    		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
-    			intake.setIntakePower(-1.0);
-    		}
     		else {
+    			driver.setRumble(RumbleType.kLeftRumble, 0.0);
+				driver.setRumble(RumbleType.kRightRumble, 0.0);
     			intake.setIntakePower(0.0);
     		}
     		dashBoard();
@@ -229,6 +269,7 @@ public class Robot extends SampleRobot {
 		Common.dashBool("Is partially loaded", intake.isPartiallyLoaded());
 		Common.dashNum("Bat", bat.getDistance());
 		Common.dashStr("Intake arm State", intake.state.toString());
+		Common.dashBool("Loading", intake.loading);
 	}
 	
 	public static Elevator getElevator() {

@@ -1,6 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -19,6 +20,8 @@ public class Intake {
 			rightIntake = new Spark(Constants.RIGHT_INTAKE);
 	private AnalogInput irInput = new AnalogInput(Constants.IR_SENSOR);
 	private AnalogInput pot = new AnalogInput(Constants.INTAKE_POT);
+	private Solenoid hardSole = new Solenoid(Constants.PCM_CAN_ID, Constants.HARD_SOLE);
+	private Solenoid openSole = new Solenoid(Constants.PCM_CAN_ID, Constants.OPEN_SOLE);
 	private PositionByVelocityPID pid;
 	
 	public final double MAX_ELEVATOR_SAFE = 64, MIN_ELEVATOR_SAFE = 0, //Safe angles when elevator is not at top
@@ -48,6 +51,7 @@ public class Intake {
 			lastPower = 0, previousReading = 0;
 	
 	private long intakeTime = 0;
+	public boolean loading = false;
 	public double velocity = 0.0, lastVelocityTarget = 0;
 	public double targetVelocity = 0.0;
 	public double position = 64;
@@ -97,6 +101,8 @@ public class Intake {
 		power = rampPower(power);
 		intakeArm.set(power);
 		Common.dashNum("Intake arm Power", power);
+		Common.dashNum("Intake Last Power", lastPower);
+		lastPower = power;
 	}
 	
 	private void setAccelArmPower(double targetPower) {
@@ -110,10 +116,7 @@ public class Intake {
 		} else {
 			power = targetPower;
 		}
-		Common.dashNum("Intake arm Power", power);
-		Common.dashNum("Intake Last Power", lastPower);
 		setArmPower(power);
-		lastPower = power;
 	}
 	
 	public double rampPower(double power) {
@@ -121,7 +124,7 @@ public class Intake {
 		final double MIDDLE_POWER = 0.7;
 		final double MAX_POWER = 1.0;
 		final double MIN_POWER = 0.0;
-		final double LOW_POWER = 0.05;
+		final double LOW_POWER = 0.08;
 		double maxPower = 0.0;
 		double minPower = 0.0;
 		if (Robot.getElevator().intakeSafe())
@@ -245,6 +248,24 @@ public class Intake {
 			setIntakePower(power);
 			return false;
 		}
+	}
+	
+	public void hardArm() {
+		//Common.debug("Hard");
+		hardSole.set(true);
+		openSole.set(false);
+	}
+	
+	public void softArm() {
+		//Common.debug("soft");
+		hardSole.set(false);
+		openSole.set(false);
+	}
+	
+	public void openArm() {
+		//Common.debug("open");
+		hardSole.set(false);
+		openSole.set(true);
 	}
 	
 	/**
