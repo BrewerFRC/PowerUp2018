@@ -33,10 +33,16 @@ public class Paths {
 		CENTER_SWITCH_LEFT = new Path()
 				.addDriveStraight(96, -30, 0.65, "centerDrive")
 				.addEvent(armUp())
-				.addDriveStraight(36, 0, 0.5, "straightDrive")
+				.addDriveToWall(36, 0, 0.5, "straightDrive")
 				.addEvent(shootWhenStopped())
 				//Two Cube
-				.addDriveStraight(-24, -45, -0.85, "backDrive")
+				.addDriveStraight(-24, 45, -0.85, "backDrive")
+				.addDriveStraight(36, 45, 0.65, "forwardDrive")
+				.addEvent(closeOnDriveComplete())
+				.addEvent(loadCubeLeft())
+				.addDriveStraight(-36, 45, -0.85, "driveback2")
+				.addDriveStraight(24, 0, 0.65, "driveToSwitch")
+				.addEvent(shootWhenStopped())
 				;
 		
 		CENTER_SWITCH_RIGHT = new Path()

@@ -223,7 +223,9 @@ public class Robot extends SampleRobot {
     				driver.setRumble(RumbleType.kLeftRumble, 0.0);
     				driver.setRumble(RumbleType.kRightRumble, 0.0);
     			}
-    			intake.setIntakePower(1.0);
+    			//intake.setIntakePower(1.0);
+    			intake.setLeftIntakePower(0.7);
+    			intake.setRightIntakePower(1.0);
     		}
     		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
     			intake.setIntakePower(-0.5);
