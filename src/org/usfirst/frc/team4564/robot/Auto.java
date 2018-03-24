@@ -110,7 +110,7 @@ public class Auto {
 				}
 			case CLOSE:
 				//If near switch is ours
-				if (gameData.charAt(0) == position) {
+				/*if (gameData.charAt(0) == position) {
 					if (position == 'L') {
 						Common.debug("Auto#getPath() - Near Switch Left");
 						return Paths.NEAR_SWITCH_LEFT;
@@ -149,6 +149,38 @@ public class Auto {
 				else {
 					Common.debug("Auto#getPath() - Far Scale Right");
 					return Paths.FAR_SCALE_RIGHT;
+				}*/
+				//If near scale is ours
+				if (gameData.charAt(1) == position) {
+					//If we own the near switch
+					if (gameData.charAt(0) == position) {
+						if (position == 'L') {
+							Common.debug("Auto#getPath() - Near Scale Left w/Switch 2-Cube");
+							return Paths.TWO_CUBE_LEFT_SWITCH;
+						}
+						Common.debug("Auto#getPath() - Near Scale Right w/Switch 2-Cube");
+						return Paths.TWO_CUBE_RIGHT_SWITCH;
+					}
+					//If we don't own the near switch
+					else {
+						if (position == 'L') {
+							Common.debug("Auto#getPath() - Near Scale Left w/Scale 2-Cube");
+							return Paths.TWO_CUBE_LEFT_SCALE;
+						}
+						Common.debug("Auto#getPath() - Near Scale Right w/Scale 2-Cube");
+						return Paths.TWO_CUBE_RIGHT_SCALE;
+					}
+				}
+				//If near switch is ours
+				else if (gameData.charAt(0) == position) {
+					if (position == 'L') {
+						Common.debug("Auto#getPath() - Near Switch Left");
+						return Paths.NEAR_SWITCH_LEFT;
+					}
+					else {
+						Common.debug("Auto#getPath() - Near Switch Right");
+						return Paths.NEAR_SWITCH_RIGHT;
+					}
 				}
 		}
 		Common.debug("Auto#getPath() - Cross Line");

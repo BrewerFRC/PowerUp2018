@@ -34,16 +34,47 @@ public class Paths {
 				.addDriveStraight(96, -30, 0.65, "centerDrive")
 				.addEvent(armUp())
 				.addDriveToWall(36, 0, 0.5, "straightDrive")
+				//.addDriveStraight(36, 0, 0.5, "straightDrive")
 				.addEvent(shootWhenStopped())
 				//Two Cube
-				.addDriveStraight(-24, 45, -0.85, "backDrive")
-				.addDriveStraight(36, 45, 0.65, "forwardDrive")
+				.addDriveStraight(-20, 40, -0.75, "backDrive")
+				.addEvent(new Event(false) {
+
+					@Override
+					public void start(Stage stage) {
+						Robot.getIntake().openArm();
+					}
+
+					@Override
+					public void trigger(Stage stage) {
+						
+					}
+			
+				})
+				.addEvent(new Event(true) {
+
+					@Override
+					public void start(Stage stage) {
+						Robot.getIntake().movePosition(-6);
+						Robot.getElevator().moveToHeight(0);
+						this.complete = false;
+					}
+
+					@Override
+					public void trigger(Stage stage) {
+						if (Robot.getElevator().isComplete() && Robot.getIntake().isComplete()) {
+							this.complete = true;
+						}		
+					}
+			
+				})
+				.addDriveStraight(41, 60, 0.65, "forwardDrive")
 				.addEvent(closeOnDriveComplete())
 				.addEvent(loadCubeLeft())
-				.addDriveStraight(-36, 45, -0.85, "driveback2")
+				.addDriveStraight(-26, 45, -0.75, "driveback2")
+				.addEvent(armUp())
 				.addDriveStraight(24, 0, 0.65, "driveToSwitch")
-				.addEvent(shootWhenStopped())
-				;
+				.addEvent(shootWhenStopped());
 		
 		CENTER_SWITCH_RIGHT = new Path()
 				.addDriveStraight(96, 30, 0.65, "centerDrive")
@@ -174,7 +205,7 @@ public class Paths {
 		
 		//Near scale on left side, then second cube in near scale.
 		TWO_CUBE_LEFT_SCALE = nearScaleLeftPickupSecond()
-				.addDriveStraight(-36, 5, -0.65, "drive")
+				.addDriveStraight(-36, 8, -0.65, "drive")
 				.addEvent(elevatorUpAtDistance(0))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1, -0.5))
@@ -203,9 +234,12 @@ public class Paths {
 	public Path nearScaleLeft() {
 		return new Path()
 				//.addDriveStraight(-117, 0, -0.85, "testDrive")
-				.addDriveStraight(-121, 0, -0.85, "testDrive")
-				.addDriveStraight(-88, 17, -0.85, "testDriveTurn")
+				.addDriveStraight(-121, 0, -0.85, "testDrive -121")
+				//.addDriveStraight(-139, 0, -0.85, "testDrive") //Run longer for steeper angle
+				//.addDriveStraight(-88, 17, -0.85, "testDriveTurn")
 				//.addDriveStraight(-94, 17, -0.85, "testDriveTurn") //ran test but too close to platform
+				.addDriveStraight(-88, 16, -0.85, "testDriveTurn -88") //was too harsh at practice field PT
+				//.addDriveStraight(-70.5, 20, -0.85, "testDriveTurn") //Trying steeper angle
 				.addEvent(elevatorUpAtDistance(-20))
 				.addEvent(intakeOverOnElevatorHeight())
 				.addEvent(shootOnEventComplete(1, -0.6))
@@ -596,7 +630,9 @@ public class Paths {
 			@Override
 			public void trigger(Stage stage) {
 				//isComplete checks events
-				if (DriveTrain.instance().getAverageVelocity() < 2) {
+				//Changed PT
+				DriveStraight drive = (DriveStraight) stage;
+				if (drive.isDistanceComplete()) {
 					Common.debug("Closed on drive Complete");
 					Robot.getIntake().hardArm();
 					complete = true;

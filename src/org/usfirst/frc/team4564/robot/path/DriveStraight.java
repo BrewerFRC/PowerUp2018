@@ -17,8 +17,9 @@ public class DriveStraight extends Stage {
 	private int direction = 1;
 	private String name;
 	
-	public DriveStraight(double distance, double angle, double power) {
+	public DriveStraight(double distance, double angle, double power, String name) {
 		super(false);
+		this.name = name;
 		this.target = distance;
 		this.angle = angle;
 		this.power = power;
@@ -43,11 +44,15 @@ public class DriveStraight extends Stage {
 	
 	public boolean isDistanceComplete() {
 		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
-			//System.out.println("DriveStraight: " + this.name + " - Complete");
+			if (super.eventsFinished()) {
+				System.out.println("DriveStraight: " + this.name + " - Complete"+ DriveTrain.instance().getAverageDist());
+			}
 			return true;
 		}
 		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
-			//System.out.println("DriveStraight: " + this.name + " - Complete");
+			if (super.eventsFinished()) {
+				System.out.println("DriveStraight: " + this.name + " - Complete" + DriveTrain.instance().getAverageDist());
+			}
 			return true;
 		}
 		return false;

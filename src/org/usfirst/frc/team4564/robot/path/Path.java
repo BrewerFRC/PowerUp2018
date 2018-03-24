@@ -137,7 +137,7 @@ public class Path {
 	 * @return the current Path instance
 	 */
 	public Path addDriveStraight(double distance, double heading, double power, String name) {
-		stages.add(new DriveStraight(distance, heading, power));
+		stages.add(new DriveStraight(distance, heading, power, name));
 		return this;
 	}
 	
