@@ -31,11 +31,11 @@ public class Paths {
 		CROSS_LINE = new Path().addDriveStraight(-95, 0, -0.65, "crossLine");
 		
 		CENTER_SWITCH_LEFT = new Path()
-				.addDriveStraight(96, -30, 0.65, "centerDrive")
+				.addDriveStraight(96, -30, 0.7, "centerDrive")
 				.addEvent(armUp())
-				.addDriveToWall(36, 0, 0.5, "straightDrive")
+				.addDriveToWall(36, 0, 0.65, "straightDrive")
 				//.addDriveStraight(36, 0, 0.5, "straightDrive")
-				.addEvent(shootWhenStopped())
+				.addEvent(shootWhenStopped(-0.7))
 				//Two Cube
 				.addDriveStraight(-20, 40, -0.75, "backDrive")
 				.addEvent(new Event(false) {
@@ -68,19 +68,68 @@ public class Paths {
 					}
 			
 				})
-				.addDriveStraight(41, 60, 0.65, "forwardDrive")
-				.addEvent(closeOnDriveComplete())
+				.addDriveStraight(12, 55, 0.65, "forwardDrive part 1")
+				.addDriveToWall(38, 55, 0.65, "forwardDrive Part 2")
+				.addEvent(closeOnSlow())
 				.addEvent(loadCubeLeft())
-				.addDriveStraight(-26, 45, -0.75, "driveback2")
+				.addDriveStraight(-18, 55, -0.75, "driveback2")
 				.addEvent(armUp())
-				.addDriveStraight(24, 0, 0.65, "driveToSwitch")
-				.addEvent(shootWhenStopped());
+				.addDriveStraight(6, 0, 0.65, "DriveToSwitch Straight")
+				.addDriveToWall(24, 0, 0.65, "driveToSwitch")
+				.addEvent(shootWhenStopped(-0.6));
 		
 		CENTER_SWITCH_RIGHT = new Path()
-				.addDriveStraight(96, 30, 0.65, "centerDrive")
+				/*.addDriveStraight(96, 30, 0.65, "centerDrive")
 				.addEvent(armUp())
 				.addDriveStraight(36, 0, 0.5, "straightDrive")
-				.addEvent(shootWhenStopped());
+				//was -0.6
+				.addEvent(shootWhenStopped(-0.7));*/
+				.addDriveStraight(96, 30, 0.7, "centerDrive")
+				.addEvent(armUp())
+				.addDriveToWall(36, 0, 0.65, "straightDrive")
+				//.addDriveStraight(36, 0, 0.5, "straightDrive")
+				.addEvent(shootWhenStopped(-0.7))
+				//Two Cube
+				.addDriveStraight(-20, -40, -0.75, "backDrive")
+				.addEvent(new Event(false) {
+
+					@Override
+					public void start(Stage stage) {
+						Robot.getIntake().openArm();
+					}
+
+					@Override
+					public void trigger(Stage stage) {
+						
+					}
+			
+				})
+				.addEvent(new Event(true) {
+
+					@Override
+					public void start(Stage stage) {
+						Robot.getIntake().movePosition(-6);
+						Robot.getElevator().moveToHeight(0);
+						this.complete = false;
+					}
+
+					@Override
+					public void trigger(Stage stage) {
+						if (Robot.getElevator().isComplete() && Robot.getIntake().isComplete()) {
+							this.complete = true;
+						}		
+					}
+			
+				})
+				.addDriveStraight(12, -55, 0.65, "forwardDrive part 1")
+				.addDriveToWall(38, -55, 0.65, "forwardDrive Part 2")
+				.addEvent(closeOnSlow())
+				.addEvent(loadCubeLeft())
+				.addDriveStraight(-18, -55, -0.75, "driveback2")
+				.addEvent(armUp())
+				.addDriveStraight(6, 0, 0.65, "DriveToSwitch Straight")
+				.addDriveToWall(24, 0, 0.65, "driveToSwitch")
+				.addEvent(shootWhenStopped(-0.6));
 		
 		//Switch paths
 		NEAR_SWITCH_LEFT = new Path()
@@ -508,9 +557,10 @@ public class Paths {
 	/**
 	 * Shoots when the drivetrain reports a near-stopped velocity. Complete after 0.3 seconds of run.
 	 * 
+	 * @param power -The power to run at should be negative 
 	 * @return - the event
 	 */
-	public Event shootWhenStopped() {
+	public Event shootWhenStopped( double power) {
 		return new Event(true) { //Changed to true inorder to prevent early driving
 			long startTime = -1;
 			@Override
@@ -528,7 +578,7 @@ public class Paths {
 					this.complete = true;
 				}
 				else if (startTime > 0) {
-					Robot.getIntake().setIntakePower(-0.6);
+					Robot.getIntake().setIntakePower(power);
 				}
 			}
 		};
@@ -551,11 +601,13 @@ public class Paths {
 				Robot.getIntake().setLeftIntakePower(1.0);
 				Robot.getIntake().setRightIntakePower(0.5);
 				if (Robot.getIntake().isFullyLoaded()) {
+					Common.debug("Fully Loaded");
 					Robot.getIntake().setIntakePower(0.0);
 					Robot.getIntake().hardArm();
 					complete = true;
 				}
 				else if (Robot.getIntake().isPartiallyLoaded()) {
+					Common.debug("Partially Loadeds");
 					Robot.getIntake().setIntakePower(0.0);
 					Robot.getIntake().softArm();
 					complete = true;
@@ -634,6 +686,25 @@ public class Paths {
 				DriveStraight drive = (DriveStraight) stage;
 				if (drive.isDistanceComplete()) {
 					Common.debug("Closed on drive Complete");
+					Robot.getIntake().hardArm();
+					complete = true;
+				}
+			}
+		};
+	}
+	
+	public Event closeOnSlow() {
+		return new Event(false) {
+			@Override
+			public void start(Stage stage) {
+				complete = false;
+			}
+			@Override
+			public void trigger(Stage stage) {
+				//isComplete checks events
+				//Changed PT
+				if (DriveTrain.instance().getAverageVelocity() < 2) {
+					Common.debug("Closed on Slow Velocity");
 					Robot.getIntake().hardArm();
 					complete = true;
 				}

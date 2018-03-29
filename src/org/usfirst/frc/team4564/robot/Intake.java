@@ -455,8 +455,12 @@ public class Intake {
 				
 				double previousVelocity = velocity;
 				long millis = Common.time();
-				velocity = (position - previousPosition) / ((millis - previousMillis) / 1000.0);
-				velocity = 0.97 * previousVelocity + 0.03 * velocity;
+				if (millis - previousMillis > 0) {
+					velocity = (position - previousPosition) / ((millis - previousMillis) / 1000.0);
+					velocity = 0.97 * previousVelocity + 0.03 * velocity;
+				} else {
+					velocity = 0.0;
+				}
 				previousMillis = millis;
 				try {
 					Thread.sleep(5);
