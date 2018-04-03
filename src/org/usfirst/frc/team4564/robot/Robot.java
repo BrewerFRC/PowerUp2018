@@ -194,7 +194,7 @@ public class Robot extends SampleRobot {
     		}
     		if (driver.falling("leftTrigger") || operator.falling("leftTrigger")) {
     			intake.loading = true;
-    			}
+    		}
     		
     		if (intake.loading) {
 				/*if (intake.isFullyLoaded()) {
@@ -229,6 +229,9 @@ public class Robot extends SampleRobot {
     		}
     		else if (driver.getPressed("rightTrigger") || operator.getPressed("rightTrigger")) {
     			intake.setIntakePower(-0.5);
+    		}
+    		else if (operator.getPressed("rightBumper")) {
+    			intake.setIntakePower(-0.8);
     		}
     		else {
     			driver.setRumble(RumbleType.kLeftRumble, 0.0);
