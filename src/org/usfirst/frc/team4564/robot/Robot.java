@@ -217,8 +217,8 @@ public class Robot extends SampleRobot {
     		//intake wheel control
     		if (driver.getPressed("a")) {
     			if (intake.isFullyLoaded()) {
-    				driver.setRumble(RumbleType.kLeftRumble, 0.3);
-    				driver.setRumble(RumbleType.kRightRumble, 0.3);
+    				driver.setRumble(RumbleType.kLeftRumble, 0.6);
+    				driver.setRumble(RumbleType.kRightRumble, 0.6);
     			} else {
     				driver.setRumble(RumbleType.kLeftRumble, 0.0);
     				driver.setRumble(RumbleType.kRightRumble, 0.0);
