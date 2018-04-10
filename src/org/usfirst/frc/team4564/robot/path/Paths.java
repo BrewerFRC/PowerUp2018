@@ -69,14 +69,16 @@ public class Paths {
 			
 				})
 				.addDriveStraight(12, 55, 0.65, "forwardDrive part 1")
-				.addDriveToWall(38, 55, 0.65, "forwardDrive Part 2")
+				//.addDriveToWall(38, 55, 0.65, "forwardDrive Part 2")   - Made sharper and faster to hit cube better
+				.addDriveToWall(38, 58, 0.75, "forwardDrive Part 2")
 				.addEvent(closeOnSlow())
 				.addEvent(loadCubeLeft())
 				.addDriveStraight(-18, 55, -0.75, "driveback2")
 				.addEvent(armUp())
 				.addDriveStraight(6, 0, 0.65, "DriveToSwitch Straight")
 				.addDriveToWall(24, 0, 0.65, "driveToSwitch")
-				.addEvent(shootWhenStopped(-0.6));
+				//.addEvent(shootWhenStopped(-0.6));  - Shoot too weak, barely made it in
+				.addEvent(shootWhenStopped(-0.8));
 		
 		CENTER_SWITCH_RIGHT = new Path()
 				/*.addDriveStraight(96, 30, 0.65, "centerDrive")
@@ -122,14 +124,16 @@ public class Paths {
 			
 				})
 				.addDriveStraight(12, -55, 0.65, "forwardDrive part 1")
-				.addDriveToWall(38, -55, 0.65, "forwardDrive Part 2")
+				//.addDriveToWall(38, -55, 0.65, "forwardDrive Part 2")   - Made sharper and faster to hit cube better
+				.addDriveToWall(38, -58, 0.75, "forwardDrive Part 2")
 				.addEvent(closeOnSlow())
 				.addEvent(loadCubeLeft())
 				.addDriveStraight(-18, -55, -0.75, "driveback2")
 				.addEvent(armUp())
 				.addDriveStraight(6, 0, 0.65, "DriveToSwitch Straight")
 				.addDriveToWall(24, 0, 0.65, "driveToSwitch")
-				.addEvent(shootWhenStopped(-0.6));
+				//.addEvent(shootWhenStopped(-0.6));  - Shoot too weak, barely made it in
+				.addEvent(shootWhenStopped(-0.8));
 		
 		//Switch paths
 		NEAR_SWITCH_LEFT = new Path()
