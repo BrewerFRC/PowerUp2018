@@ -216,13 +216,13 @@ public class Robot extends SampleRobot {
     			
     		//intake wheel control
     		if (driver.getPressed("a")) {
-    			if (intake.isFullyLoaded()) {
-    				driver.setRumble(RumbleType.kLeftRumble, 0.6);
-    				driver.setRumble(RumbleType.kRightRumble, 0.6);
+    			/*if (intake.isFullyLoaded()) {
+    				driver.setRumble(RumbleType.kLeftRumble, 0.3);
+    				driver.setRumble(RumbleType.kRightRumble, 0.3);
     			} else {
     				driver.setRumble(RumbleType.kLeftRumble, 0.0);
     				driver.setRumble(RumbleType.kRightRumble, 0.0);
-    			}
+    			}*/
     			//intake.setIntakePower(1.0);
     			intake.setLeftIntakePower(0.7);
     			intake.setRightIntakePower(1.0);
@@ -234,9 +234,17 @@ public class Robot extends SampleRobot {
     			intake.setIntakePower(-0.8);
     		}
     		else {
+    			//driver.setRumble(RumbleType.kLeftRumble, 0.0);
+				//driver.setRumble(RumbleType.kRightRumble, 0.0);
+    			intake.setIntakePower(0.0);
+    		}
+    		if (intake.isFullyLoaded()){
+    			driver.setRumble(RumbleType.kLeftRumble, 0.3);
+				driver.setRumble(RumbleType.kRightRumble, 0.3);
+    		}
+    		else {
     			driver.setRumble(RumbleType.kLeftRumble, 0.0);
 				driver.setRumble(RumbleType.kRightRumble, 0.0);
-    			intake.setIntakePower(0.0);
     		}
     		dashBoard();
     		//Robot loop delay
