@@ -70,7 +70,7 @@ public class Paths {
 				})
 				.addDriveStraight(12, 55, 0.65, "forwardDrive part 1")
 				//.addDriveToWall(38, 55, 0.65, "forwardDrive Part 2")   - Made sharper and faster to hit cube better
-				.addDriveToWall(38, 58, 0.75, "forwardDrive Part 2")
+				.addDriveToWall(38, 60, 0.75, "forwardDrive Part 2")
 				.addEvent(closeOnSlow())
 				.addEvent(loadCubeLeft())
 				.addDriveStraight(-18, 55, -0.75, "driveback2")
@@ -206,7 +206,7 @@ public class Paths {
 		
 		//Near scale from the left side, then second cube in near switch.
 		TWO_CUBE_LEFT_SWITCH = nearScaleLeftPickupSecond()
-				.addEvent(elevatorToSwitchOnEventComplete(0))
+				.addEvent(elevatorToSwitchOnEventComplete(1))
 				.addDriveStraight(6, -18, 0.75, "drive")
 				.addEvent(new Event(false) {
 					long startTime = -1;
@@ -232,7 +232,7 @@ public class Paths {
 		
 		//Near scale from right side, then second cube in near switch.
 		TWO_CUBE_RIGHT_SWITCH = nearScaleRightPickupSecond()
-				.addEvent(elevatorToSwitchOnEventComplete(0))
+				.addEvent(elevatorToSwitchOnEventComplete(1))
 				.addDriveStraight(6, 18, 0.75, "drive")
 				.addEvent(new Event(false) {
 					long startTime = -1;
@@ -325,9 +325,11 @@ public class Paths {
 		return nearScaleLeft()
 //		.addDriveStraight(18, 18, 0.75, "DriveBack")
 //		.addDriveStraight(21, -18, 0.6, "drive")
-		.addDriveStraight(21, 18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
-		.addDriveStraight(24, -18, 0.6, "drive")
-		.addEvent(closeOnDriveComplete())
+		//.addDriveStraight(21, 18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
+		.addDriveStraight(17, 18, 0.75, "DriveBack") //DCMP 4 inches less
+		//.addDriveStraight(27, -18, 0.6, "drive") //DCMP added 3 inches
+		.addDriveStraight(33, -18, 0.6, "drive") //DCMP added 6 inches
+		.addEvent(closeOnSlow())
 		.addEvent(loadCubeLeft());
 	}
 	/**
@@ -339,9 +341,11 @@ public class Paths {
 		return nearScaleRight()
 		//.addDriveStraight(18, -18, 0.75, "DriveBack")
 		//.addDriveStraight(21, 18, 0.6, "drive")
-		.addDriveStraight(21, -18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
-		.addDriveStraight(24, 18, 0.6, "drive")		
-		.addEvent(closeOnDriveComplete())
+		//.addDriveStraight(21, -18, 0.75, "DriveBack") //adding 6 inches, 3 to each leg
+		.addDriveStraight(17, -18, 0.75, "DriveBack") //DCMP reduced 4 inches
+		//.addDriveStraight(24, 18, 0.6, "drive")
+		.addDriveStraight(33, 18, 0.6, "drive") //DCMP added 33 inches
+		.addEvent(closeOnSlow())
 		.addEvent(loadCubeRight());
 	}
 		
@@ -597,6 +601,7 @@ public class Paths {
 		return new Event(true) {
 			@Override
 			public void start(Stage stage) {
+				Common.debug("loadCubeLeft - Event started");
 				Robot.getIntake().openArm();
 				complete = false;
 			}
@@ -613,7 +618,7 @@ public class Paths {
 				else if (Robot.getIntake().isPartiallyLoaded()) {
 					Common.debug("Partially Loadeds");
 					Robot.getIntake().setIntakePower(0.0);
-					Robot.getIntake().softArm();
+					Robot.getIntake().hardArm();
 					complete = true;
 				}
 				
@@ -630,6 +635,8 @@ public class Paths {
 		return new Event(true) {
 			@Override
 			public void start(Stage stage) {
+				Common.debug("loadCubeRight - Event started");
+				Robot.getIntake().openArm();
 				complete = false;
 			}
 			@Override
@@ -644,7 +651,7 @@ public class Paths {
 				}
 				else if (Robot.getIntake().isPartiallyLoaded()) {
 					Common.debug("Soft cube arm");
-					Robot.getIntake().setIntakePower(0.0);
+					//Robot.getIntake().setIntakePower(0.0);
 					Robot.getIntake().softArm();
 					complete = true;
 				}

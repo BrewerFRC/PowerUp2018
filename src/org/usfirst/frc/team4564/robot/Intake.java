@@ -384,7 +384,7 @@ public class Intake {
 	public double getMaxAngle() {
 		if (Robot.getElevator().intakeSafe()) {
 			if (Robot.instance().isOperatorControl()) {
-				return 110;
+				return MAX_ELEVATOR_SAFE;
 			}
 			else {
 				Common.dashBool("MAX_ANGLE", true);

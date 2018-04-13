@@ -16,9 +16,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Common {
 	private static final DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
+	private static String lastMessage = "";
 
 	public static void debug(String text) {
-		System.out.println(formatter.format(new Date(time())) + text);
+		if (!lastMessage.equals(text)) {
+			System.out.println(formatter.format(new Date(time())) + text);
+		}
+		lastMessage = text;
 	}
 	
 	public static void dashStr(String title, String a) {

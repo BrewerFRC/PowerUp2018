@@ -132,6 +132,12 @@ public class Robot extends SampleRobot {
     	}
     	intake.reset();
     	//intake.hardArm();
+    	if (intake.isPartiallyLoaded()) {
+    		intake.hardArm();
+    		intake.loading = true;
+    	} else {
+    		intake.loading = true;
+    	}
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -208,7 +214,8 @@ public class Robot extends SampleRobot {
 				else if (driver.getPressed("leftTrigger") || operator.getPressed("leftTrigger")) {
 					intake.openArm();
 				} else {
-					intake.softArm();
+					//intake.softArm();
+					intake.hardArm();
 				}
     		} else {	//Unload
     			intake.openArm();
@@ -238,13 +245,18 @@ public class Robot extends SampleRobot {
 				//driver.setRumble(RumbleType.kRightRumble, 0.0);
     			intake.setIntakePower(0.0);
     		}
+    		//Rumble
     		if (intake.isFullyLoaded()){
     			driver.setRumble(RumbleType.kLeftRumble, 0.3);
 				driver.setRumble(RumbleType.kRightRumble, 0.3);
+    			operator.setRumble(RumbleType.kLeftRumble, 0.3);
+				operator.setRumble(RumbleType.kRightRumble, 0.3);
     		}
     		else {
     			driver.setRumble(RumbleType.kLeftRumble, 0.0);
 				driver.setRumble(RumbleType.kRightRumble, 0.0);
+				operator.setRumble(RumbleType.kLeftRumble, 0.0);
+				operator.setRumble(RumbleType.kRightRumble, 0.0);
     		}
     		dashBoard();
     		//Robot loop delay

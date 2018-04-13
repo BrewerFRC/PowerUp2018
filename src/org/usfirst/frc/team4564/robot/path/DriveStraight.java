@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4564.robot.path;
 
+import org.usfirst.frc.team4564.robot.Common;
 import org.usfirst.frc.team4564.robot.DriveTrain;
 import org.usfirst.frc.team4564.robot.Heading;
 
@@ -39,20 +40,18 @@ public class DriveStraight extends Stage {
 		if (!super.eventsFinished() || !isDistanceComplete()) {
 			return false;
 		}
+		Common.debug("DriveStraight: " + this.name + " - Complete");
 		return true;
 	}
 	
 	public boolean isDistanceComplete() {
+		double truncatedDistance = ((int)(DriveTrain.instance().getAverageDist() * 10)) / 10.0;
 		if (DriveTrain.instance().getAverageDist() >= target && direction == 1) {
-			if (super.eventsFinished()) {
-				System.out.println("DriveStraight: " + this.name + " - Complete"+ DriveTrain.instance().getAverageDist());
-			}
+			Common.debug("DriveStraight: " + this.name + " - Distance Complete"+ truncatedDistance);
 			return true;
 		}
 		else if (DriveTrain.instance().getAverageDist() <= target && direction == -1) {
-			if (super.eventsFinished()) {
-				System.out.println("DriveStraight: " + this.name + " - Complete" + DriveTrain.instance().getAverageDist());
-			}
+			Common.debug("DriveStraight: " + this.name + " - Distance Complete" + truncatedDistance);
 			return true;
 		}
 		return false;
