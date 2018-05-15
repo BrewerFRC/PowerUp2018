@@ -179,6 +179,15 @@ public class Robot extends SampleRobot {
     		else if (operator.when("b")) {
     			intake.movePosition(intake.MAX_ANGLE);
     		}
+    		else if(driver.getPressed("dPadUp")){
+    			intake.moveVelocity(intake.MAX_VELOCITY);
+    		}
+    		else if(driver.getPressed("dPadDown")){
+    			intake.moveVelocity(-intake.MAX_VELOCITY);
+    		}
+    		else{
+    			intake.moveVelocity(0);
+    		}
     		/*double intakePow = operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15);
     		if (intakePow < 0.0) {
     			intake.joystickControl(60);
@@ -186,9 +195,11 @@ public class Robot extends SampleRobot {
     		else if (intakePow > 0.0) {
     			intake.joystickControl(-60);
     		}*/
-    		intake.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
+    		if (operator.getY(GenericHID.Hand.kRight) != 0){
+    			intake.joystickControl(operator.deadzone(operator.getY(GenericHID.Hand.kRight), 0.15));
+    			
+    		}
     		intake.update();
-    		
     		//Intake
     		//intake arm pressure
     		if (driver.when("leftTrigger") || operator.when("leftTrigger")) {
