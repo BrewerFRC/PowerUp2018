@@ -163,8 +163,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setLeftIntakePower(double power) {
-		if (power > 0.0 && isFullyLoaded()) {
-			power = 0.0;
+		if (power >= 0.0 && isFullyLoaded()) {
+			//was 0.0
+			power = 0.25;
 		}
 		leftIntake.set(power);
 	}
@@ -175,8 +176,9 @@ public class Intake {
 	 * @param power - the power
 	 */
 	public void setRightIntakePower(double power) {
-		if (power > 0.0 && isFullyLoaded()) {
-			power = 0.0;
+		if (power >= 0.0 && isFullyLoaded()) {
+			//was 0.0
+			power = 0.25;
 		}
 		rightIntake.set(power);
 	}
