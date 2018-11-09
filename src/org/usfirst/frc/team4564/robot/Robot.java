@@ -33,6 +33,7 @@ public class Robot extends SampleRobot {
 	private Xbox driver = new Xbox(0);
 	private Xbox operator = new Xbox(1);
 	private Bat bat = new Bat();
+	private LED led = new LED();
 	
 	private String gameData;
 	
@@ -138,6 +139,7 @@ public class Robot extends SampleRobot {
     	} else {
     		intake.loading = true;
     	}
+    	led.setMode(LED.TELEOP);
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		double forward = 0;
@@ -269,6 +271,7 @@ public class Robot extends SampleRobot {
 				operator.setRumble(RumbleType.kLeftRumble, 0.0);
 				operator.setRumble(RumbleType.kRightRumble, 0.0);
     		}
+    		led.update();
     		dashBoard();
     		//Robot loop delay
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
